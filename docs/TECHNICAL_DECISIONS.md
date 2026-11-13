@@ -51,3 +51,14 @@ Record decisions that constrain future implementation. Amend entries only when a
 - **Rationale:** PTC Integration Kit documentation describes GET_SELECTION as invoking the standard SELECT subaction and returning selected SEL_ITEMs. Its check function can return `:ok` to retain or `:filter` to exclude each selected item.
 - **Expected workflow:** Matching Parts should be available in the native selection list for commands such as Add to Drawlist.
 - **Verification caveat:** Documentation reviewed is for Elements/Direct 20.x; GET_SELECTION is an established Integration Kit interrupt action, but the exact behavior must be confirmed on the user's Creo 18.1 build.
+
+
+## TD-007 – Select matching nodes in the native Structure Browser
+
+- **Date:** 2026-11-13
+- **Decision:** To meet the user's workflow, select matching objects in the existing Structure Browser's own selection state rather than treating a GET_SELECTION return value as persistent UI selection.
+- **Browser:** Standard Structure Browser name is `parcel-gbrowser`.
+- **API:** `sd-browser-exec-cmd` with `:set-object-selection` accepts a BrowserNode struct and a Boolean; `:clear-select-list` clears prior browser selections; `:expand-tree` can expose descendants.
+- **Node lookup:** Traverse browser nodes using `sd-query-browser :get-children`, compare `BrowserNode-objPath` with `sd-inq-obj-pathname` of the matching model object.
+- **Rationale:** PTC Graphical Browsers reference documents these commands and the Structure Browser-specific name. This corresponds to the user's desired browser row selection behavior.
+- **Verification caveat:** Reference is for a later release; compatibility and behavior must be tested on Creo 18.1. Browser nodes must be visible/selectable.
