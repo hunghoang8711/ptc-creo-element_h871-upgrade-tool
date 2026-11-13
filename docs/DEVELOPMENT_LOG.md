@@ -139,3 +139,25 @@ This file records chronological development work. Major features receive their o
 1. Structure Browser may be closed, not fully built, or in a mode where some nodes are not selectable.
 2. Browser object paths must match `sd-inq-obj-pathname` paths.
 3. Density exact-match retrieval still requires separate verification against known Part Properties values.
+
+
+## 2026-11-13 – Part Filter redesign investigation: dedicated results browser
+
+### User feedback
+- The previous versions still produced Output messages and did not provide a usable selected result set.
+- User requested a BOM-like result table, double-click locate, row selection, Select All, and extensible filtering for additional properties.
+
+### Research
+- Reviewed PTC Structure Browser Search & Filter user documentation.
+- Reviewed PTC Integration Kit Graphical Browser concepts: BrowserNode data tree, client data, custom table columns, mouse handlers, selection queries, browser commands, and display/hide utilities.
+- PTC describes default browser behavior including single-click select, Ctrl-click add/remove from selection list, double-click select-and-operate, and configurable click handlers.
+- Search results in the standard Structure Browser can expand the relevant branch, scroll to the object, and highlight it in Browser and viewport.
+
+### Architectural decision
+- Stop iterating on direct mutation of the existing Structure Browser selection as the main UX.
+- Build a dedicated H871 Graphical Browser results view with BOM-like table columns and each row bound to its model Part via BrowserNode client data.
+- Keep filter predicates separate from browser/result presentation for future properties.
+
+### Status
+- Research and architecture decision only; no new result browser code has been committed yet.
+- PTC references are later than 18.1; confirm exact API availability/signatures in 18.1 before coding.
