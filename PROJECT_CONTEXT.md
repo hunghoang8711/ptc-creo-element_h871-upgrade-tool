@@ -35,16 +35,25 @@ Do not assume that APIs, commands, object models, or LISP functions from Creo Pa
 
 Each Part can expose properties such as **Material** and **Density**, with separate **Instance** and **Base** values visible in Part Properties.
 
-The requested filter is an exact-value lookup, not a comparison/query-language interface.
+The requested filter targets **Density**, displayed under the **Material** tab in Part Properties. It is an exact-value lookup, not a comparison/query-language interface.
 
-Example:
-- Property: Material
-- Instance value: `1`
-- Base value: `304`
+Example confirmed by the user's Part Properties screenshot:
+- Density Instance value: `1`
+- Density Base value: `304`
+
+The UI should expose only the two numeric fields (Density Instance and Density Base). Both values are mandatory for matching; no comparison operators, per-field enable toggles, or AND/OR selector are required.
 
 The tool should find Parts whose corresponding property values match the entered Instance **and** Base values. Both values form one exact pair; do not interpret them as comparison operators or as alternatives.
 
 The user selected implementation approach **B** in the earlier design discussion. The detailed technical meaning of option B must be recovered from the original source/discussion before changing architecture; do not invent missing implementation details.
+
+### Initial implementation (2026-11-13)
+
+- Added `src/part-filter/H871_PART_FILTER.lsp`.
+- The implementation uses `sd-inq-part-density` with `:instance` for Instance and `:contents` for Base.
+- It scans Parts recursively under the selected Assembly and writes exact-pair matches to `H871_PART_FILTER_RESULT.txt` in the user's home directory.
+- Initial dialog values are 1.0 and 304.0, matching the supplied screenshot.
+- This is a first implementation, not yet loaded or functionally tested in Creo 18.1.
 
 ### Known historical development information
 
@@ -66,7 +75,7 @@ The user selected implementation approach **B** in the earlier design discussion
 
 ## Source and test status
 
-At baseline initialization, no LISP source or test model has been committed. The first source import should preserve original filenames and, where useful, include a known-working version before edits begin.
+Source `src/part-filter/H871_PART_FILTER_DIAG.lsp` has been imported and preserved unchanged as the diagnostic baseline. The first working implementation is `src/part-filter/H871_PART_FILTER.lsp`. No Creo test model or functional test evidence has been committed yet.
 
 ## Session handover checklist
 
