@@ -30,3 +30,14 @@ Record decisions that constrain future implementation. Amend entries only when a
 - **Date:** 2026-11-13
 - **Decision:** Meaningful source changes must be accompanied by updates to the development log and, where relevant, technical decisions, lessons learned, known issues, and changelog.
 - **Rationale:** New development sessions must be able to resume from repository evidence rather than relying on chat history.
+
+
+## TD-005 – Density filter is an exact Instance/Base pair
+
+- **Date:** 2026-11-13
+- **Decision:** The Material tab's Density filter uses exactly two numeric values: Density Instance and Density Base.
+- **Retrieval:** `sd-inq-part-density` with `:instance` retrieves the Instance value; `:contents` retrieves the Base value.
+- **Match rule:** A Part matches only if both returned values are non-NIL and numerically equal to the two requested values.
+- **UI:** No comparison operators, enable toggles, or AND/OR selector for this pair.
+- **Rationale:** Matches the supplied Part Properties screenshot (Instance 1, Base 304) and PTC Integration Kit inquiry semantics.
+- **Verification caveat:** The function documentation is available in current PTC Integration Kit references and the function was already present in the imported source, but the new implementation still requires load and functional verification in the user's Creo 18.1 installation.
