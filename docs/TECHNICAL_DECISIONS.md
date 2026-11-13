@@ -41,3 +41,13 @@ Record decisions that constrain future implementation. Amend entries only when a
 - **UI:** No comparison operators, enable toggles, or AND/OR selector for this pair.
 - **Rationale:** Matches the supplied Part Properties screenshot (Instance 1, Base 304) and PTC Integration Kit inquiry semantics.
 - **Verification caveat:** The function documentation is available in current PTC Integration Kit references and the function was already present in the imported source, but the new implementation still requires load and functional verification in the user's Creo 18.1 installation.
+
+
+## TD-006 – Return matches through Creo native selection
+
+- **Date:** 2026-11-13
+- **Decision:** Matching Parts should be selected using Creo's native `GET_SELECTION` interrupt action, not merely written to a text report or highlighted as a dialog variable.
+- **Implementation:** Use `*sd-part-seltype*`, `:check_function` for exact Density pair validation, and `:select :in_assembly` for the selected Assembly.
+- **Rationale:** PTC Integration Kit documentation describes GET_SELECTION as invoking the standard SELECT subaction and returning selected SEL_ITEMs. Its check function can return `:ok` to retain or `:filter` to exclude each selected item.
+- **Expected workflow:** Matching Parts should be available in the native selection list for commands such as Add to Drawlist.
+- **Verification caveat:** Documentation reviewed is for Elements/Direct 20.x; GET_SELECTION is an established Integration Kit interrupt action, but the exact behavior must be confirmed on the user's Creo 18.1 build.
