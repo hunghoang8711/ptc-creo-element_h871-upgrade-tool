@@ -62,3 +62,14 @@ Record decisions that constrain future implementation. Amend entries only when a
 - **Node lookup:** Traverse browser nodes using `sd-query-browser :get-children`, compare `BrowserNode-objPath` with `sd-inq-obj-pathname` of the matching model object.
 - **Rationale:** PTC Graphical Browsers reference documents these commands and the Structure Browser-specific name. This corresponds to the user's desired browser row selection behavior.
 - **Verification caveat:** Reference is for a later release; compatibility and behavior must be tested on Creo 18.1. Browser nodes must be visible/selectable.
+
+
+## TD-008 – Replace direct-selection approach with a dedicated H871 results browser
+
+- **Date:** 2026-11-13
+- **Decision:** The Part Filter will present search results in a dedicated BOM-like Creo Graphical Browser, rather than attempting to force selection into the existing Structure Browser immediately after a scan.
+- **Rationale:** The user needs a persistent, inspectable list where individual results and all results can be selected, double-click can locate a model object, and subsequent operations can be applied to the selected result set. PTC's Graphical Browser framework supports data trees, BrowserNode client data, tables with custom columns, mouse click handlers, selection queries, and browser commands.
+- **Interaction:** Single click selects a row; Ctrl-click adds/removes; double-click locates/operates on the corresponding object; explicit Select All/Clear Selection actions; Clear Results separate from selection clearing.
+- **Extensibility:** Separate property predicate from result browser so Density is the first filter and additional Part properties can be added later.
+- **Compatibility:** PTC documents reviewed are for 20.4/20.8; must verify the relevant APIs in the user's Creo 18.1 Integration Kit before implementing. Do not reuse unverified function signatures from newer releases.
+- **Supersedes:** TD-006 and TD-007 as the primary user interaction strategy. Their selection experiments are historical and not accepted as successful implementations.
