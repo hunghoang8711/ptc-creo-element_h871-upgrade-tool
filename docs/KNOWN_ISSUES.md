@@ -35,3 +35,13 @@ Track confirmed defects and unresolved investigations. Close an issue only after
 - **Fix:**
 - **Verification:**
 - **Closure criteria:**
+
+
+## KI-003 – Native selection-list integration pending Creo 18.1 test
+
+- **Status:** Implemented; pending functional verification.
+- **Area:** Part filter / Creo native selector.
+- **Expected behavior:** Exact Density Instance/Base matches become native selected Parts, usable by Add to Drawlist and other standard commands.
+- **Implementation:** `GET_SELECTION` with Part focus, an exact-pair check function, and `:in_assembly`.
+- **Risk:** PTC references reviewed are for later 20.x releases; actual 18.1 runtime behavior and selection-list persistence must be confirmed.
+- **Next action:** Run the updated LISP in Creo 18.1 and report selected count, selection-list behavior, and Add to Drawlist result.
