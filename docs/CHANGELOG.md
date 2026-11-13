@@ -26,4 +26,12 @@ Notable repository changes. Detailed implementation and test evidence lives in `
 - Replaced GET_SELECTION-based selection assumption with direct Structure Browser node selection using `:set-object-selection`; reports matching and selected counts separately. Pending Creo 18.1 verification.
 
 - Part Filter UX direction changed to a dedicated BOM-like Graphical Browser result list; research completed, implementation pending 18.1 API verification.
-\n## 2026-11-13 – Dedicated Part Filter results browser\n\n- Replaced direct manipulation of the standard Structure Browser selection with a dedicated Graphical Browser results view.\n- Added BOM-like columns: Part Name, Density Instance, Density Base, and Assembly Path.\n- Added browser Select All, Clear Selection, and selected-row count actions.\n- Preserved exact Density Instance/Base pair matching and text report output.\n- Static parenthesis/string scan passed after correcting a missing close parenthesis in the browser constructor form.\n- Creo 18.1 loading, row selection, double-click model navigation, and downstream Add to Drawlist behavior remain unverified.\n
+
+## 2026-11-13 – Dedicated Part Filter results browser
+
+- Replaced direct manipulation of the standard Structure Browser selection with a dedicated Graphical Browser results view.
+- Added BOM-like columns: Part Name, Density Instance, Density Base, and Assembly Path.
+- Added browser Select All, Clear Selection, and selected-row count actions.
+- Preserved exact Density Instance/Base pair matching and text report output.
+- Static parenthesis/string scan passed after correcting a missing close parenthesis in the browser constructor form.
+- Creo 18.1 loading, row selection, double-click model navigation, and downstream Add to Drawlist behavior remain unverified.
