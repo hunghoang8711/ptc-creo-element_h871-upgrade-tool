@@ -4,17 +4,17 @@ Track confirmed defects and unresolved investigations. Close an issue only after
 
 ## KI-001 – Part filter returns values that do not match the intended exact pair
 
-- **Status:** Historical report; current reproducibility unknown.
-- **Area:** Part property filter / Material.
+- **Status:** First implementation added; pending in-Creo functional verification.
+- **Area:** Part property filter / Material tab – Density.
 - **Reported behavior:** The filter UI and options appeared, but the values returned by filtering were not as intended.
 - **Expected behavior:** Match Parts using the exact Instance and Base values entered by the user. Both fields must match.
-- **Current blocker:** The current LISP source and test model are not yet in the repository.
-- **Next action:** Import source, inspect property access and filtering logic, then reproduce with a controlled model.
+- **Implementation:** `src/part-filter/H871_PART_FILTER.lsp` now compares Density Instance and Density Base as an exact pair.
+- **Next action:** Load in Creo 18.1 and compare results against known Parts, including the screenshot pair (1, 304).
 - **Closure criteria:** Verified expected and actual matching Part sets in Creo Elements/Direct Modeling 18.1.
 
 ## KI-002 – Diagnostic LISP file reports unexpected end of input
 
-- **Status:** Historical error; not yet reproduced.
+- **Status:** Historical error; imported revision passes static parenthesis/string balance check, but the historical error is not confirmed resolved in Creo.
 - **Area:** `H871_PART_FILTER_DIAG.lsp`.
 - **Reported message:** `Unexpected end of #<input stream "D:/HH871/05-TEST-LISP-PTC/H871_PART_FILTER_DIAG.lsp">`.
 - **Current blocker:** Exact failing file revision is not present in the repository.
