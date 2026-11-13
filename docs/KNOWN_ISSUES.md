@@ -54,3 +54,12 @@ Track confirmed defects and unresolved investigations. Close an issue only after
 - **Root cause:** The implementation relied on GET_SELECTION return values and incorrectly claimed those values were persisted as Structure Browser selections. PTC documents GET_SELECTION as a selector that returns SEL_ITEMs.
 - **Fix:** Use `sd-browser-exec-cmd "parcel-gbrowser" :set-object-selection` on matching BrowserNode structs.
 - **Next action:** Test updated source in Creo 18.1 and report matched/selected counts.
+
+
+## KI-005 – Part Filter requires a dedicated result browser
+
+- **Status:** Architecture agreed; implementation pending.
+- **Observed:** User reports previous approaches still only produce Output messages and do not create an actionable result list.
+- **Required fix:** Dedicated Graphical Browser with a BOM-like table, row selection, Select All/Clear Selection, double-click locate, and extensible property filters.
+- **Research evidence:** PTC Graphical Browser documentation describes custom data trees, BrowserNode client data, tables, mouse click handlers, selection state, and browser commands. Standard Search results can navigate/highlight matching objects.
+- **Risk:** Available online documentation is for later releases (20.4/20.8); exact APIs must be checked against installed Creo 18.1 Integration Kit. Do not commit speculative code.
