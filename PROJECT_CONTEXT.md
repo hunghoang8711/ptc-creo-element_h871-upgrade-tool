@@ -92,3 +92,12 @@ Source `src/part-filter/H871_PART_FILTER_DIAG.lsp` has been imported and preserv
 - Updated the filter to call Creo's `GET_SELECTION` interrupt action with Part focus, `:in_assembly`, and a check function that accepts only the exact Density Instance/Base pair.
 - Intended result: matching Parts become native Creo selection items for follow-on commands such as Add to Drawlist.
 - This behavior is implemented in source but still requires verification in Creo 18.1; static code review cannot confirm the selector's runtime behavior in this installation.
+
+
+### Structure Browser selection implementation (2026-11-13)
+
+- Corrected the earlier approach: `GET_SELECTION` returns `SEL_ITEM` values and is a selector/inquiry API; it is not itself a command to set the Structure Browser's selected nodes.
+- New implementation targets the standard Structure Browser named `parcel-gbrowser` and uses `sd-browser-exec-cmd` with `:set-object-selection` for each matching BrowserNode.
+- It expands the current Structure Browser tree, locates nodes by object path, clears the previous browser selection, then selects matching nodes.
+- The code now distinguishes model matches from nodes successfully selected in the browser and does not claim selection success when the count is zero.
+- Still pending actual verification in Creo 18.1.
