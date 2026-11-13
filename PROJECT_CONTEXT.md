@@ -101,3 +101,23 @@ Source `src/part-filter/H871_PART_FILTER_DIAG.lsp` has been imported and preserv
 - It expands the current Structure Browser tree, locates nodes by object path, clears the previous browser selection, then selects matching nodes.
 - The code now distinguishes model matches from nodes successfully selected in the browser and does not claim selection success when the count is zero.
 - Still pending actual verification in Creo 18.1.
+
+
+### H871 Part Filter redesign – result browser (2026-11-13)
+
+The previous two approaches (GET_SELECTION return values and direct mutation of the standard Structure Browser selection) did not meet the user's workflow and must not be treated as working solutions.
+
+New architecture direction: build a dedicated H871 results browser using Creo Elements/Direct Graphical Browser / Integration Kit APIs, rather than a plain Dialog Generator output or TXT-only report. The browser should present a BOM-like tabular result list and keep a direct reference to each model Part in BrowserNode client data.
+
+Required interaction:
+- Find: scan the selected Assembly and build result rows for Parts matching the active criteria.
+- Results table: display at least Part name, Density Instance, Density Base, and owning assembly/path; additional property columns can be added later.
+- Single click / Ctrl-click: select one or multiple result rows using native browser selection behavior.
+- Select All / Clear Selection: select or clear every result row.
+- Double-click: locate the corresponding model object in the assembly structure and highlight/select it in the model/browser; exact viewport centering/zoom behavior must be verified against 18.1 APIs.
+- Add to Drawlist: invoke the supported native selection/Drawlist workflow on the selected result Parts, after confirming the correct command/API in 18.1.
+- Clear Results: remove the current result set without modifying the model.
+
+Design principle: use the PTC Graphical Browser framework (BrowserNodes, table definition, click handlers, browser queries/commands, show/hide browser) if confirmed available in Creo 18.1. Keep property matching as a separate reusable predicate so future filters can be added without rewriting the result UI.
+
+PTC references reviewed (20.x documentation; API compatibility with 18.1 still needs confirmation): Graphical Browser concepts and table definitions, click handlers, BrowserNode client data, and built-in Structure Browser search/filter behavior. Do not claim the new browser has been implemented yet.
