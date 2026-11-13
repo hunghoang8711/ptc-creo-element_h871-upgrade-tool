@@ -81,3 +81,35 @@ This file records chronological development work. Major features receive their o
 2. Run against an Assembly containing known Parts with (Instance 1, Base 304), plus near-matches such as (1, other) and (other, 304).
 3. Confirm the report contains only Parts matching both values.
 4. If the result file is not sufficient and the user expects matching Parts selected/highlighted in the viewport, implement selection feedback after verifying the supported 18.1 selection API.
+
+
+## 2026-11-13 – Native selection-list output
+
+### Objective
+- After exact Density Instance/Base matching, place matching Parts into Creo's native selection list so the user can apply standard commands such as Add to Drawlist.
+
+### Files changed
+- Updated `src/part-filter/H871_PART_FILTER.lsp`.
+- Updated project context, technical decisions, known issues, and changelog.
+
+### Implementation
+- Added a GET_SELECTION check function that accepts only Parts whose Density Instance and Density Base both exactly match the requested values.
+- Calls `get_selection` with `*sd-part-seltype*`, `:check_function`, and `:select :in_assembly`.
+- Writes the returned selection items and their properties to the result report.
+
+### Verification
+- PTC Integration Kit reference describes GET_SELECTION, :in_assembly, and :check_function behavior.
+- Source updated on GitHub successfully.
+- Static balance/load checks: pending re-run after this update.
+- Creo 18.1 selection-list behavior: not yet tested.
+
+### Result
+- Implemented; pending in-application verification.
+
+### Next test
+1. Load the updated `H871_PART_FILTER.lsp` only (avoid loading the old diagnostic file as a command source for this test).
+2. Run `H871_PART_FILTER` and select the target Assembly.
+3. Enter Instance 1 and Base 304.
+4. Confirm matching Parts appear in the active selection list / Structure Browser selection state.
+5. Invoke Add to Drawlist and confirm it acts on those Parts.
+6. Report the selected count and any error text.
