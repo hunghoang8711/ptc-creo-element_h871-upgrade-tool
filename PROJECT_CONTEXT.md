@@ -85,3 +85,10 @@ Source `src/part-filter/H871_PART_FILTER_DIAG.lsp` has been imported and preserv
 - [ ] Confirm the target Creo version and actual LISP runtime.
 - [ ] Identify what has been functionally tested in Creo.
 - [ ] Update docs with every meaningful implementation or test result.
+
+
+### Native selection-list output (2026-11-13)
+
+- Updated the filter to call Creo's `GET_SELECTION` interrupt action with Part focus, `:in_assembly`, and a check function that accepts only the exact Density Instance/Base pair.
+- Intended result: matching Parts become native Creo selection items for follow-on commands such as Add to Drawlist.
+- This behavior is implemented in source but still requires verification in Creo 18.1; static code review cannot confirm the selector's runtime behavior in this installation.
