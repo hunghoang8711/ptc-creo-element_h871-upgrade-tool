@@ -2,18 +2,15 @@
 ;; H871 PART FILTER - Density Instance/Base exact match
 ;; Target: PTC Creo Elements/Direct Modeling 18.1
 ;;
-;; Searches all Parts recursively below a selected Assembly.
-;; A Part matches only when BOTH Density values match exactly.
-;; Matching Parts are passed to Creo's standard selection action
-;; (GET_SELECTION), so they become a native selection set for
-;; subsequent commands such as Add to Drawlist.
+;; Scans Parts recursively below a selected Assembly.
+;; A match requires exact Density Instance AND Density Base.
 ;;
-;; Density inquiry:
-;;   :instance -> Density Instance
-;;   :contents -> Density Base
+;; Matching objects are selected in the native Structure Browser
+;; ("parcel-gbrowser") using :SET-OBJECT-SELECTION.
+;; This is intended to leave the Parts selected in the browser
+;; so the user can continue with standard commands.
 ;;
-;; Verification status:
-;;   Static source review only. Must be tested in Creo 18.1.
+;; Verification: static source review only; test in Creo 18.1.
 ;; ============================================================
 
 (in-package :oli)
@@ -38,20 +35,81 @@
          (= actual-instance requested-instance)
          (= actual-base requested-base))))
 
-;; GET_SELECTION check function.
-;; Return :OK to retain the Part in Creo's selection list,
-;; or :FILTER to exclude it.
-(defun h871-pf-selection-check (part)
-  (if
-    (h871-pf-density-pair-match
-      part
-      *h871-pf-requested-instance*
-      *h871-pf-requested-base*)
-    :ok
-    :filter))
+;; ------------------------------------------------------------
+;; Collect exact matches from the model object tree
+;; ------------------------------------------------------------
+
+(defun h871-pf-collect
+       (obj matches requested-instance requested-base)
+  (when (sd-inq-part-p obj)
+    (when
+      (h871-pf-density-pair-match
+        obj requested-instance requested-base)
+      (push obj matches)))
+
+  (dolist (child (sd-inq-obj-children obj))
+    (setf matches
+      (h871-pf-collect
+        child matches requested-instance requested-base)))
+
+  matches)
+
+;; ------------------------------------------------------------
+;; Find a Structure Browser node by the model object's path
+;; ------------------------------------------------------------
+
+(defun h871-pf-find-browser-node (browser-name parent-node target-path)
+  (when parent-node
+    (if (equal (BrowserNode-objPath parent-node) target-path)
+        parent-node
+      (let ((children
+              (sd-query-browser browser-name :get-children parent-node))
+            (found nil))
+        (dolist (child children)
+          (unless found
+            (setf found
+              (h871-pf-find-browser-node
+                browser-name child target-path))))
+        found))))
+
+(defun h871-pf-select-in-structure-browser (matches)
+  (let* ((browser-name "parcel-gbrowser")
+         (root-node
+           (sd-query-browser browser-name :get-graphics-root))
+         (selected-count 0)
+         (not-visible-count 0))
+
+    (if (null root-node)
+        (values 0 (length matches))
+      (progn
+        ;; Expand the browser tree so matching descendants can be selected.
+        (sd-browser-exec-cmd
+          browser-name :expand-tree 0 root-node)
+
+        ;; Start with a clean selection list.
+        (sd-browser-exec-cmd browser-name :clear-select-list)
+
+        (dolist (part matches)
+          (let* ((path (h871-pf-path part))
+                 (node
+                   (h871-pf-find-browser-node
+                     browser-name root-node path)))
+            (if node
+                (when
+                  (sd-browser-exec-cmd
+                    browser-name :set-object-selection node t)
+                  (incf selected-count))
+              (incf not-visible-count))))
+
+        (values selected-count not-visible-count)))))
+
+;; ------------------------------------------------------------
+;; Report
+;; ------------------------------------------------------------
 
 (defun h871-pf-write-report
-       (assembly matches requested-instance requested-base)
+       (assembly matches requested-instance requested-base
+        selected-count not-visible-count)
   (let ((report
           (merge-pathnames
             "H871_PART_FILTER_RESULT.txt"
@@ -65,7 +123,7 @@
       (format s "Assembly: ~A~%" (h871-pf-path assembly))
       (format s "Requested Density Instance: ~A~%" requested-instance)
       (format s "Requested Density Base: ~A~%" requested-base)
-      (format s "Match rule: Instance AND Base must both match exactly.~%")
+      (format s "Match rule: both values must match exactly.~%")
       (dolist (part matches)
         (format s "~%----------------------------------------~%")
         (format s "PART: ~A~%" (h871-pf-name part))
@@ -75,39 +133,55 @@
         (format s "DENSITY BASE: ~A~%"
           (sd-inq-part-density part :contents)))
       (format s "~%========================================~%")
-      (format s "Matching parts: ~A~%" (length matches)))
+      (format s "Matching Parts: ~A~%" (length matches))
+      (format s "Selected in Structure Browser: ~A~%" selected-count)
+      (format s "Not found/visible in Structure Browser: ~A~%"
+        not-visible-count))
     report))
 
+;; ------------------------------------------------------------
+;; Main action
+;; ------------------------------------------------------------
+
 (defun h871-pf-run (assembly requested-instance requested-base)
-  (let* ((*h871-pf-requested-instance* requested-instance)
-         (*h871-pf-requested-base* requested-base)
-         (matches nil)
+  (let* ((matches
+           (h871-pf-collect
+             assembly nil requested-instance requested-base))
+         (selected-count 0)
+         (not-visible-count 0)
          (report nil))
 
-    ;; Ask Creo's native selector to select every matching Part
-    ;; under the selected Assembly. The check function rejects
-    ;; every Part whose Instance/Base pair is not an exact match.
-    (setf matches
-      (sd-call-cmds
-        (get_selection
-          :focus_type *sd-part-seltype*
-          :check_function #'h871-pf-selection-check
-          :select
-          :in_assembly assembly)))
+    (multiple-value-setq (selected-count not-visible-count)
+      (h871-pf-select-in-structure-browser matches))
 
     (setf report
       (h871-pf-write-report
-        assembly matches requested-instance requested-base))
+        assembly matches requested-instance requested-base
+        selected-count not-visible-count))
 
-    (display
-      (format nil
-        "H871 Part Filter completed.~%Density Instance: ~A~%Density Base: ~A~%Matching Parts selected: ~A~%Report: ~A~%~%The matching Parts are now in Creo's selection list."
-        requested-instance
-        requested-base
-        (length matches)
-        (namestring report)))
+    (cond
+      ((zerop (length matches))
+       (display
+         (format nil
+           "No Parts matched Density Instance ~A and Density Base ~A.~%Please verify the Density values in Part Properties.~%Report: ~A"
+           requested-instance requested-base (namestring report))))
+      ((zerop selected-count)
+       (display
+         (format nil
+           "Found ~A matching Parts, but none could be selected in the Structure Browser.~%Check that the Structure Browser is open and showing the Assembly branch.~%Report: ~A"
+           (length matches) (namestring report))))
+      (t
+       (display
+         (format nil
+           "H871 Part Filter completed.~%Matching Parts: ~A~%Selected in Structure Browser: ~A~%Not visible/selectable: ~A~%You can now use the selected items with Creo commands such as Add to Drawlist.~%Report: ~A"
+           (length matches) selected-count not-visible-count
+           (namestring report)))))
 
     matches))
+
+;; ------------------------------------------------------------
+;; Dialog
+;; ------------------------------------------------------------
 
 (sd-defdialog 'h871_part_filter
   :dialog-title "H871 - PART FILTER"
