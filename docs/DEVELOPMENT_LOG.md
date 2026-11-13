@@ -113,3 +113,29 @@ This file records chronological development work. Major features receive their o
 4. Confirm matching Parts appear in the active selection list / Structure Browser selection state.
 5. Invoke Add to Drawlist and confirm it acts on those Parts.
 6. Report the selected count and any error text.
+
+
+## 2026-11-13 – Correct native Structure Browser selection
+
+### Objective
+- Make matched Parts visibly selected in the existing Structure Browser, like selecting rows in the browser, so the user can continue with Add to Drawlist.
+
+### Root cause of previous attempt
+- The previous implementation treated `GET_SELECTION` return values as if they set persistent Structure Browser selection. PTC documents GET_SELECTION as invoking the standard SELECT subaction and returning SEL_ITEMs; it does not provide the Structure Browser node-selection operation.
+- The previous success message was unconditional even when the result count was zero. This was incorrect and has been removed.
+
+### Implementation
+- Scan the selected Assembly's model object tree and collect exact Density Instance/Base matches.
+- Use the standard Structure Browser `parcel-gbrowser`.
+- Expand the browser tree, locate each matching BrowserNode by its object path, clear the previous selection list, and call `:set-object-selection node t` for each match.
+- Report matching count, selected count, and nodes not found separately.
+
+### Verification
+- PTC Graphical Browser reference documents `:SET-OBJECT-SELECTION`, `:CLEAR-SELECT-LIST`, `:EXPAND-TREE`, `:GET-CHILDREN`, and `:GET-GRAPHICS-ROOT`.
+- Source updated on GitHub; static balance check pending.
+- Creo 18.1 runtime behavior: not yet tested.
+
+### Remaining risks
+1. Structure Browser may be closed, not fully built, or in a mode where some nodes are not selectable.
+2. Browser object paths must match `sd-inq-obj-pathname` paths.
+3. Density exact-match retrieval still requires separate verification against known Part Properties values.
