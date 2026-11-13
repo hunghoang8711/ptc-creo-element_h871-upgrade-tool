@@ -22,3 +22,5 @@ Notable repository changes. Detailed implementation and test evidence lives in `
 - Static source structure check passed; Creo execution remains unverified.
 
 - Updated Part Filter to pass exact matches through Creo's native GET_SELECTION selector; pending Creo 18.1 test.
+
+- Replaced GET_SELECTION-based selection assumption with direct Structure Browser node selection using `:set-object-selection`; reports matching and selected counts separately. Pending Creo 18.1 verification.
