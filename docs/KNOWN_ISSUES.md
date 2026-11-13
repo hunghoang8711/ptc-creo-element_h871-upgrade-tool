@@ -58,8 +58,8 @@ Track confirmed defects and unresolved investigations. Close an issue only after
 
 ## KI-005 – Part Filter requires a dedicated result browser
 
-- **Status:** Architecture agreed; implementation pending.
-- **Observed:** User reports previous approaches still only produce Output messages and do not create an actionable result list.
-- **Required fix:** Dedicated Graphical Browser with a BOM-like table, row selection, Select All/Clear Selection, double-click locate, and extensible property filters.
-- **Research evidence:** PTC Graphical Browser documentation describes custom data trees, BrowserNode client data, tables, mouse click handlers, selection state, and browser commands. Standard Search results can navigate/highlight matching objects.
-- **Risk:** Available online documentation is for later releases (20.4/20.8); exact APIs must be checked against installed Creo 18.1 Integration Kit. Do not commit speculative code.
+- **Status:** First Graphical Browser implementation candidate committed; pending Creo 18.1 load and functional verification.
+- **Observed:** Previous approaches only produced Output messages and did not create an actionable result list.
+- **Implemented candidate:** Dedicated Graphical Browser data tree with BrowserNode client data retaining the corresponding model Part; BOM-like columns for Part Name, Density Instance, Density Base, and Assembly Path; browser row selection; Select All and Clear Selection actions; exact Density pair filtering remains separate from result presentation.
+- **Not yet verified:** Browser creation/update lifecycle, table display, row selection, and menu actions in Creo 18.1. Double-click navigation to the corresponding model object and transfer of selected result Parts to downstream commands such as Add to Drawlist remain required acceptance tests.
+- **Risk:** Public PTC Integration Kit references available during development are for 20.x. The Graphical Browser framework predates these releases, but exact 18.1 signatures and behavior must be confirmed in the installed environment.
