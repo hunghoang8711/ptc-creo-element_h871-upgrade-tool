@@ -165,7 +165,7 @@
                :push (h871-pf-clear-selection))
               ("selection-summary"
                :label "Update Selection Count"
-               :push (h871-pf-show-selection-summary)))))
+               :push (h871-pf-show-selection-summary))))))
     (sd-display-error "H871: Could not create the results browser.")
     (return-from h871-pf-open-results-browser nil))
 
