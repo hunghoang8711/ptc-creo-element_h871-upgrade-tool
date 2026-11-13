@@ -20,3 +20,5 @@ Notable repository changes. Detailed implementation and test evidence lives in `
 - Preserved the uploaded diagnostic LISP unchanged.
 - Added a backup branch before implementation.
 - Static source structure check passed; Creo execution remains unverified.
+
+- Updated Part Filter to pass exact matches through Creo's native GET_SELECTION selector; pending Creo 18.1 test.
