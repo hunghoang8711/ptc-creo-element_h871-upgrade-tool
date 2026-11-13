@@ -1,0 +1,78 @@
+# Project Context
+
+Last updated: 2026-11-13
+
+## Purpose
+
+Develop and maintain practical LISP-based productivity tools for PTC Creo Elements/Direct Modeling, with a reliable handover process across development sessions.
+
+## Target environment
+
+| Item | Current information |
+|---|---|
+| CAD platform | PTC Creo Elements/Direct Modeling |
+| Version | 18.1 |
+| CAD paradigm | Direct Modeling (not Creo Parametric) |
+| Main customization language | Creo/ME10-style LISP environment; confirm exact supported dialect/API per feature |
+| User technical background | Automation machine design engineer; basic LISP familiarity |
+| Related CAD tools | AutoCAD 2023, Autodesk Inventor 2021 |
+
+Do not assume that APIs, commands, object models, or LISP functions from Creo Parametric or another Creo release are available in Elements/Direct Modeling 18.1. Verify against the target application's actual environment and documentation.
+
+## Development conventions
+
+- Prefer small, testable LISP modules over one large monolithic file.
+- Give commands and user-facing labels clear, consistent names.
+- Handle missing properties, empty selections, unsupported objects, and malformed input explicitly.
+- Avoid modifying model data unless the feature explicitly requires it.
+- Provide diagnostic output that helps identify the failing object/property without overwhelming normal users.
+- Keep UI behavior predictable and avoid filters or comparisons that were not requested.
+- Preserve working behavior unless a requirement explicitly changes it.
+
+## Initial feature: Part property filter
+
+### User requirement
+
+Each Part can expose properties such as **Material** and **Density**, with separate **Instance** and **Base** values visible in Part Properties.
+
+The requested filter is an exact-value lookup, not a comparison/query-language interface.
+
+Example:
+- Property: Material
+- Instance value: `1`
+- Base value: `304`
+
+The tool should find Parts whose corresponding property values match the entered Instance **and** Base values. Both values form one exact pair; do not interpret them as comparison operators or as alternatives.
+
+The user selected implementation approach **B** in the earlier design discussion. The detailed technical meaning of option B must be recovered from the original source/discussion before changing architecture; do not invent missing implementation details.
+
+### Known historical development information
+
+- A filter UI with input/filter options was displayed, but the returned filter values did not match the intended behavior.
+- The user clarified that the Material page only needs filtering by Instance and Base values.
+- An earlier diagnostic LISP file, `H871_PART_FILTER_DIAG.lsp`, produced:
+  `Unexpected end of #<input stream "...H871_PART_FILTER_DIAG.lsp">`
+- The exact source file and failing line are not currently in this repository. The error is recorded as historical evidence, not a confirmed current defect.
+
+### Acceptance criteria for the Part filter
+
+1. User can enter an exact Instance value and an exact Base value for the target property.
+2. A Part is a match only when both requested values match the corresponding property fields.
+3. No comparison operators are required or shown for this workflow.
+4. Matching is evaluated against actual Part property data, not text guessed from display labels.
+5. Empty, missing, or unavailable property values are handled explicitly.
+6. Results are verified against representative Parts in Creo Elements/Direct Modeling 18.1.
+7. The test record states the exact property, input pair, expected Parts, and actual results.
+
+## Source and test status
+
+At baseline initialization, no LISP source or test model has been committed. The first source import should preserve original filenames and, where useful, include a known-working version before edits begin.
+
+## Session handover checklist
+
+- [ ] Read README and this file.
+- [ ] Read technical decisions, known issues, lessons learned, and development log.
+- [ ] Inspect the current source and latest commit.
+- [ ] Confirm the target Creo version and actual LISP runtime.
+- [ ] Identify what has been functionally tested in Creo.
+- [ ] Update docs with every meaningful implementation or test result.
