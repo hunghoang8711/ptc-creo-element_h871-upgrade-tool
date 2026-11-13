@@ -10,9 +10,9 @@ The repository is intended to be the engineering source of truth for:
 
 ## Project status
 
-**Documentation baseline initialized – 2026-11-13.**
+**Part Filter development in progress – 2026-11-13.**
 
-The repository was empty when this baseline was created. No production LISP source files have been imported yet. Existing behavior described in the project context is recorded as historical requirements, not as verified source-code behavior.
+The repository contains the uploaded diagnostic baseline and an evolving Part Filter implementation. The current implementation candidate uses a dedicated Graphical Browser for BOM-like search results; it is not yet functionally verified in Creo 18.1. Existing behavior described in the project context is recorded as historical requirements, not as verified source-code behavior.
 
 ## Repository map
 
