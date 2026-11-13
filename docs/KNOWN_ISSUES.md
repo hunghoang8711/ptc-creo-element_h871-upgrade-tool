@@ -45,3 +45,12 @@ Track confirmed defects and unresolved investigations. Close an issue only after
 - **Implementation:** `GET_SELECTION` with Part focus, an exact-pair check function, and `:in_assembly`.
 - **Risk:** PTC references reviewed are for later 20.x releases; actual 18.1 runtime behavior and selection-list persistence must be confirmed.
 - **Next action:** Run the updated LISP in Creo 18.1 and report selected count, selection-list behavior, and Add to Drawlist result.
+
+
+## KI-004 – Earlier GET_SELECTION implementation did not set Structure Browser selection
+
+- **Status:** Superseded by Structure Browser node-selection implementation; pending Creo 18.1 verification.
+- **Observed behavior:** User saw only Output messages and no rows selected in the Structure Browser.
+- **Root cause:** The implementation relied on GET_SELECTION return values and incorrectly claimed those values were persisted as Structure Browser selections. PTC documents GET_SELECTION as a selector that returns SEL_ITEMs.
+- **Fix:** Use `sd-browser-exec-cmd "parcel-gbrowser" :set-object-selection` on matching BrowserNode structs.
+- **Next action:** Test updated source in Creo 18.1 and report matched/selected counts.
