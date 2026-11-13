@@ -16,5 +16,5 @@ No production source files have been imported yet.
 ## Part filter source files
 
 - `part-filter/H871_PART_FILTER_DIAG.lsp`: uploaded diagnostic baseline; preserved unchanged.
-- `part-filter/H871_PART_FILTER.lsp`: first exact Density Instance/Base filter implementation. Load and test this file in Creo Elements/Direct Modeling 18.1. The dialog defaults to Instance 1.0 and Base 304.0 and writes matches to `H871_PART_FILTER_RESULT.txt` in the user's home directory.
+- `part-filter/H871_PART_FILTER.lsp`: current exact Density Instance/Base filter candidate. It opens a dedicated Graphical Browser results table with Part Name, Density Instance, Density Base, and Assembly Path columns. Browser row selection, Select All, and Clear Selection are implemented as candidate UI actions. Load and test this file in Creo Elements/Direct Modeling 18.1. The dialog defaults to Instance 1.0 and Base 304.0 and writes matches to `H871_PART_FILTER_RESULT.txt` in the user's home directory.
 - Do not treat static checks as proof of successful loading or functional behavior in Creo.
