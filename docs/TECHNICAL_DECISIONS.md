@@ -73,3 +73,11 @@ Record decisions that constrain future implementation. Amend entries only when a
 - **Extensibility:** Separate property predicate from result browser so Density is the first filter and additional Part properties can be added later.
 - **Compatibility:** PTC documents reviewed are for 20.4/20.8; must verify the relevant APIs in the user's Creo 18.1 Integration Kit before implementing. Do not reuse unverified function signatures from newer releases.
 - **Supersedes:** TD-006 and TD-007 as the primary user interaction strategy. Their selection experiments are historical and not accepted as successful implementations.
+
+## TD-009 – Density numeric normalization and 18.1 API compatibility investigation
+
+- **Date:** 2026-11-14
+- **Decision:** Normalize numeric Density values before comparing. Accept numeric values and numeric strings; compare numerically with a small tolerance. This covers representations such as `1` and `1.0`.
+- **Rationale:** Lisp numeric equality already considers integer 1 and float 1.0 equal; text representations need parsing before numeric comparison.
+- **Compatibility finding:** PTC's public Modeling 20.8 release notes say separate Density attributes on Part Instance and Contents, and the `:instance` / `:contents` inquiry kind, were introduced in 20.8. The target environment is 18.1, so the current API assumption is not yet justified for that release.
+- **Next step:** Run `H871_DENSITY_DIAG.lsp` on a known Part and identify the 18.1 property/attribute source. Do not claim the filter is fixed based only on numeric normalization.
