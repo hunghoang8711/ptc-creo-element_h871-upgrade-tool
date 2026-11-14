@@ -8,7 +8,7 @@ Concise milestone history. Detailed abandoned UI iterations are consolidated in 
 - Kept Assembly selection unchanged.
 - Replaced numeric Instance input with Machining Process choices: CNC=1, KH=2, CG=3, COVER=4.
 - Replaced numeric Base input with Material choices: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
-- Added adjacent read-only code fields; selected numeric range values are passed directly to the existing `h871-pf-run`.
+- Added read-only code fields after each selector; selected numeric range values are passed directly to the existing `h871-pf-run`. The standard dialog places these variables on separate rows, so same-row right-side placement remains deferred pending 18.1 UI verification.
 - Default remains CNC + SUS304 (1/304).
 - Existing density normalization, exact pair matching, report, Results Browser, Select All and native Apply implementation retained.
 - Static source review only. Not yet loaded or functionally tested in Modeling 18.1.
