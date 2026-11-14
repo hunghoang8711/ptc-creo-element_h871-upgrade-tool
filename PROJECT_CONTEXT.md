@@ -148,3 +148,12 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Current implementation assigns **Select All** to the Graphical Browser's native `:abortButtonLabel` / `:abortButtonAction` slot, while retaining the native OK/Apply action.
 - Keep the standalone Graphical Browser. Do not reintroduce `sd-set-graphical-browser-parent` or unified host-shell embedding.
 - PTC Graphical Browser reference confirms native OK/abort labels and actions, but detailed source consulted is a later release than 18.1. Runtime validation is required, especially whether the Select All action leaves the Results window open and whether the normal close control remains available.
+
+
+## 2026-11-14 – Part Filter independent footer button implementation
+
+The latest source attempts the requested single-window layout using two independently-created UICT pushbuttons, Apply and Select All, side by side in the host dialog footer. Select All no longer occupies the Graphical Browser Abort/Close slot and no separate Selection Tools window is created.
+
+The Graphical Browser is instantiated with `sd-show-graphical-browser` before `sd-set-graphical-browser-parent` reparents it into a resizable child grid of the host shell. If embedding fails, the source reports a numbered stage error and restores the standalone Graphical Browser so matching results remain accessible.
+
+Static source checks pass. Runtime behavior is still unverified in Creo Elements/Direct Modeling 18.1. Preserve Density matching, result table, and row-selection code while testing the UI.
