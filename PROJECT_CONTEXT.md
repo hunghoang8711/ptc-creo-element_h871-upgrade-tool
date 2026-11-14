@@ -41,3 +41,23 @@ The production filter source now has a dedicated normalization helper that divid
 - Removed `READ-FROM-STRING`, `STRING-TRIM`, and `#\\Space` / `#\\Tab` / `#\\Newline` from the numeric helper.
 - The helper now accepts numeric values only, which matches the current API and dialog contract.
 - If the same message persists, verify the local file version/path and capture the exact source line or load-stage prompt before further edits.
+
+
+## 2026-11-14 – Part Filter result browser follow-up
+
+### User-confirmed current behavior
+- The BOM-like Part Name result table is now visible.
+- Individual Part rows can be selected.
+- A remaining runtime message appears when the filter command is run: `Odd number of arguments for keywords.`
+
+### Source correction and requested workflow
+- Corrected both `sd-browser-set-status-text` calls: the status message is now supplied using `:value`, matching the PTC Integration Kit function signature. This is the likely cause of the keyword-argument error.
+- Added visible `Select All` and `Clear Selection` buttons to the result browser.
+- The filter dialog now defers termination after the search, keeping Assembly, Density Instance, and Density Base inputs available for the next search.
+- The result browser is a separate window and can be closed after the user has selected the required Parts.
+
+### Pending runtime confirmation
+- Confirm no keyword-argument error appears in Creo 18.1.
+- Confirm Select All selects every displayed result row.
+- Confirm the filter input dialog remains open and accepts a changed Density pair for a subsequent search.
+- Do not describe these new behaviors as runtime-verified until the user confirms them.
