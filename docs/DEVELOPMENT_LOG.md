@@ -253,3 +253,30 @@ The user requires a separate Select All button immediately beside Apply in the s
 Apply calls Graphical Browser `:select-and-execute`. Select All calls `:select-all`, updates the status text, and leaves the window open. The host shell close control closes the unified results window. The browser is shown/instantiated before `sd-set-graphical-browser-parent` reparents it into a resizable child grid. If embedding fails, a numbered diagnostic is shown and the standalone browser is restored as a fallback.
 
 Static checks: balanced parentheses and quotes; two separate pushbutton creation calls; no Selection Tools dialog. Runtime verification in Creo Elements/Direct Modeling 18.1 is pending. Test one-window display, side-by-side buttons, Select All without closing, Apply hand-off, and normal close behavior. If it fails, report the exact `H871: Stage ...` message.
+
+
+## 2026-11-14 – Restore original Part Filter Results Browser and native footer actions
+
+### User correction
+The user clarified that the Results Browser already worked correctly and Select All already worked in its own UICT button. The remaining requirement is only to place Select All beside Apply in the same Results window. Rebuilding the Browser inside a new host dialog was an unnecessary architectural change.
+
+### Source investigation
+- Compared the latest host-shell implementation with the last known-good standalone Graphical Browser source at commit `3e9f3c1`.
+- Confirmed the oversized window and missing result rows were introduced by the new Dialog Shell / grid / browser reparenting path, not by Density matching or result-tree construction.
+- Restored the original standalone Graphical Browser creation, table definition, row data, selection state, and result-tree flow.
+
+### Minimal UI implementation
+- Added the native Graphical Browser footer label **Apply** using `:okButtonLabel`.
+- Added **Select All** beside it using `:abortButtonLabel` and `:abortButtonAction`, calling the already-working `h871-pf-select-all`.
+- Removed the host shell, extra grid areas, UICT footer buttons, and `sd-set-graphical-browser-parent`.
+- Added a custom Apply callback: execute the existing native `:select-and-execute` hand-off, then show the same Results Browser again so the user can continue working without reopening the filter.
+
+### Static validation
+- Parenthesis balance: 0.
+- Confirmed the original standalone `sd-show-graphical-browser` flow is restored.
+- Confirmed no host-shell variables or browser-parent API remain.
+- Confirmed native Apply and Select All labels/actions are both defined on the same Graphical Browser.
+- Confirmed Apply callback performs `:select-and-execute` and then re-shows the Results Browser.
+
+### Runtime verification required
+Creo Elements/Direct Modeling 18.1 must still verify the exact footer placement and that Select All leaves the browser open. Also verify Apply transfers the selected Parts and restores the same Results Browser, and that normal close remains available. This is a minimal compatibility implementation based on the original working browser; static checks do not prove runtime behavior.
