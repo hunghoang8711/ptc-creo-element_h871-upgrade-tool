@@ -23,7 +23,9 @@
 
 (defvar *h871-pf-browser-name* "h871-pf-results")
 (defvar *h871-pf-tree-name* "h871-pf-results-tree")
-(defvar *h871-pf-tools-shell* "h871-pf-selection-tools")
+(defvar *h871-pf-host-shell* "H871-PF-RESULTS")
+(defvar *h871-pf-host-area* "H871-PF-RESULTS-RG")
+(defvar *h871-pf-browser-area* "H871-PF-BROWSER-RG")
 
 (defun h871-pf-name (obj)
   (or (sd-inq-obj-basename obj) "<NO NAME>"))
@@ -151,11 +153,27 @@
                   :base-api base))))
     root))
 
+(defun h871-pf-apply-selected ()
+  (sd-browser-exec-cmd *h871-pf-browser-name* :select-and-execute)
+  (ignore-errors
+    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t)))
+
 (defun h871-pf-select-all ()
-  (sd-browser-exec-cmd *h871-pf-browser-name* :select-all))
+  ;; Select all result rows and immediately perform the same hand-off
+  ;; as Apply; no second click is required.
+  (sd-browser-exec-cmd *h871-pf-browser-name* :select-all)
+  (sd-browser-exec-cmd *h871-pf-browser-name* :select-and-execute)
+  (ignore-errors
+    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t)))
 
 (defun h871-pf-clear-selection ()
   (sd-browser-exec-cmd *h871-pf-browser-name* :clear-select-list))
+
+(defun h871-pf-close-results ()
+  (ignore-errors
+    (sd-hide-graphical-browser *h871-pf-browser-name* :ignore-pin t))
+  (ignore-errors
+    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t)))
 
 (defun h871-pf-selected-parts ()
   (let ((parts nil))
@@ -173,39 +191,67 @@
       *h871-pf-browser-name*
       :value (format nil "~A result row(s) selected." (length parts)))))
 
-(defun h871-pf-open-selection-tools ()
-  ;; Use the Modeling UI Construction Toolkit instead of relying on
-  ;; Graphical Browser menu surfaces that are not exposed consistently
-  ;; by the user's 18.1 browser UI.
-  (ignore-errors (sd-hide-dialog-shell *h871-pf-tools-shell* :ignorePin t))
-  (ignore-errors (sd-destroy-dialog-shell *h871-pf-tools-shell*))
-  (when (sd-create-dialog-shell
-          *h871-pf-tools-shell*
-          :title "H871 - SELECTION TOOLS"
-          :pin nil
-          :close t
-          :bottomLine :none)
-    (when (sd-append-grid-area
-            (concatenate 'string *h871-pf-tools-shell* "-GA")
-            (concatenate 'string *h871-pf-tools-shell* "-AA")
-            :width 220
-            :height 32
-            :cellSize 1,1
-            :margin 2
-            :spacing 2)
+(defun h871-pf-create-results-host ()
+  ;; Host the Graphical Browser inside one resizable dialog shell.
+  ;; Action controls are siblings of the browser control in one footer.
+  (unless (and (fboundp 'sd-create-resizable-dialog-shell)
+               (fboundp 'sd-create-resizable-grid-area)
+               (fboundp 'sd-set-graphical-browser-parent))
+    (sd-display-error
+      "H871: This Modeling version does not expose the resizable browser-parent API required for the unified results window.")
+    (return-from h871-pf-create-results-host nil))
+
+  (ignore-errors
+    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t))
+  (ignore-errors
+    (sd-destroy-dialog-shell *h871-pf-host-shell*))
+
+  (unless
+    (sd-create-resizable-dialog-shell
+      *h871-pf-host-shell*
+      :title "H871 - PART FILTER RESULTS"
+      :width 640 :height 430
+      :margin 0 :spacing 0 :cellSize 1,1)
+    (return-from h871-pf-create-results-host nil))
+
+  (unless
+    (sd-create-resizable-grid-area
+      *h871-pf-browser-area*
+      *h871-pf-host-area*
+      :x 0 :y 0 :width 640 :height 390
+      :cellSize 1,1 :margin 0 :spacing 0)
+    (sd-destroy-dialog-shell *h871-pf-host-shell*)
+    (return-from h871-pf-create-results-host nil))
+
+  (when (fboundp 'sd-set-control-binding)
+    (sd-set-control-binding *h871-pf-browser-area* '(:resize-both)))
+
+  ;; Footer order: Apply | Select All | Clear Selection | Close.
+  (unless
+    (and
       (sd-create-pushbutton-control
-        "h871-pf-select-all-button"
-        (concatenate 'string *h871-pf-tools-shell* "-GA")
-        :x 2 :y 3 :width 92 :height 24
+        "H871-PF-APPLY-PB" *h871-pf-host-area*
+        :x 8 :y 398 :width 72 :height 24
+        :title "Apply"
+        :pushAction '(h871-pf-apply-selected))
+      (sd-create-pushbutton-control
+        "H871-PF-SELECT-ALL-PB" *h871-pf-host-area*
+        :x 88 :y 398 :width 88 :height 24
         :title "Select All"
         :pushAction '(h871-pf-select-all))
       (sd-create-pushbutton-control
-        "h871-pf-clear-selection-button"
-        (concatenate 'string *h871-pf-tools-shell* "-GA")
-        :x 108 :y 3 :width 108 :height 24
+        "H871-PF-CLEAR-PB" *h871-pf-host-area*
+        :x 184 :y 398 :width 112 :height 24
         :title "Clear Selection"
         :pushAction '(h871-pf-clear-selection))
-      (sd-show-dialog-shell *h871-pf-tools-shell*))))
+      (sd-create-pushbutton-control
+        "H871-PF-CLOSE-PB" *h871-pf-host-area*
+        :x 552 :y 398 :width 76 :height 24
+        :title "Close"
+        :pushAction '(h871-pf-close-results)))
+    (sd-destroy-dialog-shell *h871-pf-host-shell*)
+    (return-from h871-pf-create-results-host nil))
+  t)
 
 (defun h871-pf-open-results-browser ()
   ;; Recreate browser/tree so every search has a clean result set.
@@ -235,8 +281,9 @@
       :minHeight 280
       :maxWidth 900
       :maxHeight 760
-      ;; Retain only a popup fallback; persistent controls are provided
-      ;; by the separate UI Construction Toolkit selection window.
+      ;; Footer actions are provided by the single host dialog shell.
+      :okButtonLabel ""
+      :abortButtonLabel ""
       :topMenu
         '(("selection"
            :label "Selection"
@@ -280,17 +327,30 @@
     (sd-display-error "H871: Could not create the BOM result table.")
     (return-from h871-pf-open-results-browser nil))
 
+  (unless (h871-pf-create-results-host)
+    (sd-display-error "H871: Could not create the unified results window.")
+    (return-from h871-pf-open-results-browser nil))
+
+  (unless
+    (sd-set-graphical-browser-parent
+      *h871-pf-browser-name*
+      *h871-pf-host-shell*
+      *h871-pf-browser-area*
+      :dockable nil)
+    (sd-destroy-dialog-shell *h871-pf-host-shell*)
+    (sd-display-error "H871: Could not embed the results browser in its host window.")
+    (return-from h871-pf-open-results-browser nil))
+
   (sd-browser-set-active-table
     *h871-pf-browser-name* :table-name "h871-pf-bom")
   (sd-browser-exec-cmd *h871-pf-browser-name* :set-table-mode)
-  (sd-show-graphical-browser *h871-pf-browser-name*)
-  (h871-pf-open-selection-tools)
 
   ;; Root node is the table root; the table displays all matching Parts.
   (let ((root (sd-get-browsernode-struct *h871-pf-tree-name* :root)))
     (when root
       (sd-browser-exec-cmd
         *h871-pf-browser-name* :change-table-root root t)))
+  (sd-show-dialog-shell *h871-pf-host-shell*)
   t)
 
 ;; ------------------------------------------------------------
