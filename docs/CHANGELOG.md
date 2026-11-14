@@ -6,7 +6,7 @@ Concise record of meaningful project milestones. See Git history for individual 
 
 - Added fixed Machining Process choices mapped to Density Instance: CNC=1, KH=2, CG=3, COVER=4.
 - Added fixed Material choices mapped to Density Base: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
-- Added adjacent read-only numeric code fields.
+- Added read-only numeric code fields following their corresponding selectors (standard dialog rows); a right-side same-row layout remains a separate UI task.
 - Preserved Assembly selection, exact Density pair engine, report, Results Browser and native Apply path.
 - Kept ver-01 source unchanged.
 - Runtime verification in Modeling 18.1 is still pending.
