@@ -14,3 +14,14 @@
 - **Native data constraint:** all development and tests must use native Creo Elements/Direct `.pkg` / `.bdl` model content. Do not assume a STEP import data path.
 - **Next action:** verify the scale on another known Part, then normalize values in a dedicated reusable function before exact-pair comparison.
 - **Production filter status:** a successful isolated inquiry is not proof that the complete Assembly scan or result UI works. Keep full runtime status separate.
+
+
+
+## KI-006 update – 1000:1 Density scale confirmed on a second native Part
+
+- **Second test Part:** `010-plate_2.1.1.2.1.1`.
+- **Part Properties:** Instance = `2`, Base = `400`.
+- **API results:** `:instance` = `2000.0`; `:contents` = `400000.0`.
+- **Combined evidence:** first Part UI 1/304 maps to API 1000/304000; second Part UI 2/400 maps to API 2000/400000. Both independently establish a 1000:1 scale relationship for both fields.
+- **Status:** empirically confirmed on two native Parts. The source now normalizes API values by dividing by 1000.0 before exact matching and displays normalized values in the result table/report while retaining raw values in diagnostics.
+- **Remaining risk:** complete Assembly scan and Graphical Browser runtime behavior have not yet been tested. This code update must not be described as a successful end-to-end filter test.
