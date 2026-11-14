@@ -244,3 +244,12 @@ PTC's Graphical Browser reference documents `:abortButtonLabel` and `:abortButto
 
 ### Runtime test required
 Verify that Results Browser shows a **Select All** button in the same window, that pressing it selects all result rows without closing the browser, that native Apply still works, and that the window can still be closed normally.
+
+
+## 2026-11-14 – Independent Apply / Select All footer implementation
+
+The user requires a separate Select All button immediately beside Apply in the same Filter Results window. The source now creates two independent UICT pushbuttons in one host dialog footer; Select All no longer uses the Graphical Browser Abort slot and no separate Selection Tools window is created.
+
+Apply calls Graphical Browser `:select-and-execute`. Select All calls `:select-all`, updates the status text, and leaves the window open. The host shell close control closes the unified results window. The browser is shown/instantiated before `sd-set-graphical-browser-parent` reparents it into a resizable child grid. If embedding fails, a numbered diagnostic is shown and the standalone browser is restored as a fallback.
+
+Static checks: balanced parentheses and quotes; two separate pushbutton creation calls; no Selection Tools dialog. Runtime verification in Creo Elements/Direct Modeling 18.1 is pending. Test one-window display, side-by-side buttons, Select All without closing, Apply hand-off, and normal close behavior. If it fails, report the exact `H871: Stage ...` message.
