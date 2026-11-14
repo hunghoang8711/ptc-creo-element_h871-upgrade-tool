@@ -90,3 +90,20 @@ The latest source creates:
 5. Graphical Browser parent set to the browser grid, with dialog basename `H871-PF-RESULTS`.
 
 Static validation is required; runtime embedding remains unconfirmed until user tests the new source.
+
+
+## 2026-11-14 – Part Filter host-window failure isolation
+
+The user reports that the no-match path still works, but a search that finds matching Parts displays `H871: Could not create the unified results window.` This confirms the search reaches the result-window branch, but the specific UICT creation failure is not yet known.
+
+The latest source replaces the generic host creation error with exact numbered stages:
+1. API availability
+2. Dialog shell creation
+3. Root grid creation under the automatic `-AA` client area
+4. Browser child grid creation
+5. Apply button creation
+6. Select All button creation
+7. Clear Selection button creation
+8. Close button creation
+
+The next runtime test must capture the exact stage message. Do not alter the Density filter or browser-parent API speculatively. Static parenthesis balance is 0; no runtime fix is claimed.
