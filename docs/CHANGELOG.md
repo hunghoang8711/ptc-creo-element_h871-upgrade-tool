@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-14 – Add ver-03 independent multi-search Results Browsers
+
+- Added per-search session storage and unique Browser/Tree identities.
+- Each successful search requests its own docked tab, labeled by Material + Machining Process (e.g. SUS304-CNC); duplicate labels receive a suffix.
+- Scoped Select All, Clear Selection and selection summary actions to the owning Browser.
+- Preserved the Graphical Browser's native Apply behavior.
+- Modeling 18.1 runtime compatibility and multi-session regression tests are pending.
+
+
 Concise record of meaningful project milestones. See Git history for individual commits and intermediate experiments.
 
 ## 2026-11-14 – Add H871 Part Filter ver-02 dialog candidate
