@@ -61,3 +61,18 @@ The user confirmed that the previous Select All / Clear Selection controls appea
 
 ### Compatibility and test status
 PTC's later Integration Kit docs describe browser-parent hosting inside a resizable grid area and UICT Pushbuttons inside a grid area. This is the architecture used by the latest source. Since the reference is later than Modeling 18.1, function availability and actual layout still require runtime confirmation. Static LISP checks pass; do not describe the feature as runtime verified until the user tests it.
+
+
+## 2026-11-14 – Part Filter browser-parent runtime error
+
+The user tested the unified results-window implementation and received `H871: Could not embed the results browser in its host window.`
+
+PTC's release-history page places the resizable UICT functions and `sd-set-graphical-browser-parent` in older CoCreate Modeling history. Do not incorrectly label these APIs as introduced only in 20.7/20.8; they are plausible in the 18.1 lineage.
+
+The latest source adds `h871-pf-parent-diagnostic`, which reports:
+- Whether the named Graphical Browser exists and whether it is docked
+- Whether the host dialog shell exists
+- Whether the root host grid exists
+- Whether the nested browser-parent grid exists
+
+The diagnostic is displayed before the host shell is destroyed. Next action is to ask the user to load the latest source, run one search, and provide the complete `H871 EMBED DIAGNOSTIC` message. No runtime fix has yet been confirmed.
