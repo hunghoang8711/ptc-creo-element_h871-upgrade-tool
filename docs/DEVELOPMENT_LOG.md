@@ -68,3 +68,23 @@ Updated `src/part-filter/H871_PART_FILTER.lsp`:
 - After the user reported the same load error persisted, removed `READ-FROM-STRING`, `STRING-TRIM`, and all `#\\...` character literals from `h871-pf-as-number`.
 - The workflow uses numeric dialog fields and numeric Density API results, so numeric-string parsing is unnecessary.
 - Static check: balanced parentheses, no negative nesting, no unterminated string, and no remaining `READ-FROM-STRING` or character literals in the source. Creo runtime reload is pending.
+
+
+## 2026-11-14 – Part Filter browser error, Select All, and repeat-search workflow
+
+### User-reported state
+- The BOM-like result table now appears and individual Part rows can be selected in Creo Elements/Direct Modeling 18.1.
+- A LISP error still appears when the filter command is run: `Odd number of arguments for keywords.`
+
+### Source diagnosis and correction
+- Reviewed the current result-browser call sequence against the PTC Integration Kit Graphical Browser API reference.
+- Found both calls to `sd-browser-set-status-text` passed the status message as a positional argument. The documented function takes the message through the keyword `:value`; this mismatch is the likely source of the keyword-argument error.
+- Updated both status-text calls to use `:value`.
+- Added visible browser toolbar buttons for `Select All` and `Clear Selection`, using the documented `:select-all` and `:clear-select-list` browser commands.
+- Updated the filter dialog OK action to call `sd-return-from-ok-action` after each search, so the Assembly and Density Instance/Base inputs remain available for repeated searches without reopening the command.
+- The result browser remains a separate window that the user can close after selecting the desired Parts.
+
+### Verification status
+- GitHub source update committed; this is a code change, not proof of runtime success.
+- Need user confirmation in Creo 18.1 that the keyword error is gone, the Select All button selects all visible result rows, and the filter dialog remains open after each search.
+- If Creo 18.1 rejects the new button-menu or deferred-dialog behavior, isolate those UI changes separately without disturbing the working result table.
