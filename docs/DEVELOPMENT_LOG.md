@@ -302,3 +302,19 @@ The Results Browser now displays the Part list and Select All control, but click
 
 ### Verification status
 Static source checks confirm the custom Apply callback and override are absent and the Apply label / Select All action remain. This does not prove Creo 18.1 runtime behavior. The user must retest single-row selection, multi-row selection, Select All, and Apply. If row clicks still do not highlight/select a row, investigate the browser's click/selectability behavior separately; do not assume the Apply correction also fixes row selection.
+
+
+## 2026-11-14 – User-confirmed Part Filter selection workflow restored
+
+### Creo 18.1 runtime verification
+The user reloaded the corrected source and confirmed that the selection workflow is working again:
+- Clicking a Part row selects the corresponding Part.
+- Apply transfers the selected Part(s) to Creo Modeling selection as expected.
+
+This confirms the native Graphical Browser selection behavior and native default Apply hand-off are functioning in the user's Creo Elements/Direct Modeling 18.1 environment.
+
+### Final implementation status
+- Keep the standalone Graphical Browser architecture.
+- Keep the native Apply action; do not reintroduce the custom callback that immediately reopens the browser.
+- Keep Select All in the Results Browser footer.
+- The row-selection and Apply regression is resolved based on user runtime confirmation.
