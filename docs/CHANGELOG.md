@@ -113,3 +113,10 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - The visible Apply button now uses Creo Graphical Browser's native default OK action.
 - Select All and the standalone result table are retained.
 - Creo 18.1 runtime retest is pending; row selection and Apply are not yet marked fixed.
+
+
+## 2026-11-14 – Part Filter selection workflow verified
+
+- User confirmed in Creo Elements/Direct Modeling 18.1 that clicking a Part row selects it and Apply correctly transfers selected Parts to Modeling selection.
+- The native Graphical Browser Apply action is retained; the custom Apply callback remains removed.
+- The row-selection / Apply regression is resolved.
