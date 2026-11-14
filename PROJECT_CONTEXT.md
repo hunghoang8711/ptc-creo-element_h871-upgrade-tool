@@ -21,3 +21,11 @@ Both API values are 1000 times the UI display values for this sample. This is an
 - The optional `:instance` and `:contents` forms are confirmed supported in this user's Modeling 18.1 installation.
 - The isolated API read is confirmed; the production Assembly traversal, exact-pair matching, BOM-like result list, double-click locate, and Add to Drawlist workflow remain unverified.
 - Keep property acquisition, normalization, and exact-pair matching as separate functions so the scale rule can be changed safely after verification.
+
+
+
+## 2026-11-14 – Density scale verified on two Parts; normalization added
+
+A second native Part `010-plate_2.1.1.2.1.1` was tested. Its Part Properties values are Instance = `2`, Base = `400`; API inquiries returned `2000.0` for `:instance` and `400000.0` for `:contents`. Combined with the first Part (UI 1/304; API 1000/304000), both fields show a consistent API-to-display factor of 1000 across two different native Parts.
+
+The production filter source now has a dedicated normalization helper that divides numeric API Density values by 1000.0 before exact-pair comparison. The result table displays normalized values and diagnostics retain raw values. This source update is committed but has not yet been run in Creo 18.1. Full Assembly scan and Graphical Browser interactions remain unverified.
