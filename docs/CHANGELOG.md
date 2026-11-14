@@ -35,3 +35,10 @@ Notable repository changes. Detailed implementation and test evidence lives in `
 - Preserved exact Density Instance/Base pair matching and text report output.
 - Static parenthesis/string scan passed after correcting a missing close parenthesis in the browser constructor form.
 - Creo 18.1 loading, row selection, double-click model navigation, and downstream Add to Drawlist behavior remain unverified.
+
+## 2026-11-14 – Density value normalization and diagnostics
+
+- Added numeric normalization for Density comparisons, including numeric strings such as `1` and `1.0`.
+- Added first-30-Part raw Density value/type samples to the result report for diagnosing zero-match searches.
+- Added `H871_DENSITY_DIAG.lsp` to inspect one known Part's Density inquiry results and instance/contents attributes in Creo 18.1.
+- Static scan passed; Creo execution not performed.
