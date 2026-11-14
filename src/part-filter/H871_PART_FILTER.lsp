@@ -5,7 +5,7 @@
 ;; Search: exact Density Instance + Density Base pair.
 ;; Results: dedicated Graphical Browser with BOM-like table.
 ;; Row selection: native Graphical Browser selection state.
-;; Select All / Clear Selection: browser commands.
+;; Select All: native browser command plus a compact UICT pushbutton.
 ;;
 ;; IMPORTANT:
 ;; Graphical Browser APIs are documented in later PTC Integration
@@ -153,9 +153,6 @@
 (defun h871-pf-select-all ()
   (sd-browser-exec-cmd *h871-pf-browser-name* :select-all))
 
-(defun h871-pf-clear-selection ()
-  (sd-browser-exec-cmd *h871-pf-browser-name* :clear-select-list))
-
 (defun h871-pf-selected-parts ()
   (let ((parts nil))
     (dolist (node
@@ -200,24 +197,13 @@
       :minHeight 280
       :maxWidth 900
       :maxHeight 760
-      :buttonMenu
-        '(("select-all"
-           :label "Select All"
-           :push (h871-pf-select-all))
-          ("clear-selection"
-           :label "Clear Selection"
-           :push (h871-pf-clear-selection)))
-      :buttonMenuOffObjectOnly nil
       :topMenu
         '(("selection"
            :label "Selection"
            :contents
              (("select-all"
                :label "Select All"
-               :push (h871-pf-select-all))
-              ("clear-selection"
-               :label "Clear Selection"
-               :push (h871-pf-clear-selection))
+               :browser-push-cmd :SELECT-ALL)
               ("selection-summary"
                :label "Update Selection Count"
                :push (h871-pf-show-selection-summary))))))
@@ -322,7 +308,7 @@
         (sd-browser-set-status-text
           *h871-pf-browser-name*
           :value (format nil
-            "~A matching Part(s). Select rows; use Select All/Clear Selection buttons."
+            "~A matching Part(s). Select rows or use the Select All tool window."
             (length *h871-pf-results*)))))
     (values (length *h871-pf-results*) report)))
 
