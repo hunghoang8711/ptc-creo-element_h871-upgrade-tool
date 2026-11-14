@@ -124,3 +124,8 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 **Mitigation committed:** removed the custom Apply callback and restored the Graphical Browser's native default OK action. This addresses the known unnecessary re-open behavior in the custom callback.
 
 **Still unresolved pending Creo 18.1 retest:** individual row selection. If single-click still fails, inspect browser node selectability and click handling independently. Do not claim the full selection workflow is fixed based on static source validation.
+
+
+## 2026-11-14 – Resolved: Part Filter row selection / Apply regression
+
+**Resolved and user-confirmed in Creo Elements/Direct Modeling 18.1.** Clicking a Part row selects it, and Apply correctly transfers the selected Part(s) to Creo Modeling selection. The fix is to retain the Graphical Browser's native default Apply action and avoid the custom callback that reopened the browser immediately after selection hand-off.
