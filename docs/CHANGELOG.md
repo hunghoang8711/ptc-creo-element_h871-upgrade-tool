@@ -50,3 +50,23 @@
 - Isolated checks for dialog shell, root grid, browser child grid, and each footer button.
 - Removed duplicate generic error reporting.
 - No change to Density matching or Graphical Browser parenting behavior; Creo 18.1 runtime diagnosis pending.
+
+ 
+## 2026-11-14 – Roll back unified results-window regression
+
+### User report
+After merging Apply / Select All / Clear Selection / Close into one window, searches that find Parts no longer open the results UI. The no-match path still works.
+
+### History comparison
+- Last known-good standalone browser source: commit `3e9f3c1`, blob `2d65e613708e8ef8721c5cd58c50d950b89488b3`.
+- The standalone implementation creates the Graphical Browser, defines the BOM table, calls `sd-browser-set-active-table`, switches to table mode, then calls `sd-show-graphical-browser`.
+- The unified-window implementation introduced a host dialog/grid hierarchy and the additional `sd-set-graphical-browser-parent` call. This path was not present in the known-good source and is the regression boundary.
+- The Density collector and result-tree construction are retained from the known-good source.
+
+### Rollback
+Restored the complete LISP source to the exact known-good standalone-browser implementation from `3e9f3c1`. This intentionally prioritizes restoring the working results browser and manual row selection / Apply flow over the unverified single-window footer.
+
+### Runtime verification
+- Static source restored from the historical Git blob.
+- User must reload this version and confirm the results browser opens again for a matching Assembly.
+- Select All / Clear Selection visibility remains a separate unresolved enhancement; do not reintroduce browser-parent hosting until a Modeling 18.1-compatible method is proven.
