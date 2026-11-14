@@ -29,13 +29,35 @@
 (defun h871-pf-path (obj)
   (or (sd-inq-obj-pathname obj) "<NO PATH>"))
 
+;; Convert numeric values consistently. In Lisp, (= 1 1.0) is
+;; already true; this helper additionally accepts numeric strings such
+;; as "1" and "1.0" if a runtime/property layer returns text.
+(defun h871-pf-as-number (value)
+  (cond
+    ((numberp value) value)
+    ((stringp value)
+     (let ((*read-eval* nil))
+       (multiple-value-bind (parsed position)
+           (ignore-errors (read-from-string (string-trim '(#\\Space #\\Tab #\\Newline) value) nil nil))
+         (when (and (numberp parsed)
+                    (= position
+                       (length (string-trim '(#\\Space #\\Tab #\\Newline) value))))
+           parsed))))
+    (t nil)))
+
+(defun h871-pf-numeric-equal-p (actual requested)
+  (let ((a (h871-pf-as-number actual))
+        (b (h871-pf-as-number requested)))
+    (and a b
+         (<= (abs (- a b)) 0.0000001))))
+
 (defun h871-pf-density-pair-match (part requested-instance requested-base)
   (let ((actual-instance (sd-inq-part-density part :instance))
         (actual-base (sd-inq-part-density part :contents)))
-    (and (numberp actual-instance)
-         (numberp actual-base)
-         (= actual-instance requested-instance)
-         (= actual-base requested-base))))
+    (and (not (null actual-instance))
+         (not (null actual-base))
+         (h871-pf-numeric-equal-p actual-instance requested-instance)
+         (h871-pf-numeric-equal-p actual-base requested-base))))
 
 ;; ------------------------------------------------------------
 ;; Filter engine - keep predicates separate from result UI
