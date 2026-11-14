@@ -55,3 +55,10 @@ Updated `src/part-filter/H871_PART_FILTER.lsp`:
 - Static source inspection is still required after this edit.
 - The complete Assembly traversal, result count, Graphical Browser creation, and row-selection interactions remain unverified in Creo 18.1.
 - Treat 1000 as an empirically confirmed conversion for the two tested Parts; if later testing reveals mixed units or exceptional values, isolate any adjustment in the normalization helper.
+
+
+## 2026-11-14 — Fix Lisp reader error in numeric string parser
+- Fixed invalid doubled backslashes in Common Lisp character literals in `h871-pf-as-number`: `#\\Space`, `#\\Tab`, and `#\\Newline` are now the valid `#\Space`, `#\Tab`, and `#\Newline` forms.
+- Root cause of Creo's `Octal digit expected` reader error; the subsequent misplaced-right-parenthesis message was likely a cascading parse error.
+- Static source check after the fix: balanced parentheses (0), no negative nesting, no unterminated string, and all three character literals verified.
+- Creo Elements/Direct Modeling 18.1 runtime reload and filter execution still require user confirmation.
