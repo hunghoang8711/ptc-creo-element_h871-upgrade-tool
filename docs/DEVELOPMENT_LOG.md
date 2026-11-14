@@ -192,3 +192,31 @@ This file records chronological development work. Major features receive their o
 3. Confirm double-click locates/highlights the original model Part; this is not yet claimed as verified.
 4. Confirm selected result Parts can be passed to downstream commands such as Add to Drawlist.
 5. If the browser fails to build, capture the exact Creo LISP error and the first failing line; adjust the 18.1 API signature rather than reverting to Output-only behavior.
+
+## 2026-11-14 – Investigate zero Density matches on Creo 18.1
+
+### User observation
+- The Assembly is known to contain Parts whose Part Properties show Density Instance = 1 and Density Base = 304, but the filter returns zero matches.
+
+### Findings
+- Lisp numeric `=` already treats numeric 1 and 1.0 as equal. Numeric formatting alone is not a sufficient explanation.
+- PTC public Modeling 20.8 release notes indicate that separate Density values on Part Instance and Contents, and the `:instance` / `:contents` inquiry kind for `sd-inq-part-density`, were introduced in 20.8. This is a serious compatibility concern for the project's Modeling 18.1 target.
+- The actual 18.1 data source must be inspected before another production matcher change is justified.
+
+### Source changes
+- Updated `H871_PART_FILTER.lsp` with numeric normalization and a raw-value/type sample (first 30 Parts) in the TXT report.
+- Added `H871_DENSITY_DIAG.lsp` to inspect one known Part's default/instance/contents density inquiry values and available item attributes.
+
+### Verification
+- GitHub commits completed.
+- Static scan of `H871_PART_FILTER.lsp`: balanced parentheses; no unterminated strings.
+- Creo 18.1 execution: not performed.
+
+### Required user test
+1. Load `H871_DENSITY_DIAG.lsp`.
+2. Run `H871_DENSITY_DIAG`.
+3. Select one Part whose Part Properties visibly show Instance 1 and Base 304.
+4. Send `H871_DENSITY_DIAGNOSTIC.txt` back for inspection.
+
+### Next engineering decision
+- Identify the actual 18.1 property/attribute source from the diagnostic before changing the production filter again.
