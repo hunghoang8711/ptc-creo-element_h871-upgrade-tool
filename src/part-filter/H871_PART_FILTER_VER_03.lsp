@@ -33,7 +33,7 @@
     (if entry
         (setf (cdr entry) data)
       (push (cons browser-name data) *h871-pf-session-list*))
-    data)
+    data))
 
 (defun h871-pf-next-session-id ()
   (incf *h871-pf-session-counter*))
