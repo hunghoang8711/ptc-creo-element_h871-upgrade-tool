@@ -176,3 +176,10 @@ The user reported that the Results Browser displays its Part list and Select All
 Source commit: ba2da0d72d29a53e36d4587a1b5abea3d9331c88.
 
 Static checks only. User must retest in Creo Elements/Direct Modeling 18.1. Manual row selection is still an open issue until explicitly confirmed.
+
+
+## 2026-11-14 – Part Filter row selection / Apply confirmed working
+
+The user confirmed the latest source works in Creo Elements/Direct Modeling 18.1: clicking a Part row selects it, and Apply correctly transfers the selected Part(s) into Creo Modeling selection. This resolves the reported regression.
+
+Keep the standalone Graphical Browser, native default Apply action, and existing Select All footer action. Do not restore the custom h871-pf-apply-selected callback or immediately reopen the browser after :select-and-execute.
