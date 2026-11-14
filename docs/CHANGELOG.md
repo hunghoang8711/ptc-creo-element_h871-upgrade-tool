@@ -28,3 +28,11 @@
 ## 2026-11-14
 - Simplified numeric conversion to avoid `READ-FROM-STRING` and Lisp character literals after the user reported the reader error persisted.
 - Creo 18.1 runtime verification remains pending.
+
+
+## 2026-11-14 – Part Filter usability and keyword-error correction
+- Corrected both `sd-browser-set-status-text` calls to pass the text with the documented `:value` keyword; this is the likely cause of the reported `Odd number of arguments for keywords` error.
+- Added visible `Select All` and `Clear Selection` toolbar buttons to the result browser.
+- Kept the Assembly / Density Instance / Density Base input dialog active after each search so another density pair can be entered immediately.
+- Result browser remains separately closable after Part selection.
+- Creo 18.1 runtime verification is pending.
