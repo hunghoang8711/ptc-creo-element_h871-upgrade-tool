@@ -27,6 +27,21 @@ Run these in Creo Elements/Direct Modeling 18.1 after loading `H871_PART_FILTER_
 9. Test at least one other process/material combination and verify the expected numeric pair reaches the filter.
 10. Confirm the input dialog remains available for a subsequent search.
 
+## Part Filter ver-03 multi-session / tab tests
+
+Run in Creo Elements/Direct Modeling 18.1 after loading `H871_PART_FILTER_VER_03.lsp`:
+
+1. Confirm command `H871_PART_FILTER_VER_03` opens without LISP errors.
+2. Run a SUS304-CNC search and confirm a tab with that label appears.
+3. Run a different process/material search; confirm a second tab appears and the first result list remains unchanged.
+4. Switch between tabs and verify each tab displays only its own results.
+5. Select one row in the first tab and press native Apply; verify only that Part is transferred.
+6. Use Select All in the second tab and press native Apply; verify only that session's Parts are transferred.
+7. Repeat an identical search; confirm a unique tab label is generated and prior sessions remain intact.
+8. Hide/close one tab and verify the other tabs remain available.
+9. Run a no-match search; confirm it does not create an empty Results Browser tab.
+10. Verify the mapped-choice dialog still behaves as in the user-confirmed ver-02 baseline.
+
 ## Part Filter regression checklist
 
 After changing the filter engine or Results Browser, retest in Modeling 18.1:
@@ -40,6 +55,6 @@ After changing the filter engine or Results Browser, retest in Modeling 18.1:
 7. Search an Assembly with no matches and confirm the normal no-match message.
 8. If repeat-search behavior is changed, verify the input dialog and result-window lifecycle separately.
 
-No sanitized automated fixture or repeatable model package is currently committed. The ver-01 baseline test evidence is the user's manual runtime confirmation dated 2026-11-14. ver-02 still requires runtime testing.
+No sanitized automated fixture or repeatable model package is currently committed. The ver-01 baseline test evidence is the user's manual runtime confirmation dated 2026-11-14. ver-02 was subsequently user-confirmed as working. ver-03 multi-session behavior remains untested.
 
 Never use customer-confidential CAD data as a public test fixture.
