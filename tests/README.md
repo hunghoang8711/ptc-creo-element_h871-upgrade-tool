@@ -1,32 +1,30 @@
 # Tests and Sample Data
 
-Store non-confidential test assets and repeatable test instructions here.
+Store sanitized test assets and repeatable test procedures here.
 
-## Suggested structure
+## Test record
 
-```text
-tests/
-├── README.md
-├── lisp/
-│   └── syntax and command-level test notes
-├── fixtures/
-│   └── sanitized sample models or property datasets
-└── test-cases/
-    └── feature-specific expected results
-```
-
-## Test record requirements
-
-For each test, record:
+For each meaningful test, record:
 - Test ID and date.
 - Creo Elements/Direct Modeling version.
 - Source commit or file revision.
-- Model/setup used (sanitized).
-- Input values and selected objects.
-- Expected result.
-- Actual result.
-- Pass/fail and notes.
+- Sanitized model/setup and input values.
+- Expected and actual results.
+- Pass/fail status and any regression observations.
 
-Never use customer-confidential CAD data as a public test fixture. Replace it with a minimal synthetic model that preserves only the properties needed for the test.
+## Part Filter regression checklist
 
-No test fixtures have been committed yet.
+After changing the filter engine or Results Browser, retest in Modeling 18.1:
+
+1. Search an Assembly with known matching Parts.
+2. Confirm the Results Browser opens and lists the expected Parts.
+3. Select one row and confirm the corresponding Part is selected.
+4. Select multiple rows and confirm the selection is retained.
+5. Use Select All and confirm all result rows are selected.
+6. Press native Apply and confirm the selected Parts transfer to Modeling selection.
+7. Search an Assembly with no matches and confirm the normal no-match message.
+8. If repeat-search behavior is changed, verify the input dialog and result-window lifecycle separately.
+
+No sanitized automated fixture or repeatable model package is currently committed. The current baseline test evidence is the user's manual runtime confirmation dated 2026-11-14.
+
+Never use customer-confidential CAD data as a public test fixture.
