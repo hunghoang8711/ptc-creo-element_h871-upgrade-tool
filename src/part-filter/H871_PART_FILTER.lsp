@@ -373,10 +373,10 @@
       *h871-pf-host-shell*
       *h871-pf-browser-area*
       :dockable nil)
-    (sd-destroy-dialog-shell *h871-pf-host-shell*)
     (progn
       (sd-display-error "H871: Could not embed the results browser in its host window.")
       (h871-pf-parent-diagnostic))
+    (sd-destroy-dialog-shell *h871-pf-host-shell*)
     (return-from h871-pf-open-results-browser nil))
 
   (sd-browser-set-active-table
