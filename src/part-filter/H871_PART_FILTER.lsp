@@ -23,9 +23,6 @@
 
 (defvar *h871-pf-browser-name* "h871-pf-results")
 (defvar *h871-pf-tree-name* "h871-pf-results-tree")
-(defvar *h871-pf-host-shell* "H871-PF-RESULTS")
-(defvar *h871-pf-host-area* "H871-PF-RESULTS-RG")
-(defvar *h871-pf-browser-area* "H871-PF-BROWSER-RG")
 
 (defun h871-pf-name (obj)
   (or (sd-inq-obj-basename obj) "<NO NAME>"))
@@ -153,27 +150,11 @@
                   :base-api base))))
     root))
 
-(defun h871-pf-apply-selected ()
-  (sd-browser-exec-cmd *h871-pf-browser-name* :select-and-execute)
-  (ignore-errors
-    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t)))
-
 (defun h871-pf-select-all ()
-  ;; Select all result rows and immediately perform the same hand-off
-  ;; as Apply; no second click is required.
-  (sd-browser-exec-cmd *h871-pf-browser-name* :select-all)
-  (sd-browser-exec-cmd *h871-pf-browser-name* :select-and-execute)
-  (ignore-errors
-    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t)))
+  (sd-browser-exec-cmd *h871-pf-browser-name* :select-all))
 
 (defun h871-pf-clear-selection ()
   (sd-browser-exec-cmd *h871-pf-browser-name* :clear-select-list))
-
-(defun h871-pf-close-results ()
-  (ignore-errors
-    (sd-hide-graphical-browser *h871-pf-browser-name* :ignore-pin t))
-  (ignore-errors
-    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t)))
 
 (defun h871-pf-selected-parts ()
   (let ((parts nil))
@@ -190,133 +171,6 @@
     (sd-browser-set-status-text
       *h871-pf-browser-name*
       :value (format nil "~A result row(s) selected." (length parts)))))
-
-(defun h871-pf-host-fail (stage)
-  ;; Keep the exact failing UICT operation visible to the user.
-  (ignore-errors
-    (sd-destroy-dialog-shell *h871-pf-host-shell*))
-  (sd-display-error
-    (format nil "H871 RESULTS WINDOW: failed at stage [~A]." stage))
-  nil)
-
-(defun h871-pf-create-results-host ()
-  ;; Host the Graphical Browser inside one resizable dialog shell.
-  ;; Stage-specific errors identify the exact UICT call that fails.
-  (unless (and (fboundp 'sd-create-resizable-dialog-shell)
-               (fboundp 'sd-create-resizable-grid-area)
-               (fboundp 'sd-set-graphical-browser-parent))
-    (return-from h871-pf-create-results-host
-      (h871-pf-host-fail "API availability check")))
-
-  (ignore-errors
-    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t))
-  (ignore-errors
-    (sd-destroy-dialog-shell *h871-pf-host-shell*))
-
-  (unless
-    (sd-create-resizable-dialog-shell
-      *h871-pf-host-shell*
-      :title "H871 - PART FILTER RESULTS"
-      :width 640 :height 430
-      :margin 0 :spacing 0 :cellSize 1,1)
-    (return-from h871-pf-create-results-host
-      (h871-pf-host-fail "1 - create dialog shell")))
-
-  ;; Dialog shell creates its automatic client area "<basename>-AA".
-  (unless
-    (sd-create-resizable-grid-area
-      *h871-pf-host-area*
-      (concatenate 'string *h871-pf-host-shell* "-AA")
-      :x 0 :y 0 :width 640 :height 430
-      :cellSize 1,1 :margin 0 :spacing 0)
-    (return-from h871-pf-create-results-host
-      (h871-pf-host-fail "2 - create root grid under -AA")))
-
-  (unless
-    (sd-create-resizable-grid-area
-      *h871-pf-browser-area*
-      *h871-pf-host-area*
-      :x 0 :y 0 :width 640 :height 390
-      :cellSize 1,1 :margin 0 :spacing 0)
-    (return-from h871-pf-create-results-host
-      (h871-pf-host-fail "3 - create browser child grid")))
-
-  (when (fboundp 'sd-set-control-binding)
-    (sd-set-control-binding *h871-pf-browser-area* '(:resize-both)))
-
-  ;; Footer order: Apply | Select All | Clear Selection | Close.
-  (unless
-    (sd-create-pushbutton-control
-      "H871-PF-APPLY-PB" *h871-pf-host-area*
-      :x 8 :y 398 :width 72 :height 24
-      :title "Apply"
-      :pushAction '(h871-pf-apply-selected))
-    (return-from h871-pf-create-results-host
-      (h871-pf-host-fail "4 - create Apply button")))
-
-  (unless
-    (sd-create-pushbutton-control
-      "H871-PF-SELECT-ALL-PB" *h871-pf-host-area*
-      :x 88 :y 398 :width 88 :height 24
-      :title "Select All"
-      :pushAction '(h871-pf-select-all))
-    (return-from h871-pf-create-results-host
-      (h871-pf-host-fail "5 - create Select All button")))
-
-  (unless
-    (sd-create-pushbutton-control
-      "H871-PF-CLEAR-PB" *h871-pf-host-area*
-      :x 184 :y 398 :width 112 :height 24
-      :title "Clear Selection"
-      :pushAction '(h871-pf-clear-selection))
-    (return-from h871-pf-create-results-host
-      (h871-pf-host-fail "6 - create Clear Selection button")))
-
-  (unless
-    (sd-create-pushbutton-control
-      "H871-PF-CLOSE-PB" *h871-pf-host-area*
-      :x 552 :y 398 :width 76 :height 24
-      :title "Close"
-      :pushAction '(h871-pf-close-results))
-    (return-from h871-pf-create-results-host
-      (h871-pf-host-fail "7 - create Close button")))
-  t)
-
-(defun h871-pf-parent-diagnostic ()
-  ;; Capture the actual UI object hierarchy when browser parenting fails.
-  ;; This avoids masking a missing shell/area or a docked browser as one
-  ;; generic embedding error.
-  (let* ((shell-handle (concatenate 'string *h871-pf-host-shell* "-DS"))
-         (host-area *h871-pf-host-area*)
-         (browser-area *h871-pf-browser-area*)
-         (browser-list
-           (if (fboundp 'sd-list-graphical-browsers)
-               (sd-list-graphical-browsers)
-             :function-unavailable))
-         (browser-exists
-           (and (listp browser-list)
-                (member *h871-pf-browser-name* browser-list
-                        :test #'string=)))
-         (shell-exists
-           (and (fboundp 'sd-dialog-shell-p)
-                (sd-dialog-shell-p shell-handle)))
-         (host-exists
-           (and (fboundp 'sd-control-p) (sd-control-p host-area)))
-         (browser-area-exists
-           (and (fboundp 'sd-control-p) (sd-control-p browser-area)))
-         (docked
-           (if (and browser-exists
-                    (fboundp 'sd-graphical-browser-docked-p))
-               (sd-graphical-browser-docked-p *h871-pf-browser-name*)
-             :unknown)))
-    (sd-display-message
-      (format nil
-        "H871 EMBED DIAGNOSTIC~%Browser exists: ~A~%Browser docked: ~A~%Dialog shell exists: ~A (~A)~%Host grid exists: ~A (~A)~%Browser parent grid exists: ~A (~A)~%"
-        (if browser-exists "T" "NIL")
-        docked
-        shell-exists shell-handle
-        host-exists host-area
-        browser-area-exists browser-area))))
 
 (defun h871-pf-open-results-browser ()
   ;; Recreate browser/tree so every search has a clean result set.
@@ -346,19 +200,24 @@
       :minHeight 280
       :maxWidth 900
       :maxHeight 760
-      ;; Footer actions are provided by the single host dialog shell.
-      :okButtonLabel ""
-      :abortButtonLabel ""
+      :buttonMenu
+        '(("select-all"
+           :label "Select All"
+           :push (h871-pf-select-all))
+          ("clear-selection"
+           :label "Clear Selection"
+           :push (h871-pf-clear-selection)))
+      :buttonMenuOffObjectOnly nil
       :topMenu
         '(("selection"
            :label "Selection"
            :contents
              (("select-all"
                :label "Select All"
-               :browser-push-cmd :SELECT-ALL)
+               :push (h871-pf-select-all))
               ("clear-selection"
                :label "Clear Selection"
-               :browser-push-cmd :CLEAR-SELECT-LIST)
+               :push (h871-pf-clear-selection))
               ("selection-summary"
                :label "Update Selection Count"
                :push (h871-pf-show-selection-summary))))))
@@ -371,52 +230,36 @@
       :table-name "h871-pf-bom"
       :with-name-column nil
       :column-definition
-        '(;; Modeling 18.1 uses the legacy :max-width column option.
-          ;; :initial-width was introduced in a later release (20.4).
+        '(;; :initial-width values below are character counts, not pixels.
           (:label "Part Name"
            :type :string-column
            :display-func h871-pf-column-name
-           :max-width 22)
+           :initial-width 28)
           (:label "Density Instance"
            :type :string-column
            :display-func h871-pf-column-instance
-           :max-width 8)
+           :initial-width 13)
           (:label "Density Base"
            :type :string-column
            :display-func h871-pf-column-base
-           :max-width 8)
+           :initial-width 12)
           (:label "Assembly Path"
            :type :string-column
            :display-func h871-pf-column-path
-           :max-width 30)))
+           :initial-width 42)))
     (sd-display-error "H871: Could not create the BOM result table.")
-    (return-from h871-pf-open-results-browser nil))
-
-  (unless (h871-pf-create-results-host)
-    (return-from h871-pf-open-results-browser nil))
-
-  (unless
-    (sd-set-graphical-browser-parent
-      *h871-pf-browser-name*
-      *h871-pf-host-shell*
-      *h871-pf-browser-area*
-      :dockable nil)
-    (progn
-      (sd-display-error "H871: Could not embed the results browser in its host window.")
-      (h871-pf-parent-diagnostic))
-    (sd-destroy-dialog-shell *h871-pf-host-shell*)
     (return-from h871-pf-open-results-browser nil))
 
   (sd-browser-set-active-table
     *h871-pf-browser-name* :table-name "h871-pf-bom")
   (sd-browser-exec-cmd *h871-pf-browser-name* :set-table-mode)
+  (sd-show-graphical-browser *h871-pf-browser-name*)
 
   ;; Root node is the table root; the table displays all matching Parts.
   (let ((root (sd-get-browsernode-struct *h871-pf-tree-name* :root)))
     (when root
       (sd-browser-exec-cmd
         *h871-pf-browser-name* :change-table-root root t)))
-  (sd-show-dialog-shell *h871-pf-host-shell*)
   t)
 
 ;; ------------------------------------------------------------
