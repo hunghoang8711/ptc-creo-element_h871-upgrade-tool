@@ -23,3 +23,8 @@
 ## 2026-11-14
 - Fixed invalid Common Lisp character literals in the numeric-string parser of `H871_PART_FILTER.lsp`, addressing the reported `Octal digit expected` load error.
 - Static syntax-balance check passed; Creo 18.1 runtime test pending.
+
+
+## 2026-11-14
+- Simplified numeric conversion to avoid `READ-FROM-STRING` and Lisp character literals after the user reported the reader error persisted.
+- Creo 18.1 runtime verification remains pending.
