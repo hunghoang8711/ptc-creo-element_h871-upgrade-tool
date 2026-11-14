@@ -42,3 +42,10 @@ Notable repository changes. Detailed implementation and test evidence lives in `
 - Added first-30-Part raw Density value/type samples to the result report for diagnosing zero-match searches.
 - Added `H871_DENSITY_DIAG.lsp` to inspect one known Part's Density inquiry results and instance/contents attributes in Creo 18.1.
 - Static scan passed; Creo execution not performed.
+
+
+## 2026-11-14 – Density diagnostic syntax correction
+
+- Fixed a missing closing parenthesis in `H871_DENSITY_DIAG.lsp` that caused Creo's unexpected end-of-input load error.
+- Full-file static parenthesis/string scan passed.
+- Actual load and diagnostic execution in Creo 18.1 remain pending.
