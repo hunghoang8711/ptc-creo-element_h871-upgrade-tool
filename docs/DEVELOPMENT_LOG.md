@@ -1,314 +1,37 @@
-# Development Log
-
-This file records chronological development work. Major features receive their own headings; small corrections are dated entries. Keep entries factual and distinguish implementation from testing.
-
-## 2026-11-13 – Repository documentation baseline
-
-### Work completed
-- Verified the public GitHub repository was empty before initialization.
-- Created the initial repository README and project context.
-- Established documentation files for decisions, lessons, issues, and changes.
-- Recorded the initial Part property filter requirements from prior project discussions.
-
-### Verification
-- GitHub repository access and file creation: successful.
-- Creo LISP execution: not performed.
-- Part filter functional behavior: not verified; source has not yet been imported.
-
-### Next steps
-1. Import the current LISP source files and any relevant historical versions.
-2. Inspect the actual implementation of approach B.
-3. Reproduce and isolate the historical filter mismatch.
-4. Inspect the historical unexpected-end-of-input diagnostic error.
-5. Establish a repeatable test set in Creo Elements/Direct Modeling 18.1.
-
-## Entry template
-
-### YYYY-MM-DD – Feature or change title
-
-**Objective**
-- What user-visible behavior is required?
-
-**Files changed**
-- List source and documentation paths.
-
-**Implementation**
-- Summarize the technical change and relevant design choices.
-
-**Verification**
-- Environment and Creo version:
-- Static checks:
-- Loaded in Creo:
-- Functional tests:
-- Regression tests:
-
-**Result**
-- Implemented / Static-checked / Loaded in Creo / Functionally tested / Regression-tested.
-
-**Remaining work / risks**
-- List unverified cases and follow-up actions.
 
 
-## 2026-11-13 – First exact Density Instance/Base filter implementation
+## 2026-11-14 – Confirm Part predicate and isolate Density kind arguments
 
-### Objective
-- Replace the unused Material text input and comparison-oriented Density controls with an exact Density Instance/Base pair lookup.
+### User runtime evidence
+- User ran `H871_DENSITY_TEST_PART_P` against the known Part `010-plate_2.1.1.2.1`.
+- `sd-inq-part-p` returned `T` (type `SYMBOL`).
+- Selected object type was `ELAN::SEL_ITEM`; its basename and full model path were returned correctly.
+- User also previously ran `H871_DENSITY_TEST_ONE_ARG`: `(sd-inq-part-density part)` returned `1000.0` (type `LONG-FLOAT`).
+
+### Conclusion
+- `ELAN::SEL_ITEM` is accepted directly by both tested inquiry calls; it is not the cause of the zero-match issue.
+- The known selected object is confirmed as a Part.
+- The one-argument density value is the default/realized value and does not establish the separate Instance/Base values shown in Part Properties.
+- The optional `:instance` and `:contents` calls remain unverified on Modeling 18.1.
 
 ### Files changed
-- Added `src/part-filter/H871_PART_FILTER.lsp`.
-- Preserved `src/part-filter/H871_PART_FILTER_DIAG.lsp` unchanged.
-- Updated `PROJECT_CONTEXT.md`, technical decisions, known issues, changelog, and source guidance.
+- Added `src/part-filter/H871_DENSITY_KIND_TEST.lsp`.
 
 ### Implementation
-- The dialog asks for an Assembly, Density Instance, and Density Base only.
-- Defaults are Instance = 1.0 and Base = 304.0, matching the user's screenshot.
-- Recursive scan uses `sd-inq-part-density` with `:instance` and `:contents`; both values must exist and match numerically.
-- Matching Part names, paths, and actual values are written to `H871_PART_FILTER_RESULT.txt` in the user's home directory.
-- Created backup branch `backup-before-density-filter-20261113` before implementation.
-
-### Verification
-- GitHub source creation: successful.
-- Static parentheses/string scan of the new source: balanced; no negative nesting or unterminated string.
-- PTC reference confirms `:instance` means Instance density and `:contents` means Base density. Reference is for a later Elements/Direct release; compatibility must still be confirmed in Creo 18.1.
-- Loaded in Creo 18.1: not performed.
-- Functional / regression tests: not performed.
-
-### Result
-- Implemented and static-checked; not yet verified in Creo.
-
-### Remaining work / risks
-1. User loads the new file in Creo 18.1 and confirms the dialog opens.
-2. Run against an Assembly containing known Parts with (Instance 1, Base 304), plus near-matches such as (1, other) and (other, 304).
-3. Confirm the report contains only Parts matching both values.
-4. If the result file is not sufficient and the user expects matching Parts selected/highlighted in the viewport, implement selection feedback after verifying the supported 18.1 selection API.
-
-
-## 2026-11-13 – Native selection-list output
-
-### Objective
-- After exact Density Instance/Base matching, place matching Parts into Creo's native selection list so the user can apply standard commands such as Add to Drawlist.
-
-### Files changed
-- Updated `src/part-filter/H871_PART_FILTER.lsp`.
-- Updated project context, technical decisions, known issues, and changelog.
-
-### Implementation
-- Added a GET_SELECTION check function that accepts only Parts whose Density Instance and Density Base both exactly match the requested values.
-- Calls `get_selection` with `*sd-part-seltype*`, `:check_function`, and `:select :in_assembly`.
-- Writes the returned selection items and their properties to the result report.
-
-### Verification
-- PTC Integration Kit reference describes GET_SELECTION, `:in_assembly`, and `:check_function` behavior.
-- Source updated on GitHub successfully.
-- Static balance/load checks: pending re-run after this update.
-- Creo 18.1 selection-list behavior: not yet tested.
-
-### Result
-- Implemented; pending in-application verification.
-
-### Next test
-1. Load the updated `H871_PART_FILTER.lsp` only (avoid loading the old diagnostic file as a command source for this test).
-2. Run `H871_PART_FILTER` and select the target Assembly.
-3. Enter Instance 1 and Base 304.
-4. Confirm matching Parts appear in the active selection list / Structure Browser selection state.
-5. Invoke Add to Drawlist and confirm it acts on those Parts.
-6. Report the selected count and any error text.
-
-
-## 2026-11-13 – Correct native Structure Browser selection
-
-### Objective
-- Make matched Parts visibly selected in the existing Structure Browser, like selecting rows in the browser, so the user can continue with Add to Drawlist.
-
-### Root cause of previous attempt
-- The previous implementation treated `GET_SELECTION` return values as if they set persistent Structure Browser selection. PTC documents GET_SELECTION as invoking the standard SELECT subaction and returning SEL_ITEMs; it does not provide the Structure Browser node-selection operation.
-- The previous success message was unconditional even when the result count was zero. This was incorrect and has been removed.
-
-### Implementation
-- Scan the selected Assembly's model object tree and collect exact Density Instance/Base matches.
-- Use the standard Structure Browser `parcel-gbrowser`.
-- Expand the browser tree, locate each matching BrowserNode by its object path, clear the previous selection list, and call `:set-object-selection node t` for each match.
-- Report matching count, selected count, and nodes not found separately.
-
-### Verification
-- PTC Graphical Browser reference documents `:SET-OBJECT-SELECTION`, `:CLEAR-SELECT-LIST`, `:EXPAND-TREE`, `:GET-CHILDREN`, and `:GET-GRAPHICS-ROOT`.
-- Source updated on GitHub; static balance check pending.
-- Creo 18.1 runtime behavior: not yet tested.
-
-### Remaining risks
-1. Structure Browser may be closed, not fully built, or in a mode where some nodes are not selectable.
-2. Browser object paths must match `sd-inq-obj-pathname` paths.
-3. Density exact-match retrieval still requires separate verification against known Part Properties values.
-
-
-## 2026-11-13 – Part Filter redesign investigation: dedicated results browser
-
-### User feedback
-- The previous versions still produced Output messages and did not provide a usable selected result set.
-- User requested a BOM-like result table, double-click locate, row selection, Select All, and extensible filtering for additional properties.
-
-### Research
-- Reviewed PTC Structure Browser Search & Filter user documentation.
-- Reviewed PTC Integration Kit Graphical Browser concepts: BrowserNode data tree, client data, custom table columns, mouse handlers, browser commands, selection queries, and display/hide utilities.
-- PTC describes default browser behavior including single-click select, Ctrl-click add/remove from selection list, double-click select-and-operate, and configurable click handlers.
-- Search results in the standard Structure Browser can expand the relevant branch, scroll to the object, and highlight it in Browser and viewport.
-
-### Architectural decision
-- Stop iterating on direct mutation of the existing Structure Browser selection as the main UX.
-- Build a dedicated H871 Graphical Browser results view with BOM-like table columns and each row bound to its model Part via BrowserNode client data.
-- Keep filter predicates separate from browser/result presentation for future properties.
-
-### Status
-- Research and architecture decision only; no new result browser code has been committed yet.
-- PTC references are later than 18.1; confirm exact API availability/signatures in 18.1 before coding.
-
-
-## 2026-11-13 – Dedicated BOM-like results browser candidate
-
-### Objective
-- Stop relying on Output messages and unreliable attempts to mutate the standard Structure Browser selection. Provide a dedicated, inspectable results list.
-
-### Files changed
-- Updated `src/part-filter/H871_PART_FILTER.lsp`.
-- Updated `PROJECT_CONTEXT.md`, `README.md`, `src/README.md`, `docs/KNOWN_ISSUES.md`, and `docs/CHANGELOG.md`.
-
-### Implementation
-- Kept the exact Density Instance/Base predicate separate from browser presentation.
-- Added a Graphical Browser tree whose result BrowserNodes retain the corresponding model Part in client data.
-- Added a BOM-like table with Part Name, Density Instance, Density Base, and Assembly Path columns.
-- Added Select All, Clear Selection, and selected-row count actions using Graphical Browser commands.
-- Retained the text report as a diagnostic fallback.
-
-### Verification
-- GitHub source and documentation commits: successful.
-- Static scan: balanced parentheses, no negative nesting, and no unterminated strings.
-- PTC reference research: Graphical Browser constructors, BrowserNode client data, table definitions, click/selection behavior, and Select All/Clear Selection documented in later Integration Kit references.
-- Loaded in Creo 18.1: not performed.
-- Functional tests: not performed.
-
-### Remaining work / risks
-1. Load the new source in Creo 18.1 and confirm the dedicated browser opens with result rows.
-2. Confirm all four columns display correctly and row selection / Ctrl-click / Select All / Clear Selection work.
-3. Confirm double-click locates/highlights the original model Part; this is not yet claimed as verified.
-4. Confirm selected result Parts can be passed to downstream commands such as Add to Drawlist.
-5. If the browser fails to build, capture the exact Creo LISP error and the first failing line; adjust the 18.1 API signature rather than reverting to Output-only behavior.
-
-
-## 2026-11-14 – Investigate zero Density matches on Creo 18.1
-
-### User observation
-- The Assembly is known to contain Parts whose Part Properties show Density Instance = 1 and Density Base = 304, but the filter returns zero matches.
-
-### Findings
-- Lisp numeric `=` already treats numeric 1 and 1.0 as equal. Numeric formatting alone is not a sufficient explanation.
-- PTC's public Integration Kit documentation describes the density inquiry kinds; runtime behavior and returned values must be measured on the user's installed Modeling 18.1 build.
-- The actual 18.1 data source must be inspected before another production matcher change is justified.
-
-### Source changes
-- Updated `H871_PART_FILTER.lsp` with numeric normalization and a raw-value/type sample (first 30 Parts) in the TXT report.
-- Added `H871_DENSITY_DIAG.lsp` to inspect one known Part's default/instance/contents density inquiry values and available item attributes.
-
-### Verification
-- GitHub commits completed.
-- Static scan of `H871_PART_FILTER.lsp`: balanced parentheses; no unterminated strings.
-- Creo 18.1 execution: not performed.
-
-### Required user test
-1. Load `H871_DENSITY_DIAG.lsp`.
-2. Run `H871_DENSITY_DIAG`.
-3. Select one Part whose Part Properties visibly show Instance 1 and Base 304.
-4. Send `H871_DENSITY_DIAGNOSTIC.txt` back for inspection.
-
-### Next engineering decision
-- Identify the actual 18.1 property/attribute source from the diagnostic before changing the production filter again.
-
-
-## 2026-11-14 – Fix density diagnostic unexpected end of input
-
-### User-reported error
-- Creo reported `Unexpected end of #<input stream ... H871_DENSITY_DIAG.lsp>` while loading the diagnostic.
-
-### Root cause and fix
-- Static parenthesis validation found one missing closing parenthesis at the end of `h871-density-diag-write-attributes`.
-- Added the missing close parenthesis in `src/part-filter/H871_DENSITY_DIAG.lsp`.
-
-### Verification
-- Full-file static scan: balanced parentheses (balance 0), no negative nesting, and no unterminated strings.
-- GitHub update committed successfully.
-- Creo 18.1 load/run: not yet tested; user should reload the corrected file and run the diagnostic.
-
-
-## 2026-11-14 – Simplify density diagnostic after Creo parser prompt
-
-### User feedback
-- After the first parenthesis correction, Creo still displayed a parser prompt: `Missing character(s) in input: ' ) '`.
-
-### Follow-up change
-- Rewrote the diagnostic into a smaller form, removing the deeply nested attribute-enumeration helper and using the same sectioned `:variables` dialog structure as the existing Part Filter dialog.
-- The report now captures default, `:instance`, and `:contents` density inquiry values, plus instance/contents attribute inquiry results, with errors contained per inquiry.
-
-### Verification
-- Full-file static scan: balanced parentheses and terminated strings.
-- GitHub source update completed.
-- Creo 18.1 parser/load remains unverified and requires a fresh test.
-
-
-## 2026-11-14 – Capture actual Creo API errors in Density diagnostic
-
-### User evidence
-- The selected Part is `010-plate_2.1.1.2.1`, with a valid object path.
-- The previous diagnostic printed the ambiguous text "NIL or inquiry raised an error" for all five inquiries.
-- The previous helper discarded the second value returned by Common Lisp `ignore-errors`, so it could not distinguish a normal NIL return from a signaled error.
-
-### Research finding
-- PTC's current Integration Kit reference documents `sd-inq-part-density` with an optional `:kind` argument (`:instance`, `:contents`, `:realized`). PTC's What's New material describes the instance/contents property-attribute extension in a later 20.x release, while its 18.1 What's New section does not list that extension. This makes 18.1 API compatibility a concrete suspect, but does not by itself prove which function or argument is failing on this installation.
-- PTC's current reference describes `sd-inq-item-attributes` using the `:attachment` keyword argument. Runtime availability must also be checked.
-
-### Files changed
-- Updated `src/part-filter/H871_DENSITY_DIAG.lsp`.
-
-### Implementation
-- The diagnostic now records the condition text and condition type separately from a genuine NIL return.
-- Added `fboundp` checks for `sd-inq-part-density` and `sd-inq-item-attributes`.
-- Added the selected object's Lisp type and `sd-inq-part-p` result.
-- Retained separate tests for the one-argument density call, `:instance`, `:contents`, and instance/contents attribute lists.
-
-### Verification
-- GitHub update succeeded.
-- Static syntax scan: pending.
-- Creo 18.1 load and runtime: not yet tested.
-
-### Next step
-- Reload this revision, run `H871_DENSITY_DIAG` on the same known Part, and send the new report. The exact recorded condition will determine whether to use a legacy one-argument density inquiry, another Part-property API, or a different attribute route.
-
-
-## 2026-11-14 – Replace invalid User Input Line tests with isolated file-based API tests
-
-### User feedback
-- The suggested `SEL_ITEM-P` test failed because `SEL_ITEM-P` is undefined in the user's Modeling 18.1 environment.
-- The user also confirmed that direct Lisp expressions cannot be executed in the User Input Line.
-
-### Correction
-- Do not use `SEL_ITEM-P` as an API or assume the User Input Line is a Lisp REPL.
-- The previous diagnostic's `IGNORE-ERRORS` / `FUNCALL` wrapper produced an `ESCAPE` result for every inquiry, so it did not isolate which direct API call was failing.
-
-### Files changed
-- Added `src/part-filter/H871_DENSITY_API_TEST.lsp`.
-
-### Implementation
-- Provides two separate dialog commands: `H871_DENSITY_TEST_PART_P` and `H871_DENSITY_TEST_ONE_ARG`.
-- Each dialog selects the same known Part and directly calls exactly one API: `sd-inq-part-p` or the legacy one-argument `sd-inq-part-density`.
-- Writes the object name/path/type, API availability, and return value/type to `H871_DENSITY_API_TEST.txt` in the user's home folder.
-- Deliberately avoids `SEL_ITEM-P`, `FUNCALL`, `LAMBDA`, and `IGNORE-ERRORS` so the next test does not repeat the earlier ambiguity.
-- This file is to be loaded using the same proven LISP file-loading method used for the existing H871 tools; its dialog commands must be launched through the Modeling command/menu mechanism, not entered as Lisp expressions in the User Input Line.
+- Added two separate dialog commands: `H871_DENSITY_TEST_INSTANCE` and `H871_DENSITY_TEST_CONTENTS`.
+- Each dialog directly calls exactly one optional-kind form and writes to its own report (`H871_DENSITY_INSTANCE_TEST.txt` or `H871_DENSITY_CONTENTS_TEST.txt`).
+- The report is flushed before the direct API call, so if the call signals an error the attempted expression and Part identity should still be recorded.
+- No `FUNCALL`, `LAMBDA`, `IGNORE-ERRORS`, or generic safe-call wrapper is used around the tested inquiry.
 
 ### Verification
 - GitHub file creation succeeded.
-- Static syntax check: pending.
-- Creo 18.1 load and dialog execution: not yet tested.
+- Static source scan: parentheses balanced (0), no negative nesting, no unterminated strings.
+- `sd-inq-part-p` runtime test: user-confirmed success.
+- One-argument density runtime test: user-confirmed success.
+- Optional `:instance` / `:contents` runtime tests: pending user execution.
 
-### Next step
-1. Load `H871_DENSITY_API_TEST.lsp`.
-2. Launch `H871_DENSITY_TEST_PART_P` from the same command mechanism used to launch `H871_PART_FILTER`.
-3. If successful, run `H871_DENSITY_TEST_ONE_ARG`.
-4. Send the generated TXT report and any exact Creo error message.
+### Next steps
+1. Load `H871_DENSITY_KIND_TEST.lsp` using the established LISP loading method.
+2. Run `H871_DENSITY_TEST_INSTANCE` on the same known Part and send `H871_DENSITY_INSTANCE_TEST.txt`.
+3. Run `H871_DENSITY_TEST_CONTENTS` and send `H871_DENSITY_CONTENTS_TEST.txt`.
+4. Only after these results, select the correct 18.1 data-access strategy and revise the production filter.
