@@ -35,3 +35,9 @@ The production filter source now has a dedicated normalization helper that divid
 - Latest source fix: `h871-pf-as-number` now uses valid `#\Space`, `#\Tab`, and `#\Newline` character literals (single backslash).
 - The previous doubled-backslash form caused the Lisp reader's octal-digit error and likely the subsequent parenthesis error.
 - Static check passed; do not mark the filter runtime-tested until the user reloads it successfully in Creo Elements/Direct Modeling 18.1.
+
+
+## 2026-11-14 — Second reader-error mitigation
+- Removed `READ-FROM-STRING`, `STRING-TRIM`, and `#\\Space` / `#\\Tab` / `#\\Newline` from the numeric helper.
+- The helper now accepts numeric values only, which matches the current API and dialog contract.
+- If the same message persists, verify the local file version/path and capture the exact source line or load-stage prompt before further edits.
