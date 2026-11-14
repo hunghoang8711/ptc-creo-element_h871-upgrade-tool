@@ -191,15 +191,22 @@
       *h871-pf-browser-name*
       :value (format nil "~A result row(s) selected." (length parts)))))
 
+(defun h871-pf-host-fail (stage)
+  ;; Keep the exact failing UICT operation visible to the user.
+  (ignore-errors
+    (sd-destroy-dialog-shell *h871-pf-host-shell*))
+  (sd-display-error
+    (format nil "H871 RESULTS WINDOW: failed at stage [~A]." stage))
+  nil)
+
 (defun h871-pf-create-results-host ()
   ;; Host the Graphical Browser inside one resizable dialog shell.
-  ;; Action controls are siblings of the browser control in one footer.
+  ;; Stage-specific errors identify the exact UICT call that fails.
   (unless (and (fboundp 'sd-create-resizable-dialog-shell)
                (fboundp 'sd-create-resizable-grid-area)
                (fboundp 'sd-set-graphical-browser-parent))
-    (sd-display-error
-      "H871: This Modeling version does not expose the resizable browser-parent API required for the unified results window.")
-    (return-from h871-pf-create-results-host nil))
+    (return-from h871-pf-create-results-host
+      (h871-pf-host-fail "API availability check")))
 
   (ignore-errors
     (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t))
@@ -212,19 +219,18 @@
       :title "H871 - PART FILTER RESULTS"
       :width 640 :height 430
       :margin 0 :spacing 0 :cellSize 1,1)
-    (return-from h871-pf-create-results-host nil))
+    (return-from h871-pf-create-results-host
+      (h871-pf-host-fail "1 - create dialog shell")))
 
-  ;; A dialog shell automatically creates its client area
-  ;; "<basename>-AA". Create the root resizable grid area inside it
-  ;; before creating any child grid areas or pushbuttons.
+  ;; Dialog shell creates its automatic client area "<basename>-AA".
   (unless
     (sd-create-resizable-grid-area
       *h871-pf-host-area*
       (concatenate 'string *h871-pf-host-shell* "-AA")
       :x 0 :y 0 :width 640 :height 430
       :cellSize 1,1 :margin 0 :spacing 0)
-    (sd-destroy-dialog-shell *h871-pf-host-shell*)
-    (return-from h871-pf-create-results-host nil))
+    (return-from h871-pf-create-results-host
+      (h871-pf-host-fail "2 - create root grid under -AA")))
 
   (unless
     (sd-create-resizable-grid-area
@@ -232,37 +238,48 @@
       *h871-pf-host-area*
       :x 0 :y 0 :width 640 :height 390
       :cellSize 1,1 :margin 0 :spacing 0)
-    (sd-destroy-dialog-shell *h871-pf-host-shell*)
-    (return-from h871-pf-create-results-host nil))
+    (return-from h871-pf-create-results-host
+      (h871-pf-host-fail "3 - create browser child grid")))
 
   (when (fboundp 'sd-set-control-binding)
     (sd-set-control-binding *h871-pf-browser-area* '(:resize-both)))
 
   ;; Footer order: Apply | Select All | Clear Selection | Close.
   (unless
-    (and
-      (sd-create-pushbutton-control
-        "H871-PF-APPLY-PB" *h871-pf-host-area*
-        :x 8 :y 398 :width 72 :height 24
-        :title "Apply"
-        :pushAction '(h871-pf-apply-selected))
-      (sd-create-pushbutton-control
-        "H871-PF-SELECT-ALL-PB" *h871-pf-host-area*
-        :x 88 :y 398 :width 88 :height 24
-        :title "Select All"
-        :pushAction '(h871-pf-select-all))
-      (sd-create-pushbutton-control
-        "H871-PF-CLEAR-PB" *h871-pf-host-area*
-        :x 184 :y 398 :width 112 :height 24
-        :title "Clear Selection"
-        :pushAction '(h871-pf-clear-selection))
-      (sd-create-pushbutton-control
-        "H871-PF-CLOSE-PB" *h871-pf-host-area*
-        :x 552 :y 398 :width 76 :height 24
-        :title "Close"
-        :pushAction '(h871-pf-close-results)))
-    (sd-destroy-dialog-shell *h871-pf-host-shell*)
-    (return-from h871-pf-create-results-host nil))
+    (sd-create-pushbutton-control
+      "H871-PF-APPLY-PB" *h871-pf-host-area*
+      :x 8 :y 398 :width 72 :height 24
+      :title "Apply"
+      :pushAction '(h871-pf-apply-selected))
+    (return-from h871-pf-create-results-host
+      (h871-pf-host-fail "4 - create Apply button")))
+
+  (unless
+    (sd-create-pushbutton-control
+      "H871-PF-SELECT-ALL-PB" *h871-pf-host-area*
+      :x 88 :y 398 :width 88 :height 24
+      :title "Select All"
+      :pushAction '(h871-pf-select-all))
+    (return-from h871-pf-create-results-host
+      (h871-pf-host-fail "5 - create Select All button")))
+
+  (unless
+    (sd-create-pushbutton-control
+      "H871-PF-CLEAR-PB" *h871-pf-host-area*
+      :x 184 :y 398 :width 112 :height 24
+      :title "Clear Selection"
+      :pushAction '(h871-pf-clear-selection))
+    (return-from h871-pf-create-results-host
+      (h871-pf-host-fail "6 - create Clear Selection button")))
+
+  (unless
+    (sd-create-pushbutton-control
+      "H871-PF-CLOSE-PB" *h871-pf-host-area*
+      :x 552 :y 398 :width 76 :height 24
+      :title "Close"
+      :pushAction '(h871-pf-close-results))
+    (return-from h871-pf-create-results-host
+      (h871-pf-host-fail "7 - create Close button")))
   t)
 
 (defun h871-pf-parent-diagnostic ()
@@ -376,7 +393,6 @@
     (return-from h871-pf-open-results-browser nil))
 
   (unless (h871-pf-create-results-host)
-    (sd-display-error "H871: Could not create the unified results window.")
     (return-from h871-pf-open-results-browser nil))
 
   (unless
