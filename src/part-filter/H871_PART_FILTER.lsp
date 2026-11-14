@@ -5,7 +5,7 @@
 ;; Search: exact Density Instance + Density Base pair.
 ;; Results: dedicated Graphical Browser with BOM-like table.
 ;; Row selection: native Graphical Browser selection state.
-;; Select All: native browser command plus a compact UICT pushbutton.
+;; Select All: native Graphical Browser button in the Results window.
 ;;
 ;; IMPORTANT:
 ;; Graphical Browser APIs are documented in later PTC Integration
@@ -23,7 +23,6 @@
 
 (defvar *h871-pf-browser-name* "h871-pf-results")
 (defvar *h871-pf-tree-name* "h871-pf-results-tree")
-(defvar *h871-pf-tools-shell* "h871-pf-selection-tools")
 
 (defun h871-pf-name (obj)
   (or (sd-inq-obj-basename obj) "<NO NAME>"))
@@ -164,33 +163,6 @@
           (push (getf data :part) parts))))
     (nreverse parts)))
 
-(defun h871-pf-open-selection-tools ()
-  ;; Keep the standalone Graphical Browser architecture that is working
-  ;; in Modeling 18.1. Provide Select All in a compact separate UICT shell.
-  (ignore-errors (sd-hide-dialog-shell *h871-pf-tools-shell* :ignorePin t))
-  (ignore-errors (sd-destroy-dialog-shell *h871-pf-tools-shell*))
-  (when (sd-create-dialog-shell
-          *h871-pf-tools-shell*
-          :title "H871 - SELECTION TOOLS"
-          :pin nil
-          :close t
-          :bottomLine :none)
-    (when (sd-append-grid-area
-            (concatenate 'string *h871-pf-tools-shell* "-GA")
-            (concatenate 'string *h871-pf-tools-shell* "-AA")
-            :width 116
-            :height 32
-            :cellSize 1,1
-            :margin 2
-            :spacing 2)
-      (sd-create-pushbutton-control
-        "h871-pf-select-all-button"
-        (concatenate 'string *h871-pf-tools-shell* "-GA")
-        :x 8 :y 3 :width 100 :height 24
-        :title "Select All"
-        :pushAction '(h871-pf-select-all))
-      (sd-show-dialog-shell *h871-pf-tools-shell*))))
-
 (defun h871-pf-show-selection-summary ()
   (let ((parts (h871-pf-selected-parts)))
     (sd-browser-set-status-text
@@ -225,6 +197,10 @@
       :minHeight 280
       :maxWidth 900
       :maxHeight 760
+      ;; Keep Apply as the native OK action. Reuse the browser's
+      ;; native abort-button slot for Select All inside this same window.
+      :abortButtonLabel "Select All"
+      :abortButtonAction '(h871-pf-select-all)
       :topMenu
         '(("selection"
            :label "Selection"
@@ -268,7 +244,6 @@
     *h871-pf-browser-name* :table-name "h871-pf-bom")
   (sd-browser-exec-cmd *h871-pf-browser-name* :set-table-mode)
   (sd-show-graphical-browser *h871-pf-browser-name*)
-  (h871-pf-open-selection-tools)
 
   ;; Root node is the table root; the table displays all matching Parts.
   (let ((root (sd-get-browsernode-struct *h871-pf-tree-name* :root)))
@@ -337,7 +312,7 @@
         (sd-browser-set-status-text
           *h871-pf-browser-name*
           :value (format nil
-            "~A matching Part(s). Select rows or use the Select All tool window."
+            "~A matching Part(s). Select rows or press Select All in this window."
             (length *h871-pf-results*)))))
     (values (length *h871-pf-results*) report)))
 
