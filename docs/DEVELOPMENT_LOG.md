@@ -62,3 +62,9 @@ Updated `src/part-filter/H871_PART_FILTER.lsp`:
 - Root cause of Creo's `Octal digit expected` reader error; the subsequent misplaced-right-parenthesis message was likely a cascading parse error.
 - Static source check after the fix: balanced parentheses (0), no negative nesting, no unterminated string, and all three character literals verified.
 - Creo Elements/Direct Modeling 18.1 runtime reload and filter execution still require user confirmation.
+
+
+## 2026-11-14 — Remove reader-dependent numeric parsing
+- After the user reported the same load error persisted, removed `READ-FROM-STRING`, `STRING-TRIM`, and all `#\\...` character literals from `h871-pf-as-number`.
+- The workflow uses numeric dialog fields and numeric Density API results, so numeric-string parsing is unnecessary.
+- Static check: balanced parentheses, no negative nesting, no unterminated string, and no remaining `READ-FROM-STRING` or character literals in the source. Creo runtime reload is pending.
