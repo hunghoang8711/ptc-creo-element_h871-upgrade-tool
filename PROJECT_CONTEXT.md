@@ -157,3 +157,13 @@ The latest source attempts the requested single-window layout using two independ
 The Graphical Browser is instantiated with `sd-show-graphical-browser` before `sd-set-graphical-browser-parent` reparents it into a resizable child grid of the host shell. If embedding fails, the source reports a numbered stage error and restores the standalone Graphical Browser so matching results remain accessible.
 
 Static source checks pass. Runtime behavior is still unverified in Creo Elements/Direct Modeling 18.1. Preserve Density matching, result table, and row-selection code while testing the UI.
+
+
+## 2026-11-14 – Current Part Filter Results UI implementation
+
+- Latest source commit: `d6b6c50be029233c556d09744da0f0965fde8a61`.
+- Reverted the oversized Dialog Shell / browser-parent embedding approach and restored the standalone Graphical Browser architecture from known-good revision `3e9f3c1`.
+- **Apply** and **Select All** are now configured as native footer controls of that same Graphical Browser. Select All calls the established `:select-all` browser command.
+- Apply uses the established `:select-and-execute` selection hand-off, then re-shows the Results Browser to allow repeated operations.
+- No host shell, browser child grid, or `sd-set-graphical-browser-parent` remains.
+- Static source checks pass; user runtime verification in Creo Elements/Direct Modeling 18.1 is still pending.
