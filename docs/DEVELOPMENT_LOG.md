@@ -189,3 +189,32 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Static source restored from the historical Git blob.
 - User must reload this version and confirm the results browser opens again for a matching Assembly.
 - Select All / Clear Selection visibility remains a separate unresolved enhancement; do not reintroduce browser-parent hosting until a Modeling 18.1-compatible method is proven.
+
+ 
+## 2026-11-14 – Restore standalone Select All tool without browser embedding
+
+### User-confirmed baseline
+The user confirms the Part Filter LISP and standalone Results Browser are working normally again after rollback. Preserve the standalone Graphical Browser architecture and its manual row selection / Apply workflow.
+
+### Source change
+- Added a compact separate UICT dialog titled **H871 - SELECTION TOOLS** with one **Select All** pushbutton.
+- Reused the previously tested UICT pattern from source revision `c06f5b8` (`sd-create-dialog-shell`, `sd-append-grid-area`, and `sd-create-pushbutton-control`).
+- The button calls the existing `h871-pf-select-all` callback, which issues the native Graphical Browser `:select-all` command.
+- Removed Clear Selection controls and callback as requested.
+- The standalone Graphical Browser is still created and shown by its existing `sd-show-graphical-browser` path. No `sd-set-graphical-browser-parent`, host shell, or browser embedding was reintroduced.
+
+### Static validation
+- LISP parenthesis balance: 0; no negative depth; strings closed.
+- Confirmed only the Select All pushbutton remains in the UICT selection-tools window.
+- Confirmed browser-parent embedding API is absent.
+- Commit: `e8c818a38592134a47550b879e66a18349e48ccb`.
+
+### Runtime verification required
+Reload the latest source in Creo Elements/Direct Modeling 18.1 and verify:
+1. The Results Browser still opens for an Assembly with matches.
+2. The small Selection Tools window appears with one Select All button.
+3. Select All highlights every result row.
+4. The existing Apply hand-off works with all rows selected.
+5. Manual row selection and Ctrl-click multi-selection remain unchanged.
+
+The source is statically checked but the new Select All button has not yet been re-tested by the user in Creo 18.1.
