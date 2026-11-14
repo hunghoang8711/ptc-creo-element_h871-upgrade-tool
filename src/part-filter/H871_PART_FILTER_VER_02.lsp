@@ -350,8 +350,12 @@
 ;;   A6061=6061, SUS201=201, SUS304=304, SS400=400,
 ;;   POM=10, Bakelit=20, MC=30, MIKA=40, PU=50
 ;;
-;; The adjacent code fields use :display-only and are synchronized
-;; by :after-input. They are informational and cannot be edited.
+;; The code fields use :display-only and are synchronized by
+;; :after-input. They are informational and cannot be edited.
+;; Standard parallel-dialog variables are laid out vertically; the
+;; code fields therefore follow their selectors as separate rows.
+;; A same-row custom layout is intentionally deferred until its
+;; compatibility with Modeling 18.1 can be verified.
 ;;
 (sd-defdialog 'h871_part_filter_ver_02
   :dialog-title "H871 - PART FILTER VER-02"
