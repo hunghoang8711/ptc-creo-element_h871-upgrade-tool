@@ -115,3 +115,12 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Apply and Select All now use the Graphical Browser's native footer slots; Apply explicitly re-shows the browser after selection hand-off.
 - Pending Creo 18.1 checks: footer button order/placement, Select All without closing, Apply hand-off followed by browser restoration, and normal close.
 - The previous host-shell / browser-reparenting limitation is no longer part of the current implementation.
+
+
+## 2026-11-14 – Part Filter row selection / Apply regression
+
+**User-reported:** the Part list and Select All button are visible, but clicking a Part row does not select it and Apply has no effect.
+
+**Mitigation committed:** removed the custom Apply callback and restored the Graphical Browser's native default OK action. This addresses the known unnecessary re-open behavior in the custom callback.
+
+**Still unresolved pending Creo 18.1 retest:** individual row selection. If single-click still fails, inspect browser node selectability and click handling independently. Do not claim the full selection workflow is fixed based on static source validation.
