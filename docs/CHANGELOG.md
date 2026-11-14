@@ -43,3 +43,10 @@
 - Create the browser grid as a child of the root grid.
 - Footer buttons remain in the root grid beside the browser area.
 - Fix addresses the confirmed missing-parent defect; runtime test pending.
+
+
+## 2026-11-14 – Results-window stage diagnostics
+- Replaced the generic unified-window creation error with a numbered diagnostic for each UICT creation step.
+- Isolated checks for dialog shell, root grid, browser child grid, and each footer button.
+- Removed duplicate generic error reporting.
+- No change to Density matching or Graphical Browser parenting behavior; Creo 18.1 runtime diagnosis pending.
