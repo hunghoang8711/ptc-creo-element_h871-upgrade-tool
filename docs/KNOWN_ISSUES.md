@@ -99,3 +99,10 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Current source uses the Graphical Browser's native `:abortButtonLabel "Select All"` and `:abortButtonAction` to expose the action in the same Results window, while preserving the native OK/Apply action.
 - This avoids browser-parent embedding and keeps the standalone browser architecture.
 - **Pending Creo 18.1 runtime verification:** confirm button placement, selection behavior, browser remains open after Select All, Apply, and normal close behavior. PTC reference consulted is for a later release, so do not assume compatibility before testing.
+
+
+## 2026-11-14 – Part Filter unified footer runtime verification pending
+- Latest source creates independent UICT Apply and Select All buttons in one host dialog footer; it no longer uses the Graphical Browser Abort slot.
+- Browser embedding still depends on `sd-set-graphical-browser-parent` succeeding in Creo Elements/Direct Modeling 18.1.
+- Browser is shown before parent assignment. If embedding fails, a numbered diagnostic is displayed and the standalone browser is restored.
+- Do not mark the unified window as working until the user confirms one-window display, adjacent buttons, Select All behavior, Apply hand-off, and normal close behavior.
