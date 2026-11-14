@@ -230,22 +230,23 @@
       :table-name "h871-pf-bom"
       :with-name-column nil
       :column-definition
-        '((:label "Part Name"
+        '(;; :initial-width values below are character counts, not pixels.
+          (:label "Part Name"
            :type :string-column
            :display-func h871-pf-column-name
-           :initial-width 190)
+           :initial-width 28)
           (:label "Density Instance"
            :type :string-column
            :display-func h871-pf-column-instance
-           :initial-width 110)
+           :initial-width 13)
           (:label "Density Base"
            :type :string-column
            :display-func h871-pf-column-base
-           :initial-width 100)
+           :initial-width 12)
           (:label "Assembly Path"
            :type :string-column
            :display-func h871-pf-column-path
-           :initial-width 360)))
+           :initial-width 42)))
     (sd-display-error "H871: Could not create the BOM result table.")
     (return-from h871-pf-open-results-browser nil))
 
