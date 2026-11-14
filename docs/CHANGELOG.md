@@ -21,3 +21,12 @@
 - Switched table column sizing from `:initial-width` to legacy `:max-width` for the Modeling 18.1 target; set max widths to 22 / 8 / 8 / 30.
 - Preserved the native browser row selection and Apply workflow.
 - Runtime validation in Creo 18.1 is pending.
+
+
+## 2026-11-14 – Single-window Part Filter controls
+- Removed the separate Selection Tools dialog.
+- Added a resizable host shell with the Graphical Browser embedded in its browser area.
+- Added a unified footer ordered Apply, Select All, Clear Selection, Close.
+- Select All now runs `:select-all` then `:select-and-execute` so the complete result set is handed to Modeling immediately.
+- Clear Selection only clears browser row selection.
+- Modeling 18.1 compatibility and runtime behavior remain pending user verification.
