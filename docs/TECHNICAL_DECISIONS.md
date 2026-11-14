@@ -50,8 +50,16 @@ Active decisions that constrain implementation. Historical experiments supersede
 - **Rule:** Changing the mapping is a user-owned convention update in the ver-02 `:range` lists. Do not describe this as actual Material-property retrieval.
 - **Compatibility note:** Dialog Generator range labels and display-only behavior are supported by later PTC Integration Kit documentation; runtime compatibility must still be checked in Modeling 18.1.
 
-## TD-008 – Multi-search result tabs are deferred
+## TD-008 – Multi-search result sessions are isolated
 
 - **Date:** 2026-11-14
-- **Decision:** Preserve the user's direction to keep each search result as an independent session and later present sessions in browser-like tabs.
-- **Rule:** Do not combine this feature with ver-02. Each session must own its result list, Browser identity, and Browser Tree. Validate tab docking separately in Modeling 18.1.
+- **Decision:** Every successful search must retain its own result set and must not destroy or overwrite earlier searches.
+- **Rule:** Each session owns its matched Part list, Assembly/filter metadata, diagnostic samples, Browser name and Browser Tree name. Never use shared mutable result globals for Browser callbacks.
+
+## TD-009 – Browser-like tabs for independent result sessions
+
+- **Date:** 2026-11-14
+- **Decision:** Present each independent result session as a docked Graphical Browser tab, with a Material-Process label such as `SUS304-CNC`.
+- **Implementation candidate:** `:createAsTab t`, `:tabname`, and Browser Tree `:update-args` routing. Select All/Clear Selection/selection summary actions receive the owning Browser name. Native Apply remains the default Graphical Browser action.
+- **Compatibility rule:** The available PTC references document these options in later releases. Do not claim Modeling 18.1 support until the user tests ver-03 in the target application.
+- **Duplicate labels:** Repeated identical searches must receive a unique suffix; they must not collide or overwrite previous sessions.
