@@ -36,3 +36,11 @@
 - Kept the Assembly / Density Instance / Density Base input dialog active after each search so another density pair can be entered immediately.
 - Result browser remains separately closable after Part selection.
 - Creo 18.1 runtime verification is pending.
+
+
+## 2026-11-14 – Part Filter results UI refinement
+- User confirmed the keyword-argument error is resolved.
+- Reworked the Select All / Clear Selection button-menu callbacks and set `:buttonMenuOffObjectOnly nil`.
+- Reduced browser maximum width to 900.
+- Reduced result column widths to 28 / 13 / 12 / 42 characters. PTC documentation confirms `:initial-width` uses character counts, not pixels.
+- Runtime visibility and selection behavior still require confirmation in Creo 18.1.
