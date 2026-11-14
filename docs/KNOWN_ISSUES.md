@@ -31,3 +31,9 @@
 - Symptom: `Octal digit expected`, followed by `misplaced right parenthesis`.
 - Cause found in `h871-pf-as-number`: character literals had two actual backslashes before `Space`, `Tab`, and `Newline`.
 - Fixed to standard Common Lisp character syntax. Runtime verification in Creo 18.1 is pending.
+
+
+## 2026-11-14 — Reader error remains under investigation
+- The previous character-literal correction did not resolve the user's reported load error.
+- Removed the entire reader-dependent string-to-number parser. `h871-pf-as-number` now accepts numeric values only, matching the dialog and Density API types used by this tool.
+- Next diagnostic is to confirm the exact local file path/version being loaded and isolate whether the error occurs during file load or command execution.
