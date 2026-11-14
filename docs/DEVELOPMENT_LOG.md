@@ -280,3 +280,25 @@ The user clarified that the Results Browser already worked correctly and Select 
 
 ### Runtime verification required
 Creo Elements/Direct Modeling 18.1 must still verify the exact footer placement and that Select All leaves the browser open. Also verify Apply transfers the selected Parts and restores the same Results Browser, and that normal close remains available. This is a minimal compatibility implementation based on the original working browser; static checks do not prove runtime behavior.
+
+
+## 2026-11-14 – Restore native Apply hand-off after selection regression
+
+### User-reported regression
+The Results Browser now displays the Part list and Select All control, but clicking a Part row does not visibly select it and pressing Apply has no effect. This is a runtime regression; do not mark row selection or Apply as working.
+
+### History and API review
+- The last confirmed working flow used the Graphical Browser's native row-selection behavior and its default OK action.
+- The recent h871-pf-apply-selected callback replaced that native OK action, invoked :select-and-execute, and immediately reopened the browser.
+- PTC's Graphical Browser reference documents the default OK action as the native :select-and-execute hand-off. That command transfers selected browser items to the active Modeling command/SD buffer, hides an unpinned browser, and clears the browser selection list.
+- The callback's immediate reopen was unnecessary and could obscure the normal hand-off/selection state.
+
+### Source correction
+- Removed h871-pf-apply-selected.
+- Removed the custom :okButtonAction override.
+- Kept the visible footer label Apply; Creo now uses its native default OK action.
+- Kept the Select All footer action and the standalone Results Browser architecture unchanged.
+- Source commit: ba2da0d72d29a53e36d4587a1b5abea3d9331c88.
+
+### Verification status
+Static source checks confirm the custom Apply callback and override are absent and the Apply label / Select All action remain. This does not prove Creo 18.1 runtime behavior. The user must retest single-row selection, multi-row selection, Select All, and Apply. If row clicks still do not highlight/select a row, investigate the browser's click/selectability behavior separately; do not assume the Apply correction also fixes row selection.
