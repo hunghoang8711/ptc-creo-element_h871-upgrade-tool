@@ -43,3 +43,21 @@ Do not describe the old `:max-width` sizing option as character-based. PTC's 20.
 
 ### Verification status
 The user's manual multi-row selection and Apply workflow remains confirmed. The new UICT dialog and reduced column widths are implementation changes only; test them in Creo 18.1 before marking complete.
+
+
+## 2026-11-14 – Part Filter single-window footer update
+
+The user confirmed that the previous Select All / Clear Selection controls appeared in a separate window and requested them inside the Part Filter Results window, between Apply and Close. Select All must immediately perform the same hand-off as Apply.
+
+### Latest implementation
+- Removed the separate Selection Tools dialog.
+- Created a resizable host dialog shell and embedded the Graphical Browser using `sd-set-graphical-browser-parent`.
+- Added a single footer row ordered Apply / Select All / Clear Selection / Close.
+- Apply uses native `:select-and-execute`.
+- Select All uses `:select-all` followed by `:select-and-execute`, then hides the host window.
+- Clear Selection uses `:clear-select-list`.
+- Close hides the browser and host shell.
+- The Graphical Browser's native OK/Abort labels are blanked so the host footer supplies the visible controls.
+
+### Compatibility and test status
+PTC's later Integration Kit docs describe browser-parent hosting inside a resizable grid area and UICT Pushbuttons inside a grid area. This is the architecture used by the latest source. Since the reference is later than Modeling 18.1, function availability and actual layout still require runtime confirmation. Static LISP checks pass; do not describe the feature as runtime verified until the user tests it.
