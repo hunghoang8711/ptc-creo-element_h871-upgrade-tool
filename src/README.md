@@ -1,20 +1,17 @@
 # Source Code
 
-Place maintained LISP source files and related implementation assets in this directory.
+Maintained LISP source and related implementation assets.
 
 ## Rules
 
-- Preserve the original source filename when importing an existing utility.
-- Before editing, keep a known baseline in Git so changes can be reviewed and reverted.
-- Use descriptive filenames; include a version suffix only when parallel versions genuinely need to coexist.
-- Keep diagnostic utilities separate from production commands unless there is a clear reason to combine them.
-- Add a short header to each source file describing purpose, command entry point, target Creo version, dependencies, and revision date.
-- Do not commit credentials, customer-sensitive models, or proprietary data without approval.
+- Preserve an untouched or known-good Git baseline before risky changes.
+- Keep diagnostic utilities separate from production commands.
+- Include purpose, command entry point, target version, and relevant compatibility notes in each source header.
+- Do not commit customer-sensitive models, proprietary drawings, credentials, or personal data without approval.
 
-No production source files have been imported yet.
+## Part Filter files
 
-## Part filter source files
+- `part-filter/H871_PART_FILTER.lsp` – current Density Instance + Density Base filter and standalone Graphical Browser results UI. User-confirmed runtime behavior: result rows display, Select All is available, individual rows can be selected, and native Apply transfers selected Parts to Modeling selection.
+- `part-filter/H871_PART_FILTER_DIAG.lsp` – preserved diagnostic/early filter baseline. Do not treat it as the current production implementation.
 
-- `part-filter/H871_PART_FILTER_DIAG.lsp`: uploaded diagnostic baseline; preserved unchanged.
-- `part-filter/H871_PART_FILTER.lsp`: current exact Density Instance/Base filter candidate. It opens a dedicated Graphical Browser results table with Part Name, Density Instance, Density Base, and Assembly Path columns. Browser row selection, Select All, and Clear Selection are implemented as candidate UI actions. Load and test this file in Creo Elements/Direct Modeling 18.1. The dialog defaults to Instance 1.0 and Base 304.0 and writes matches to `H871_PART_FILTER_RESULT.txt` in the user's home directory.
-- Do not treat static checks as proof of successful loading or functional behavior in Creo.
+Always inspect the source before editing. Documentation does not replace checking the actual function signatures and code paths in the current file.
