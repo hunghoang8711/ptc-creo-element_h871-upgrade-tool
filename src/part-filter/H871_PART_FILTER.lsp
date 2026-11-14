@@ -34,19 +34,10 @@
 ;; already true; this helper additionally accepts numeric strings such
 ;; as "1" and "1.0" if a runtime/property layer returns text.
 (defun h871-pf-as-number (value)
-  (cond
-    ((numberp value) value)
-    ((stringp value)
-     (let ((*read-eval* nil))
-       (multiple-value-bind (parsed position)
-           (ignore-errors (read-from-string (string-trim '(#\Space #\Tab #\Newline) value) nil nil))
-         (when (and (numberp parsed)
-                    (integerp position)
-                    (= position
-                       (length (string-trim '(#\Space #\Tab #\Newline) value))))
-           parsed))))
-    (t nil)))
-
+  ;; Creo's dialog fields and SD-INQ-PART-DENSITY return numeric
+  ;; values in this workflow. Avoid READ-FROM-STRING and reader
+  ;; character literals for compatibility with Modeling 18.1.
+  (if (numberp value) value nil))
 ;; The user verified two native Parts in Modeling 18.1:
 ;; UI Instance/Base values 1/304 -> API values 1000/304000,
 ;; and UI values 2/400 -> API values 2000/400000.
