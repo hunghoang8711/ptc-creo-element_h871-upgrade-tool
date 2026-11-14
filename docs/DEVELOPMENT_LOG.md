@@ -1,48 +1,38 @@
 # Development Log
 
-Concise milestone history. Detailed abandoned UI iterations have been consolidated into `LESSONS_LEARNED.md`; Git commits retain the full source history.
+Concise milestone history. Detailed abandoned UI iterations are consolidated in `LESSONS_LEARNED.md`; Git commits retain the full source history.
 
-## 2026-11-13 – Initial Part Filter investigation
+## 2026-11-14 – ver-02 mapped filter dialog candidate
 
-- Targeted Creo Elements/Direct Modeling 18.1.
-- Established the need to find Parts in an Assembly by property values and return selectable model objects.
-- Explored Density Instance/Base retrieval and Graphical Browser result presentation.
-- Early experiments with `GET_SELECTION` and direct Structure Browser selection were not accepted as the final user workflow.
+- Created `src/part-filter/H871_PART_FILTER_VER_02.lsp` on branch `feature/part-filter-ver-02`; preserved ver-01 source unchanged.
+- Kept Assembly selection unchanged.
+- Replaced numeric Instance input with Machining Process choices: CNC=1, KH=2, CG=3, COVER=4.
+- Replaced numeric Base input with Material choices: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
+- Added adjacent read-only code fields; selected numeric range values are passed directly to the existing `h871-pf-run`.
+- Default remains CNC + SUS304 (1/304).
+- Existing density normalization, exact pair matching, report, Results Browser, Select All and native Apply implementation retained.
+- Static source review only. Not yet loaded or functionally tested in Modeling 18.1.
 
-## 2026-11-13 – Exact Density pair and Results Browser direction
+## 2026-11-14 – Record deferred multi-search tabs
 
-- Clarified that the current Material/physical-property direction should distinguish Instance and Base values; the implemented Density search became an exact Instance + Base pair.
-- Chose a dedicated BOM-like Graphical Browser so results can be inspected and selected before applying them to Modeling.
-- Kept property matching separate from result-table presentation.
-- Material retrieval remained unverified and was not included in the working Density implementation.
+- Captured the next-stage requirement: each search must retain an independent result set, later presented as browser-like tabs with user-defined material/process tab names.
+- Deferred implementation until the ver-02 dialog is validated. Each search session will need independent data and unique Browser/Tree names.
 
-## 2026-11-14 – Results Browser stabilized
+## 2026-11-14 – Results Browser baseline stabilized
 
-### User-confirmed in Creo Elements/Direct Modeling 18.1
+User-confirmed in Modeling 18.1:
 - Results Browser opens and displays matching Part rows.
-- Select All is available in the Results window.
+- Select All is available.
 - Clicking individual rows selects the corresponding Part.
-- Native Apply transfers selected Part(s) to Creo Modeling selection.
+- Native Apply transfers selected Part(s) to Modeling selection.
 
-### Resolved defects
+Resolved defects:
 - Corrected `sd-browser-set-status-text` keyword usage by passing the message with `:value`.
-- Removed a custom Apply callback that replaced native browser behavior and caused selection/Apply regression.
-- Restored the standalone Graphical Browser after the unified host-shell/browser-parent experiment caused matching searches to fail.
+- Removed a custom Apply callback that replaced native behavior.
+- Restored standalone Graphical Browser after the unified host-shell/browser-parent experiment failed.
 
-### Current baseline constraints
-- Preserve the standalone Results Browser.
-- Preserve native row selection and native default Apply behavior.
-- Preserve the working Select All action.
-- Do not reintroduce the failed host-shell/browser-parent embedding approach.
-- Density matching uses the exact normalized Instance + Base pair.
+## Current source roles
 
-## Current source at consolidation
-
-- Main source: `src/part-filter/H871_PART_FILTER.lsp`
+- Confirmed ver-01 baseline: `src/part-filter/H871_PART_FILTER.lsp`
+- ver-02 candidate: `src/part-filter/H871_PART_FILTER_VER_02.lsp`
 - Diagnostic baseline: `src/part-filter/H871_PART_FILTER_DIAG.lsp`
-- Main source blob: `e94a89547460e038b2669995f2136fc1dd835816`
-- Runtime evidence: user confirmation dated 2026-11-14, as listed above.
-
-## Next step
-
-No implementation task is pre-approved yet. Wait for the user's next feature idea, then update the project context and relevant technical decisions before changing source.
