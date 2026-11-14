@@ -101,3 +101,25 @@ PTC's later Integration Kit documentation describes `sd-set-graphical-browser-pa
 
 ### Runtime test required
 Confirm the results table and all four buttons appear in one window; verify Apply, Select All immediate hand-off, Clear Selection, Close, and the existing manual multi-row selection behavior. Do not mark runtime passed until user confirmation.
+
+
+## 2026-11-14 – Diagnose Graphical Browser parent failure
+
+### User runtime result
+The user tested the unified host-window implementation and received:
+`H871: Could not embed the results browser in its host window.`
+
+### Investigation
+- The failure is the NIL return from `sd-set-graphical-browser-parent`; the earlier UI creation steps did not report failure.
+- PTC's What's New documentation places `sd-create-resizable-dialog-shell`, `sd-create-resizable-grid-area`, `sd-set-control-binding`, and `sd-set-graphical-browser-parent` in historical CoCreate Modeling 2008 additions, so it is incorrect to claim these functions were first introduced in 20.7/20.8. They are plausible APIs for the 18.1 lineage.
+- PTC documents that the browser parent must be a resizable grid area descending from the specified resizable dialog shell; dialog is the shell basename without `-DS`.
+- The source currently follows that intended structure, but actual object existence, browser docked state, and hierarchy are not yet known from the user's generic error.
+
+### Diagnostic update
+- Added `h871-pf-parent-diagnostic`, called automatically after embedding fails.
+- The diagnostic reports browser existence, docked state, dialog shell existence, root host grid existence, and nested browser-parent grid existence.
+- Diagnostic state is captured before destroying the host shell.
+- This is an information-gathering patch only; it does not claim to fix embedding.
+
+### Next test
+Load the latest source and run the same search once. Send the complete `H871 EMBED DIAGNOSTIC` message. Use those exact flags to identify whether the failure is due to a missing UI object or browser docking/parent state before changing the parenting call.
