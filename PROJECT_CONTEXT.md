@@ -22,3 +22,8 @@
 
 ### Next test required
 Confirm Select All and Clear Selection visibility/functionality, compact column layout, repeat search without reopening the filter dialog, and independent closing of the result browser. Until then, only error resolution and individual row selection are runtime-confirmed.
+
+
+## 2026-11-14 – Select All visibility implementation update
+
+The user confirms compact result columns and working manual multi-row selection followed by Apply. Select All remains absent from the visible result browser. The latest source therefore adds a dedicated `:modeMenu` row labelled "Selection" with Select All and Clear Selection buttons, calling native browser commands directly. The popup fallback uses PTC's documented `:browser-push-cmd` syntax. Preserve the working table and Apply behavior. This change is not runtime-confirmed: test button visibility, Select All, Clear Selection, and Apply in Creo Elements/Direct Modeling 18.1 before marking complete.
