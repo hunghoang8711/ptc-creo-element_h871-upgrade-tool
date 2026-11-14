@@ -235,3 +235,18 @@ This file records chronological development work. Major features receive their o
 - Full-file static scan: balanced parentheses (balance 0), no negative nesting, and no unterminated strings.
 - GitHub update committed successfully.
 - Creo 18.1 load/run: not yet tested; user should reload the corrected file and run the diagnostic.
+
+
+## 2026-11-14 – Simplify density diagnostic after Creo parser prompt
+
+### User feedback
+- After the first parenthesis correction, Creo still displayed a parser prompt: `Missing character(s) in input: ' ) '`.
+
+### Follow-up change
+- Rewrote the diagnostic into a smaller form, removing the deeply nested attribute-enumeration helper and using the same sectioned `:variables` dialog structure as the existing Part Filter dialog.
+- The report now captures default, `:instance`, and `:contents` density inquiry values, plus instance/contents attribute inquiry results, with errors contained per inquiry.
+
+### Verification
+- Full-file static scan: balanced parentheses and terminated strings.
+- GitHub source update completed.
+- Creo 18.1 parser/load remains unverified and requires a fresh test.
