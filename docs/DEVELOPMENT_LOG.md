@@ -1,37 +1,30 @@
 
 
-## 2026-11-14 – Confirm Part predicate and isolate Density kind arguments
+## 2026-11-14 – Density :instance and :contents confirmed on native model
 
 ### User runtime evidence
-- User ran `H871_DENSITY_TEST_PART_P` against the known Part `010-plate_2.1.1.2.1`.
-- `sd-inq-part-p` returned `T` (type `SYMBOL`).
-- Selected object type was `ELAN::SEL_ITEM`; its basename and full model path were returned correctly.
-- User also previously ran `H871_DENSITY_TEST_ONE_ARG`: `(sd-inq-part-density part)` returned `1000.0` (type `LONG-FLOAT`).
+Tested on the native Creo Elements/Direct model Part `010-plate_2.1.1.2.1` (not a STEP-imported object):
+- `(sd-inq-part-p part)` returned `T`.
+- `(sd-inq-part-density part :instance)` returned `1000.0` (`LONG-FLOAT`).
+- `(sd-inq-part-density part :contents)` returned `304000.0` (`LONG-FLOAT`).
+- The same Part Properties fields are displayed to the user as Instance = `1` and Base = `304`.
+- Both API values are exactly 1000 times the corresponding displayed values for this test Part.
 
-### Conclusion
-- `ELAN::SEL_ITEM` is accepted directly by both tested inquiry calls; it is not the cause of the zero-match issue.
-- The known selected object is confirmed as a Part.
-- The one-argument density value is the default/realized value and does not establish the separate Instance/Base values shown in Part Properties.
-- The optional `:instance` and `:contents` calls remain unverified on Modeling 18.1.
+### Conclusions
+- Modeling 18.1 accepts both optional kind arguments in the user's environment.
+- The direct API path correctly distinguishes the Instance and Contents/Base values; the earlier assumption that these optional arguments might be unsupported is disproven for this installation.
+- The selected object remains a valid `ELAN::SEL_ITEM` input; no unwrapping is needed for these calls.
+- The observed factor of 1000 is recorded as a measured relationship only. Its unit/conversion semantics are not yet independently established; do not hard-code a conversion without a further check against additional Parts or authoritative 18.1 unit documentation.
 
-### Files changed
-- Added `src/part-filter/H871_DENSITY_KIND_TEST.lsp`.
-
-### Implementation
-- Added two separate dialog commands: `H871_DENSITY_TEST_INSTANCE` and `H871_DENSITY_TEST_CONTENTS`.
-- Each dialog directly calls exactly one optional-kind form and writes to its own report (`H871_DENSITY_INSTANCE_TEST.txt` or `H871_DENSITY_CONTENTS_TEST.txt`).
-- The report is flushed before the direct API call, so if the call signals an error the attempted expression and Part identity should still be recorded.
-- No `FUNCALL`, `LAMBDA`, `IGNORE-ERRORS`, or generic safe-call wrapper is used around the tested inquiry.
-
-### Verification
-- GitHub file creation succeeded.
-- Static source scan: parentheses balanced (0), no negative nesting, no unterminated strings.
-- `sd-inq-part-p` runtime test: user-confirmed success.
-- One-argument density runtime test: user-confirmed success.
-- Optional `:instance` / `:contents` runtime tests: pending user execution.
+### Native model scope
+The user clarified that the source model is native Creo Elements/Direct Modeling data (`.pkg` or `.bdl`), not STEP. All subsequent tests and implementation assumptions must target Parts and Assemblies in this native model structure. Do not build a STEP-import-specific attribute path.
 
 ### Next steps
-1. Load `H871_DENSITY_KIND_TEST.lsp` using the established LISP loading method.
-2. Run `H871_DENSITY_TEST_INSTANCE` on the same known Part and send `H871_DENSITY_INSTANCE_TEST.txt`.
-3. Run `H871_DENSITY_TEST_CONTENTS` and send `H871_DENSITY_CONTENTS_TEST.txt`.
-4. Only after these results, select the correct 18.1 data-access strategy and revise the production filter.
+1. Verify the 1000 factor against at least one more Part with known Instance and Base values, ideally including a zero/decimal or different density pair.
+2. Inspect the current production filter and change only the value normalization/matching path once the scale convention is established.
+3. Then run a full Assembly scan and compare the match list against the known Part path.
+4. Continue toward the BOM-like result browser only after the core scan returns correct exact-pair matches.
+
+### Verification status
+- User-confirmed runtime success for Part predicate, `:instance`, and `:contents` calls on the native model.
+- No claim yet that the production Assembly scan, result browser, double-click locate, or Add to Drawlist workflow has passed runtime testing.
