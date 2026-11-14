@@ -18,3 +18,11 @@
 - **Likely UI-surface issue:** previous implementation put actions in `:buttonMenu` / `:topMenu`, which did not expose a clear always-visible action in the user's Creo 18.1 UI.
 - **Latest source attempt:** add `:modeMenu` with persistent Select All and Clear Selection actions, and use native `:browser-push-cmd` for popup fallback actions.
 - **Pending:** verify button visibility and actual selection behavior in Creo 18.1. If `:modeMenu` is also unavailable in 18.1, use a separate supported UI control (e.g. a dedicated dialog/button surface) rather than more menu declaration variations.
+
+
+## 2026-11-14 – Latest screenshot: Select All absent and columns still too wide
+
+- **User-confirmed:** the latest screenshot still has no visible Select All control; the Density column starts near the far right edge and is partly clipped.
+- **Correction to earlier sizing note:** the statement that the current Graphical Browser column widths were character counts was not adequately supported and is withdrawn. PTC's 20.4 release notes identify `:max-width` as the legacy option and say it was changed to `:initial-width` in 20.4. Modeling 18.1 source should therefore use `:max-width` unless the 18.1 local reference proves otherwise.
+- **Latest source:** uses `:max-width` values 22 / 8 / 8 / 30 and adds a separate UICT dialog with Select All / Clear Selection pushbuttons.
+- **Still unverified:** UICT control creation and column sizing must be tested in Creo 18.1. If the UICT window fails to appear, capture the exact LISP error before changing APIs again.
