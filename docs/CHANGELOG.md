@@ -1,9 +1,10 @@
 
 
-## 2026-11-14 – Confirm Part inquiry and add direct Density kind tests
+## 2026-11-14 – Confirm separate Density Instance and Contents inquiries
 
-- User confirmed `sd-inq-part-p` returns `T` for the known Part `010-plate_2.1.1.2.1`.
-- User confirmed the legacy one-argument `sd-inq-part-density` call returns `1000.0` (realized/default density).
-- Confirmed the `ELAN::SEL_ITEM` selection handle is accepted directly; it is not the cause of the filter mismatch.
-- Added `H871_DENSITY_KIND_TEST.lsp` with separate direct tests for `:instance` and `:contents`.
-- Static parentheses/string scan passed. Optional-kind runtime tests in Creo 18.1 remain pending.
+- User ran both direct tests on the known Part in the native Creo Elements/Direct model.
+- `:instance` returned `1000.0`; `:contents` returned `304000.0`.
+- Part Properties displays the corresponding values as Instance = `1` and Base = `304`.
+- Confirmed the two optional kind arguments work in this Modeling 18.1 environment and return distinct fields.
+- Recorded the observed 1000:1 scale relationship; its unit semantics still need confirmation before implementing normalization.
+- Clarified native model scope: test and develop against `.pkg` / `.bdl`, not STEP-imported geometry.
