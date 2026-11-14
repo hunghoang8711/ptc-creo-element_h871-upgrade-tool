@@ -30,3 +30,9 @@
 - Select All now runs `:select-all` then `:select-and-execute` so the complete result set is handed to Modeling immediately.
 - Clear Selection only clears browser row selection.
 - Modeling 18.1 compatibility and runtime behavior remain pending user verification.
+
+
+## 2026-11-14 – Browser embedding diagnostics
+- Added runtime diagnostics for `sd-set-graphical-browser-parent` failure.
+- Reports whether the browser, dialog shell, host grid, and nested browser-parent grid exist, plus browser docked state.
+- Diagnostic runs before cleanup; no functional fix is claimed yet.
