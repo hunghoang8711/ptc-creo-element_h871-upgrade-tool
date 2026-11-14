@@ -70,3 +70,12 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Static source restored from the historical Git blob.
 - User must reload this version and confirm the results browser opens again for a matching Assembly.
 - Select All / Clear Selection visibility remains a separate unresolved enhancement; do not reintroduce browser-parent hosting until a Modeling 18.1-compatible method is proven.
+
+ 
+## 2026-11-14 – Standalone Select All tool restored
+
+- Added a compact separate UICT Selection Tools window with a single Select All pushbutton.
+- Reused the previously tested UICT dialog/grid/pushbutton construction pattern from revision `c06f5b8`.
+- Removed Clear Selection from the current UI.
+- Preserved the standalone Graphical Browser and its existing manual selection / Apply workflow; did not reintroduce browser embedding.
+- Static LISP checks passed. Creo 18.1 runtime verification is pending.
