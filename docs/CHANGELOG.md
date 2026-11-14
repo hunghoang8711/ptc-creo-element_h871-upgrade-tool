@@ -36,3 +36,10 @@
 - Added runtime diagnostics for `sd-set-graphical-browser-parent` failure.
 - Reports whether the browser, dialog shell, host grid, and nested browser-parent grid exist, plus browser docked state.
 - Diagnostic runs before cleanup; no functional fix is claimed yet.
+
+
+## 2026-11-14 – Corrected unified results dialog hierarchy
+- Create root resizable grid area under the dialog shell's automatic `-AA` client area.
+- Create the browser grid as a child of the root grid.
+- Footer buttons remain in the root grid beside the browser area.
+- Fix addresses the confirmed missing-parent defect; runtime test pending.
