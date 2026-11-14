@@ -83,7 +83,7 @@ Inspect the exact source before editing. Documentation records intent and eviden
 ## 7. Required development approach
 
 1. Load ver-02 in Modeling 18.1 and verify the dialog opens.
-2. Change each selection and verify its adjacent code field updates and cannot be edited.
+2. Change each selection and verify its corresponding code field updates and cannot be edited.
 3. Run CNC + SUS304 and compare results with ver-01 numeric 1/304.
 4. Test at least one other process and material combination.
 5. Regression-test result rows, Select All, individual selection, and native Apply.
