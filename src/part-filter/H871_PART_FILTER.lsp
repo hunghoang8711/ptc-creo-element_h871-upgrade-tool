@@ -253,6 +253,42 @@
     (return-from h871-pf-create-results-host nil))
   t)
 
+(defun h871-pf-parent-diagnostic ()
+  ;; Capture the actual UI object hierarchy when browser parenting fails.
+  ;; This avoids masking a missing shell/area or a docked browser as one
+  ;; generic embedding error.
+  (let* ((shell-handle (concatenate 'string *h871-pf-host-shell* "-DS"))
+         (host-area *h871-pf-host-area*)
+         (browser-area *h871-pf-browser-area*)
+         (browser-list
+           (if (fboundp 'sd-list-graphical-browsers)
+               (sd-list-graphical-browsers)
+             :function-unavailable))
+         (browser-exists
+           (and (listp browser-list)
+                (member *h871-pf-browser-name* browser-list
+                        :test #'string=)))
+         (shell-exists
+           (and (fboundp 'sd-dialog-shell-p)
+                (sd-dialog-shell-p shell-handle)))
+         (host-exists
+           (and (fboundp 'sd-control-p) (sd-control-p host-area)))
+         (browser-area-exists
+           (and (fboundp 'sd-control-p) (sd-control-p browser-area)))
+         (docked
+           (if (and browser-exists
+                    (fboundp 'sd-graphical-browser-docked-p))
+               (sd-graphical-browser-docked-p *h871-pf-browser-name*)
+             :unknown)))
+    (sd-display-message
+      (format nil
+        "H871 EMBED DIAGNOSTIC~%Browser exists: ~A~%Browser docked: ~A~%Dialog shell exists: ~A (~A)~%Host grid exists: ~A (~A)~%Browser parent grid exists: ~A (~A)~%"
+        (if browser-exists "T" "NIL")
+        docked
+        shell-exists shell-handle
+        host-exists host-area
+        browser-area-exists browser-area))))
+
 (defun h871-pf-open-results-browser ()
   ;; Recreate browser/tree so every search has a clean result set.
   (ignore-errors
@@ -338,7 +374,9 @@
       *h871-pf-browser-area*
       :dockable nil)
     (sd-destroy-dialog-shell *h871-pf-host-shell*)
-    (sd-display-error "H871: Could not embed the results browser in its host window.")
+    (progn
+      (sd-display-error "H871: Could not embed the results browser in its host window.")
+      (h871-pf-parent-diagnostic))
     (return-from h871-pf-open-results-browser nil))
 
   (sd-browser-set-active-table
