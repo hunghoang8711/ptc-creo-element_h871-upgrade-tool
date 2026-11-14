@@ -52,3 +52,13 @@
 - PTC UICT naming convention: a dialog shell with basename `H871-PF-RESULTS` creates client area `H871-PF-RESULTS-AA`.
 - Latest source now creates the root grid under that automatic client area, then creates the browser grid under the root grid.
 - Browser parenting still requires runtime verification after this hierarchy correction.
+
+
+## 2026-11-14 – Unified results-window creation failure now reports exact stage
+
+- **User-confirmed:** searches with no matching Parts still show the expected no-match message.
+- **User-confirmed:** searches with matching Parts fail with `H871: Could not create the unified results window.`
+- This narrows the failure to the result UI creation branch after matches are found; it does not establish which UICT operation fails.
+- Latest source now reports a numbered stage: API availability, dialog shell, root grid, browser child grid, or one of the four footer buttons.
+- **Next required evidence:** exact stage text from the next Creo 18.1 run. Do not change the Density filter or browser-parent call until this is known.
+- Static parenthesis balance is 0; runtime remains unverified.
