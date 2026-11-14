@@ -61,3 +61,23 @@ The production filter source now has a dedicated normalization helper that divid
 - Confirm Select All selects every displayed result row.
 - Confirm the filter input dialog remains open and accepts a changed Density pair for a subsequent search.
 - Do not describe these new behaviors as runtime-verified until the user confirms them.
+
+
+## 2026-11-14 – Part Filter results UI refinement
+
+### User feedback
+- The previous `Odd number of arguments for keywords` message is now gone in Creo 18.1.
+- Select All is still not visible in the result browser.
+- Density Instance and Density Base columns are too far to the right due to oversized columns.
+
+### Latest source changes
+- Selection menu callbacks now invoke the named `h871-pf-select-all` and `h871-pf-clear-selection` functions.
+- Set `:buttonMenuOffObjectOnly nil` to avoid restricting the button menu to blank-space context clicks.
+- Browser max width reduced from 1150 to 900.
+- PTC Graphical Browser reference confirms `:initial-width` is in character counts, not pixels. Widths are now Part Name 28, Density Instance 13, Density Base 12, Assembly Path 42.
+
+### Pending Creo 18.1 test
+- Verify Select All and Clear Selection controls are visibly available.
+- Verify Select All selects every displayed row.
+- Verify Part Name, Density Instance, and Density Base are visible together without horizontal scrolling.
+- If Select All remains hidden, switch to a separate always-visible control mechanism instead of relying on the browser menu compatibility mapping.
