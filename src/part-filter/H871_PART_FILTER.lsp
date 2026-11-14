@@ -23,6 +23,9 @@
 
 (defvar *h871-pf-browser-name* "h871-pf-results")
 (defvar *h871-pf-tree-name* "h871-pf-results-tree")
+(defvar *h871-pf-host-shell* "H871-PF-RESULTS")
+(defvar *h871-pf-host-area* "H871-PF-RESULTS-RG")
+(defvar *h871-pf-browser-area* "H871-PF-BROWSER-RG")
 
 (defun h871-pf-name (obj)
   (or (sd-inq-obj-basename obj) "<NO NAME>"))
@@ -151,7 +154,99 @@
     root))
 
 (defun h871-pf-select-all ()
-  (sd-browser-exec-cmd *h871-pf-browser-name* :select-all))
+  ;; Select all result rows but keep the unified results window open.
+  (sd-browser-exec-cmd *h871-pf-browser-name* :select-all)
+  (sd-browser-set-status-text
+    *h871-pf-browser-name*
+    :value (format nil "~A result row(s) selected. Press Apply to select them in the model."
+              (length *h871-pf-results*))))
+
+(defun h871-pf-apply-selected ()
+  ;; Transfer the browser selection to the native Modeling selection list.
+  (sd-browser-exec-cmd *h871-pf-browser-name* :select-and-execute)
+  (ignore-errors
+    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t)))
+
+(defun h871-pf-close-results ()
+  (ignore-errors
+    (sd-hide-graphical-browser *h871-pf-browser-name* :ignore-pin t))
+  (ignore-errors
+    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t)))
+
+(defun h871-pf-create-results-host ()
+  ;; Create one UICT shell. The Graphical Browser is reparented into its
+  ;; upper resizable grid; Apply and Select All are sibling footer buttons.
+  (unless (and (fboundp 'sd-create-resizable-dialog-shell)
+               (fboundp 'sd-create-resizable-grid-area)
+               (fboundp 'sd-create-pushbutton-control)
+               (fboundp 'sd-set-graphical-browser-parent))
+    (sd-display-error
+      "H871: Required UICT/browser-parent API is unavailable in this Modeling version.")
+    (return-from h871-pf-create-results-host nil))
+
+  (ignore-errors
+    (sd-hide-dialog-shell *h871-pf-host-shell* :ignorePin t))
+  (ignore-errors
+    (sd-destroy-dialog-shell *h871-pf-host-shell*))
+
+  (unless
+    (sd-create-resizable-dialog-shell
+      *h871-pf-host-shell*
+      :title "H871 - PART FILTER RESULTS"
+      :width 900 :height 760
+      :margin 0 :spacing 0 :cellSize 1,1)
+    (sd-display-error "H871: Stage 1/4 - Could not create the results host shell.")
+    (return-from h871-pf-create-results-host nil))
+
+  (unless
+    (sd-create-resizable-grid-area
+      *h871-pf-browser-area*
+      *h871-pf-host-area*
+      :x 0 :y 0 :width 900 :height 710
+      :cellSize 1,1 :margin 0 :spacing 0)
+    (sd-display-error "H871: Stage 2/4 - Could not create the browser area.")
+    (ignore-errors (sd-destroy-dialog-shell *h871-pf-host-shell*))
+    (return-from h871-pf-create-results-host nil))
+
+  (unless
+    (and
+      (sd-create-pushbutton-control
+        "H871-PF-APPLY-PB" *h871-pf-host-area*
+        :x 710 :y 720 :width 76 :height 28
+        :title "Apply"
+        :pushAction '(h871-pf-apply-selected))
+      (sd-create-pushbutton-control
+        "H871-PF-SELECT-ALL-PB" *h871-pf-host-area*
+        :x 794 :y 720 :width 94 :height 28
+        :title "Select All"
+        :pushAction '(h871-pf-select-all)))
+    (sd-display-error "H871: Stage 3/4 - Could not create Apply / Select All footer buttons.")
+    (ignore-errors (sd-destroy-dialog-shell *h871-pf-host-shell*))
+    (return-from h871-pf-create-results-host nil))
+
+  ;; Instantiate the floating browser first, then reparent it into the
+  ;; already-created resizable grid. This order is intentional.
+  (unless (sd-show-graphical-browser *h871-pf-browser-name*)
+    (sd-display-error "H871: Stage 4/4 - Could not show the Graphical Browser before embedding.")
+    (ignore-errors (sd-destroy-dialog-shell *h871-pf-host-shell*))
+    (return-from h871-pf-create-results-host nil))
+
+  (unless
+    (sd-set-graphical-browser-parent
+      *h871-pf-browser-name*
+      *h871-pf-host-shell*
+      *h871-pf-browser-area*
+      :dockable nil)
+    (sd-display-error
+      "H871: Stage 4/4 - Browser parent assignment failed. Standalone browser will be restored.")
+    (ignore-errors (sd-destroy-dialog-shell *h871-pf-host-shell*))
+    (return-from h871-pf-create-results-host nil))
+
+  (when (fboundp 'sd-set-control-binding)
+    (ignore-errors
+      (sd-set-control-binding *h871-pf-browser-area* '(:left :top :right))))
+  (sd-show-dialog-shell *h871-pf-host-shell*)
+  t)
 
 (defun h871-pf-selected-parts ()
   (let ((parts nil))
@@ -197,10 +292,10 @@
       :minHeight 280
       :maxWidth 900
       :maxHeight 760
-      ;; Keep Apply as the native OK action. Reuse the browser's
-      ;; native abort-button slot for Select All inside this same window.
-      :abortButtonLabel "Select All"
-      :abortButtonAction '(h871-pf-select-all)
+      ;; Apply and Select All are separate UICT pushbuttons in the host
+      ;; footer; the browser's own footer is suppressed.
+      :okButtonLabel ""
+      :abortButtonLabel ""
       :topMenu
         '(("selection"
            :label "Selection"
@@ -243,13 +338,18 @@
   (sd-browser-set-active-table
     *h871-pf-browser-name* :table-name "h871-pf-bom")
   (sd-browser-exec-cmd *h871-pf-browser-name* :set-table-mode)
-  (sd-show-graphical-browser *h871-pf-browser-name*)
 
   ;; Root node is the table root; the table displays all matching Parts.
   (let ((root (sd-get-browsernode-struct *h871-pf-tree-name* :root)))
     (when root
       (sd-browser-exec-cmd
         *h871-pf-browser-name* :change-table-root root t)))
+
+  (unless (h871-pf-create-results-host)
+    ;; Preserve access to the last known-good standalone Results Browser
+    ;; if the host integration is rejected by this Modeling installation.
+    (sd-show-graphical-browser *h871-pf-browser-name*)
+    (return-from h871-pf-open-results-browser nil))
   t)
 
 ;; ------------------------------------------------------------
