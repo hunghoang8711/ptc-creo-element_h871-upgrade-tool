@@ -37,3 +37,12 @@
 - The previous character-literal correction did not resolve the user's reported load error.
 - Removed the entire reader-dependent string-to-number parser. `h871-pf-as-number` now accepts numeric values only, matching the dialog and Density API types used by this tool.
 - Next diagnostic is to confirm the exact local file path/version being loaded and isolate whether the error occurs during file load or command execution.
+
+
+## 2026-11-14 – Part Filter keyword argument error
+
+- **User symptom:** result table is displayed and individual rows can be selected, but running the filter still displays `Odd number of arguments for keywords.`
+- **Likely cause found:** the current source called `sd-browser-set-status-text` with the browser name and status string as positional arguments. The PTC Graphical Browser reference specifies the status text using `:value`.
+- **Source correction:** both status-bar updates now pass `:value <string>`.
+- **Related UI changes:** added toolbar buttons for Select All and Clear Selection; kept the Assembly and Density input dialog active after a search using `sd-return-from-ok-action`.
+- **Runtime status:** pending user test in Modeling 18.1. The API reference consulted is for a later Integration Kit release; compatibility of the added toolbar/deferred-dialog behavior must be confirmed in the user's 18.1 installation.
