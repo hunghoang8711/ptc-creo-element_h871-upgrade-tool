@@ -39,6 +39,8 @@
                   (sd-inq-item-attribute
                     part name :all :attachment attachment)))))))))
 
+)
+
 (defun h871-density-diag-run (part)
   (let ((report
           (merge-pathnames
