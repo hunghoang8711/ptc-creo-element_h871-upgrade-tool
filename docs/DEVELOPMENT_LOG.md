@@ -71,3 +71,33 @@ Reload the latest source and verify:
 5. Manual multi-row selection remains functional.
 
 Do not mark the new controls or widths as runtime-passed until the user confirms them.
+
+
+## 2026-11-14 – Unify Part Filter result browser and action footer
+
+### User requirement
+The user confirmed the Select All / Clear Selection controls appeared in a second window. They requested one results window with a single bottom row ordered: Apply, Select All, Clear Selection, Close. Select All must immediately perform the same selection hand-off as Apply, without requiring a second Apply click.
+
+### Source implementation
+- Removed the separate Selection Tools dialog.
+- Added a resizable host dialog shell and resizable browser area.
+- Embedded the Graphical Browser in the host using `sd-set-graphical-browser-parent`.
+- Added four UICT Pushbuttons to the host shell footer in the requested order.
+- Set the Graphical Browser's own OK/Abort labels to empty so the host shell supplies the visible Apply and Close controls.
+- Apply calls native `:select-and-execute`.
+- Select All calls native `:select-all` followed immediately by `:select-and-execute`, then hides the host shell.
+- Clear Selection calls native `:clear-select-list` without applying.
+- Close hides the embedded browser and host shell.
+
+### API compatibility boundary
+PTC's later Integration Kit documentation describes `sd-set-graphical-browser-parent` as hosting a Graphical Browser inside a resizable grid area that is a descendant of a resizable dialog shell. It also documents UICT Pushbuttons as controls inside a grid area. These references establish the intended architecture, but are later than the user's Modeling 18.1 installation. The source checks for the required functions and displays a clear error if the host API is unavailable. Creo 18.1 runtime validation is still required.
+
+### Static validation
+- Parenthesis balance: 0
+- Minimum parenthesis depth: 0
+- Unterminated strings: none
+- Old separate Selection Tools dialog removed.
+- Footer button declarations and Select All -> Select-and-Execute sequence present.
+
+### Runtime test required
+Confirm the results table and all four buttons appear in one window; verify Apply, Select All immediate hand-off, Clear Selection, Close, and the existing manual multi-row selection behavior. Do not mark runtime passed until user confirmation.
