@@ -49,3 +49,11 @@ Notable repository changes. Detailed implementation and test evidence lives in `
 - Fixed a missing closing parenthesis in `H871_DENSITY_DIAG.lsp` that caused Creo's unexpected end-of-input load error.
 - Full-file static parenthesis/string scan passed.
 - Actual load and diagnostic execution in Creo 18.1 remain pending.
+
+
+## 2026-11-14 – Density diagnostic now records API errors
+
+- Replaced the ambiguous "NIL or inquiry raised an error" output with separate genuine-NIL and error-condition reporting.
+- Added API availability checks and selected Part type/predicate information.
+- Recorded the 18.1 compatibility investigation: PTC documents the optional density `:kind` interface in later documentation, so the legacy one-argument call must be tested independently.
+- Creo 18.1 rerun remains pending.
