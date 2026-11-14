@@ -35,3 +35,12 @@
 - **Select All action:** `:select-all` followed by `:select-and-execute`; this should hand all matched Parts to Modeling without a second Apply click.
 - **Compatibility risk:** the available PTC reference for browser-parent hosting is from a later Integration Kit release than Modeling 18.1. The source checks function availability and reports an error rather than silently opening a second window if the API is unavailable.
 - **Pending runtime checks:** all controls in one window; native table renders inside host; Apply / Select All / Clear Selection / Close; existing row multi-selection and Apply remain intact.
+
+
+## 2026-11-14 – Graphical Browser embedding returns NIL
+
+- **User-confirmed runtime error:** `H871: Could not embed the results browser in its host window.`
+- The failure occurs at `sd-set-graphical-browser-parent`.
+- Correction: do not assume this API is unavailable in 18.1. PTC's release-history page places the resizable UICT and browser-parent functions in older CoCreate Modeling history, before the 18.1 lineage.
+- Latest source adds a diagnostic message reporting browser existence/docked state, dialog-shell existence, and both grid-area handles before cleanup.
+- **Pending:** collect the diagnostic values from the user's Creo 18.1 run. Do not alter the parent API call speculatively until the actual UI object hierarchy is known.
