@@ -79,3 +79,12 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Removed Clear Selection from the current UI.
 - Preserved the standalone Graphical Browser and its existing manual selection / Apply workflow; did not reintroduce browser embedding.
 - Static LISP checks passed. Creo 18.1 runtime verification is pending.
+
+ 
+## 2026-11-14 – Select All placed in Filter Results window
+
+- Removed the separate Selection Tools dialog.
+- Added a native Graphical Browser **Select All** button in the Results window using its abort-button label/action slot.
+- Kept the native OK/Apply action and standalone browser creation path.
+- Did not reintroduce Graphical Browser parent embedding.
+- Static checks passed; Creo 18.1 runtime verification is pending.
