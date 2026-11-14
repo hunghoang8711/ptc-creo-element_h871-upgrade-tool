@@ -25,3 +25,21 @@
 - Confirm Part Name, Density Instance, and Density Base are visible together without excessive horizontal scrolling.
 - Confirm the input dialog remains available after a search and can run a second Density pair; confirm the result browser can be closed independently.
 - Do not mark these UI refinements as runtime-passed until the user reports the result.
+
+
+## 2026-11-14 – Make Select All a persistent browser action row
+
+### Reason for follow-up
+The user confirmed the result columns are now compact and multi-row selection followed by Apply works, but no Select All control is visible. The previous source placed Select All in `:buttonMenu` and `:topMenu`; this did not produce a clearly visible always-available control in the user's Creo 18.1 UI.
+
+### Source change
+- Added a dedicated `:modeMenu` row labelled "Selection" with persistent "Select All" and "Clear Selection" action buttons.
+- The buttons call the documented browser commands directly: `:select-all` and `:clear-select-list`.
+- Kept the top-menu popup as a right-click fallback, using the documented `:browser-push-cmd` form for native browser commands.
+- Preserved the existing result table, compact column widths, multi-row selection, and Apply workflow.
+
+### API evidence and compatibility boundary
+PTC Graphical Browser reference describes `:modeMenu` as a row of buttons displayed above the `:buttonMenu`, and its examples use browser commands for Select All. The reference is for a later Integration Kit release than the user's 18.1 installation; this is a targeted compatibility attempt, not proof until tested in Creo 18.1.
+
+### Runtime verification required
+Reload the updated LISP and confirm a visible "Selection" row with "Select All" and "Clear Selection". Verify Select All highlights every result row and that Apply then operates on the complete selection. Also verify manual multi-row selection still works.
