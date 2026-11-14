@@ -138,3 +138,13 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Clear Selection has been removed.
 - Important: preserve the standalone Graphical Browser. Do not reintroduce `sd-set-graphical-browser-parent` or a unified host shell; that architecture previously caused matching searches to fail.
 - Static source checks pass. Await user runtime confirmation that the Selection Tools window appears, Select All selects all rows, and Apply hands off the full selection.
+
+ 
+## 2026-11-14 – Current Select All UI direction
+
+- User explicitly requires Select All inside the Filter Results window; a separate Selection Tools window is not acceptable.
+- Latest source commit: `5ac7e5e51b35e8da1608f4bbec3e1c172d4dda18`.
+- Separate UICT Selection Tools dialog was removed.
+- Current implementation assigns **Select All** to the Graphical Browser's native `:abortButtonLabel` / `:abortButtonAction` slot, while retaining the native OK/Apply action.
+- Keep the standalone Graphical Browser. Do not reintroduce `sd-set-graphical-browser-parent` or unified host-shell embedding.
+- PTC Graphical Browser reference confirms native OK/abort labels and actions, but detailed source consulted is a later release than 18.1. Runtime validation is required, especially whether the Select All action leaves the Results window open and whether the normal close control remains available.
