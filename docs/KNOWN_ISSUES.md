@@ -1,12 +1,16 @@
 
 
-## KI-006 – Density Instance/Base inquiry may not be supported as used on Modeling 18.1
+## KI-006 – Density API values differ from Part Properties display scale
 
-- **Status:** Investigating; direct optional-kind tests prepared, awaiting user execution.
-- **Confirmed user runtime evidence:** On the known Part `010-plate_2.1.1.2.1`, `(sd-inq-part-p part)` returned `T` (type `SYMBOL`). The object type was `ELAN::SEL_ITEM`. The legacy one-argument `(sd-inq-part-density part)` returned `1000.0` (type `LONG-FLOAT`).
-- **Conclusion:** The selected object is a valid Part handle for these calls. Do not unwrap `SEL_ITEM` or treat it as the root cause. The one-argument value is the default/realized density, not proof of Instance=1 or Base=304.
-- **Still unknown:** Whether Modeling 18.1 accepts `(sd-inq-part-density part :instance)` and `(sd-inq-part-density part :contents)`, and whether they return the two Part Properties values.
-- **New test file:** `src/part-filter/H871_DENSITY_KIND_TEST.lsp` defines separate commands `H871_DENSITY_TEST_INSTANCE` and `H871_DENSITY_TEST_CONTENTS`. Each command makes a direct call and writes to its own TXT report. No generic error-catching wrapper is used.
-- **Static verification:** Balanced parentheses, no negative nesting, no unterminated strings.
-- **Next action:** User loads the new file and runs both dialogs on the same known Part, then shares both report files or exact Creo error messages.
-- **Do not change production matching logic yet:** Wait until the two direct tests establish the 18.1 API behavior and the actual values.
+- **Status:** API calls confirmed; value normalization semantics still under investigation.
+- **Native test object:** Part `010-plate_2.1.1.2.1` in the user's native Creo Elements/Direct model (`.pkg` / `.bdl`), not STEP-imported geometry.
+- **Part predicate:** `(sd-inq-part-p part)` returns `T`.
+- **Instance inquiry:** `(sd-inq-part-density part :instance)` returns `1000.0` (`LONG-FLOAT`).
+- **Contents/Base inquiry:** `(sd-inq-part-density part :contents)` returns `304000.0` (`LONG-FLOAT`).
+- **Part Properties display:** Instance = `1`, Base = `304`.
+- **Observed relationship:** both returned API values are 1000 times the corresponding UI values on this Part.
+- **Interpretation:** optional kind arguments are supported in this Modeling 18.1 installation, and the two calls expose the intended separate fields. The unit/conversion reason for the factor is not yet proven.
+- **Risk:** comparing raw API values directly against user-entered UI values (1 and 304) will not match. Do not apply an unverified global conversion factor until another known Part or authoritative 18.1 documentation confirms it.
+- **Native data constraint:** all development and tests must use native Creo Elements/Direct `.pkg` / `.bdl` model content. Do not assume a STEP import data path.
+- **Next action:** verify the scale on another known Part, then normalize values in a dedicated reusable function before exact-pair comparison.
+- **Production filter status:** a successful isolated inquiry is not proof that the complete Assembly scan or result UI works. Keep full runtime status separate.
