@@ -63,3 +63,14 @@ Track confirmed defects and unresolved investigations. Close an issue only after
 - **Implemented candidate:** Dedicated Graphical Browser data tree with BrowserNode client data retaining the corresponding model Part; BOM-like columns for Part Name, Density Instance, Density Base, and Assembly Path; browser row selection; Select All and Clear Selection actions; exact Density pair filtering remains separate from result presentation.
 - **Not yet verified:** Browser creation/update lifecycle, table display, row selection, and menu actions in Creo 18.1. Double-click navigation to the corresponding model object and transfer of selected result Parts to downstream commands such as Add to Drawlist remain required acceptance tests.
 - **Risk:** Public PTC Integration Kit references available during development are for 20.x. The Graphical Browser framework predates these releases, but exact 18.1 signatures and behavior must be confirmed in the installed environment.
+
+## KI-006 – Density Instance/Base inquiry may not be supported as used on Modeling 18.1
+
+- **Status:** Investigating; diagnostic LISP committed.
+- **Observed behavior:** User confirms the Assembly contains Parts whose Part Properties show Density Instance = 1 and Density Base = 304, but the filter returns zero.
+- **Numeric clarification:** In Common Lisp, numeric `=` treats `1` and `1.0` as equal. The filter now also normalizes numeric strings and uses a small numeric tolerance. A formatting difference alone should not explain zero matches when both values are actual numbers.
+- **Important compatibility finding:** PTC's public Integration Kit release notes state that Density (along with color/transparency/reflectance) became attachable separately to Part Instance and Contents in Modeling 20.8, and `sd-inq-part-density` gained the optional `:instance` / `:contents` kind argument for that behavior. The target is Modeling 18.1. This makes the current assumption that the 18.1 runtime can retrieve both fields through these calls suspect.
+- **Diagnostic added:** `src/part-filter/H871_DENSITY_DIAG.lsp` asks the user to select one known Part and writes default, `:instance`, and `:contents` inquiry results plus available instance/contents item attributes to `H871_DENSITY_DIAGNOSTIC.txt`.
+- **Next action:** Run the diagnostic on a known Part. Use its raw output to determine whether 18.1 exposes the two values through another property/attribute mechanism or whether the requested Instance/Base pair is only available in a later release.
+- **Evidence:** PTC Modeling 20.8 Integration Kit release notes and Part Inquiries reference; source commits `1fc1722` and `d334324`.
+- **Do not close:** Until a known Part is read correctly and the Assembly search returns the expected Part set in Creo 18.1.
