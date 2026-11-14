@@ -105,3 +105,11 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Removed the oversized host Dialog Shell and browser reparenting.
 - Apply now performs the existing selection hand-off and re-shows the Results Browser.
 - Creo 18.1 runtime verification is pending.
+
+
+## 2026-11-14 – Part Filter: restore native Apply action
+
+- Removed the custom Apply callback that immediately reopened the Results Browser after :select-and-execute.
+- The visible Apply button now uses Creo Graphical Browser's native default OK action.
+- Select All and the standalone result table are retained.
+- Creo 18.1 runtime retest is pending; row selection and Apply are not yet marked fixed.
