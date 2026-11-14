@@ -23,6 +23,7 @@
 
 (defvar *h871-pf-browser-name* "h871-pf-results")
 (defvar *h871-pf-tree-name* "h871-pf-results-tree")
+(defvar *h871-pf-tools-shell* "h871-pf-selection-tools")
 
 (defun h871-pf-name (obj)
   (or (sd-inq-obj-basename obj) "<NO NAME>"))
@@ -172,6 +173,40 @@
       *h871-pf-browser-name*
       :value (format nil "~A result row(s) selected." (length parts)))))
 
+(defun h871-pf-open-selection-tools ()
+  ;; Use the Modeling UI Construction Toolkit instead of relying on
+  ;; Graphical Browser menu surfaces that are not exposed consistently
+  ;; by the user's 18.1 browser UI.
+  (ignore-errors (sd-hide-dialog-shell *h871-pf-tools-shell* :ignorePin t))
+  (ignore-errors (sd-destroy-dialog-shell *h871-pf-tools-shell*))
+  (when (sd-create-dialog-shell
+          *h871-pf-tools-shell*
+          :title "H871 - SELECTION TOOLS"
+          :pin nil
+          :close t
+          :bottomLine :none)
+    (when (sd-append-grid-area
+            (concatenate 'string *h871-pf-tools-shell* "-GA")
+            (concatenate 'string *h871-pf-tools-shell* "-AA")
+            :width 220
+            :height 32
+            :cellSize 1,1
+            :margin 2
+            :spacing 2)
+      (sd-create-pushbutton-control
+        "h871-pf-select-all-button"
+        (concatenate 'string *h871-pf-tools-shell* "-GA")
+        :x 2 :y 3 :width 92 :height 24
+        :title "Select All"
+        :pushAction '(h871-pf-select-all))
+      (sd-create-pushbutton-control
+        "h871-pf-clear-selection-button"
+        (concatenate 'string *h871-pf-tools-shell* "-GA")
+        :x 108 :y 3 :width 108 :height 24
+        :title "Clear Selection"
+        :pushAction '(h871-pf-clear-selection))
+      (sd-show-dialog-shell *h871-pf-tools-shell*))))
+
 (defun h871-pf-open-results-browser ()
   ;; Recreate browser/tree so every search has a clean result set.
   (ignore-errors
@@ -200,18 +235,8 @@
       :minHeight 280
       :maxWidth 900
       :maxHeight 760
-      ;; MODE-MENU is the persistent row of action buttons above
-      ;; the browser menus. Use native browser commands directly.
-      :modeMenuLabel "Selection"
-      :modeMenu
-        '(("select-all"
-           :label "Select All"
-           :push (sd-browser-exec-cmd "h871-pf-results" :select-all))
-          ("clear-selection"
-           :label "Clear Selection"
-           :push (sd-browser-exec-cmd "h871-pf-results" :clear-select-list)))
-      ;; Keep popup-menu fallbacks for right-click access.
-      :buttonMenuOffObjectOnly nil
+      ;; Retain only a popup fallback; persistent controls are provided
+      ;; by the separate UI Construction Toolkit selection window.
       :topMenu
         '(("selection"
            :label "Selection"
@@ -234,23 +259,24 @@
       :table-name "h871-pf-bom"
       :with-name-column nil
       :column-definition
-        '(;; :initial-width values below are character counts, not pixels.
+        '(;; Modeling 18.1 uses the legacy :max-width column option.
+          ;; :initial-width was introduced in a later release (20.4).
           (:label "Part Name"
            :type :string-column
            :display-func h871-pf-column-name
-           :initial-width 28)
+           :max-width 22)
           (:label "Density Instance"
            :type :string-column
            :display-func h871-pf-column-instance
-           :initial-width 13)
+           :max-width 8)
           (:label "Density Base"
            :type :string-column
            :display-func h871-pf-column-base
-           :initial-width 12)
+           :max-width 8)
           (:label "Assembly Path"
            :type :string-column
            :display-func h871-pf-column-path
-           :initial-width 42)))
+           :max-width 30)))
     (sd-display-error "H871: Could not create the BOM result table.")
     (return-from h871-pf-open-results-browser nil))
 
@@ -258,6 +284,7 @@
     *h871-pf-browser-name* :table-name "h871-pf-bom")
   (sd-browser-exec-cmd *h871-pf-browser-name* :set-table-mode)
   (sd-show-graphical-browser *h871-pf-browser-name*)
+  (h871-pf-open-selection-tools)
 
   ;; Root node is the table root; the table displays all matching Parts.
   (let ((root (sd-get-browsernode-struct *h871-pf-tree-name* :root)))
