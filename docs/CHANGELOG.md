@@ -18,3 +18,8 @@
 - Updated `H871_PART_FILTER.lsp` to normalize API values by dividing by 1000.0 before exact matching.
 - Result table and matched-Part report now use Part Properties scale; raw API values remain available in diagnostics.
 - Runtime verification of the complete filter in Creo 18.1 is still pending.
+
+
+## 2026-11-14
+- Fixed invalid Common Lisp character literals in the numeric-string parser of `H871_PART_FILTER.lsp`, addressing the reported `Octal digit expected` load error.
+- Static syntax-balance check passed; Creo 18.1 runtime test pending.
