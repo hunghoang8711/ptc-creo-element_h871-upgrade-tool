@@ -218,3 +218,29 @@ Reload the latest source in Creo Elements/Direct Modeling 18.1 and verify:
 5. Manual row selection and Ctrl-click multi-selection remain unchanged.
 
 The source is statically checked but the new Select All button has not yet been re-tested by the user in Creo 18.1.
+
+ 
+## 2026-11-14 – Put Select All inside the Filter Results window
+
+### User correction
+The user clarified that Select All must be part of the Filter Results window itself. A separate Selection Tools window is inconvenient and not acceptable.
+
+### Revised implementation
+- Removed the separate UICT Selection Tools dialog, its shell variable, and its creation call.
+- Kept the standalone Graphical Browser architecture; no browser-parent embedding or unified host shell.
+- Added **Select All** using the Graphical Browser's native `:abortButtonLabel` / `:abortButtonAction` controls. The existing native OK action remains the Apply action.
+- Select All invokes the existing `h871-pf-select-all` callback.
+- The native close control and exact button behavior must be checked in Creo 18.1; the current source change is a compatibility attempt, not runtime-confirmed.
+
+### API basis and limitation
+PTC's Graphical Browser reference documents `:abortButtonLabel` and `:abortButtonAction` as native controls on the browser itself, separate from the OK action. This is a better fit than creating another dialog. PTC's currently accessible detailed reference is for a later release, so Modeling 18.1 runtime verification remains mandatory.
+
+### Static validation
+- Balanced LISP parentheses; all strings closed.
+- No Selection Tools dialog or UICT shell remains.
+- No `sd-set-graphical-browser-parent` call is present.
+- Existing standalone `sd-show-graphical-browser` path and native OK/Apply behavior are retained.
+- Commit: `5ac7e5e51b35e8da1608f4bbec3e1c172d4dda18`.
+
+### Runtime test required
+Verify that Results Browser shows a **Select All** button in the same window, that pressing it selects all result rows without closing the browser, that native Apply still works, and that the window can still be closed normally.
