@@ -1,83 +1,43 @@
 # Technical Decisions
 
-Record decisions that constrain future implementation. Amend entries only when a decision is deliberately revisited; preserve the rationale and date.
+Active decisions that constrain implementation. Historical experiments superseded by these decisions are summarized in `DEVELOPMENT_LOG.md` and `LESSONS_LEARNED.md`.
 
-## TD-001 – Target CAD platform
+## TD-001 – Target platform
 
 - **Date:** 2026-11-13
 - **Decision:** Target PTC Creo Elements/Direct Modeling 18.1.
-- **Rationale:** This is the user's stated production environment.
-- **Implication:** Do not assume Creo Parametric APIs or newer Elements/Direct APIs are compatible. Verify functions and object/property access in version 18.1.
+- **Rule:** Do not assume Creo Parametric APIs or later Elements/Direct APIs are compatible. Verify functions, signatures, object types, and UI behavior in 18.1.
 
-## TD-002 – Part property filter uses exact Instance/Base matching
+## TD-002 – Current Density filter is an exact pair
 
-- **Date:** 2026-11-13
-- **Decision:** The Material filter is based on an exact pair of property values: Instance and Base.
-- **Example:** Instance = `1`, Base = `304`.
-- **Rationale:** The user explicitly clarified that the Material page needs filtering by Instance and Base values, not comparison operators.
-- **Implication:** A match requires both fields to match the entered values. Do not add greater-than/less-than comparisons or treat the two fields as OR alternatives.
-- **Open detail:** Confirm the exact property retrieval mechanism and the meaning of the previously selected implementation approach B from the original source/discussion before implementing.
+- **Date:** 2026-11-13 (clarified 2026-11-14)
+- **Decision:** The current filter matches both Density Instance and Density Base exactly. Both conditions must be true.
+- **Retrieval:** `sd-inq-part-density` with `:instance` for Instance and `:contents` for Base.
+- **Normalization:** Current source divides returned API values by 1000 before comparing/displaying them.
+- **Evidence:** User-tested examples: UI 1/304 corresponds to raw API 1000/304000; UI 2/400 corresponds to raw API 2000/400000.
+- **Rule:** Do not reintroduce comparison operators or AND/OR controls into this exact-pair baseline unless the user changes the requirement.
 
-## TD-003 – Test claims must distinguish static checks from in-application tests
-
-- **Date:** 2026-11-13
-- **Decision:** Code review, syntax checks, successful file loading, functional tests, and regression tests are separate verification levels.
-- **Rationale:** A LISP file can pass a basic static check but still fail in the Creo reader or behave incorrectly against real model objects.
-- **Implication:** Development logs must state precisely which verification levels were completed.
-
-## TD-004 – Documentation is part of each feature change
-
-- **Date:** 2026-11-13
-- **Decision:** Meaningful source changes must be accompanied by updates to the development log and, where relevant, technical decisions, lessons learned, known issues, and changelog.
-- **Rationale:** New development sessions must be able to resume from repository evidence rather than relying on chat history.
-
-
-## TD-005 – Density filter is an exact Instance/Base pair
-
-- **Date:** 2026-11-13
-- **Decision:** The Material tab's Density filter uses exactly two numeric values: Density Instance and Density Base.
-- **Retrieval:** `sd-inq-part-density` with `:instance` retrieves the Instance value; `:contents` retrieves the Base value.
-- **Match rule:** A Part matches only if both returned values are non-NIL and numerically equal to the two requested values.
-- **UI:** No comparison operators, enable toggles, or AND/OR selector for this pair.
-- **Rationale:** Matches the supplied Part Properties screenshot (Instance 1, Base 304) and PTC Integration Kit inquiry semantics.
-- **Verification caveat:** The function documentation is available in current PTC Integration Kit references and the function was already present in the imported source, but the new implementation still requires load and functional verification in the user's Creo 18.1 installation.
-
-
-## TD-006 – Return matches through Creo native selection
-
-- **Date:** 2026-11-13
-- **Decision:** Matching Parts should be selected using Creo's native `GET_SELECTION` interrupt action, not merely written to a text report or highlighted as a dialog variable.
-- **Implementation:** Use `*sd-part-seltype*`, `:check_function` for exact Density pair validation, and `:select :in_assembly` for the selected Assembly.
-- **Rationale:** PTC Integration Kit documentation describes GET_SELECTION as invoking the standard SELECT subaction and returning selected SEL_ITEMs. Its check function can return `:ok` to retain or `:filter` to exclude each selected item.
-- **Expected workflow:** Matching Parts should be available in the native selection list for commands such as Add to Drawlist.
-- **Verification caveat:** Documentation reviewed is for Elements/Direct 20.x; GET_SELECTION is an established Integration Kit interrupt action, but the exact behavior must be confirmed on the user's Creo 18.1 build.
-
-
-## TD-007 – Select matching nodes in the native Structure Browser
-
-- **Date:** 2026-11-13
-- **Decision:** To meet the user's workflow, select matching objects in the existing Structure Browser's own selection state rather than treating a GET_SELECTION return value as persistent UI selection.
-- **Browser:** Standard Structure Browser name is `parcel-gbrowser`.
-- **API:** `sd-browser-exec-cmd` with `:set-object-selection` accepts a BrowserNode struct and a Boolean; `:clear-select-list` clears prior browser selections; `:expand-tree` can expose descendants.
-- **Node lookup:** Traverse browser nodes using `sd-query-browser :get-children`, compare `BrowserNode-objPath` with `sd-inq-obj-pathname` of the matching model object.
-- **Rationale:** PTC Graphical Browsers reference documents these commands and the Structure Browser-specific name. This corresponds to the user's desired browser row selection behavior.
-- **Verification caveat:** Reference is for a later release; compatibility and behavior must be tested on Creo 18.1. Browser nodes must be visible/selectable.
-
-
-## TD-008 – Replace direct-selection approach with a dedicated H871 results browser
-
-- **Date:** 2026-11-13
-- **Decision:** The Part Filter will present search results in a dedicated BOM-like Creo Graphical Browser, rather than attempting to force selection into the existing Structure Browser immediately after a scan.
-- **Rationale:** The user needs a persistent, inspectable list where individual results and all results can be selected, double-click can locate a model object, and subsequent operations can be applied to the selected result set. PTC's Graphical Browser framework supports data trees, BrowserNode client data, tables with custom columns, mouse click handlers, selection queries, and browser commands.
-- **Interaction:** Single click selects a row; Ctrl-click adds/removes; double-click locates/operates on the corresponding object; explicit Select All/Clear Selection actions; Clear Results separate from selection clearing.
-- **Extensibility:** Separate property predicate from result browser so Density is the first filter and additional Part properties can be added later.
-- **Compatibility:** PTC documents reviewed are for 20.4/20.8; must verify the relevant APIs in the user's Creo 18.1 Integration Kit before implementing. Do not reuse unverified function signatures from newer releases.
-- **Supersedes:** TD-006 and TD-007 as the primary user interaction strategy. Their selection experiments are historical and not accepted as successful implementations.
-
-## TD-009 – Density numeric normalization and 18.1 API compatibility investigation
+## TD-003 – Preserve the working Results Browser selection architecture
 
 - **Date:** 2026-11-14
-- **Decision:** Normalize numeric Density values before comparing. Accept numeric values and numeric strings; compare numerically with a small tolerance. This covers representations such as `1` and `1.0`.
-- **Rationale:** Lisp numeric equality already considers integer 1 and float 1.0 equal; text representations need parsing before numeric comparison.
-- **Compatibility finding:** PTC's Integration Kit Part Inquiries reference documents `sd-inq-part-density` with `:contents`, `:instance`, and `:realized`, returning a LONG-FLOAT or NIL. The property-attribute concept also appears in the older SolidDesigner 5.0 release history. Therefore the API is not assumed to be newer than 18.1; the exact values returned by the user's installed 18.1 build still need direct diagnosis.
-- **Next step:** Run `H871_DENSITY_DIAG.lsp` on a known Part and identify the 18.1 property/attribute source. Do not claim the filter is fixed based only on numeric normalization.
+- **Decision:** Keep the standalone Graphical Browser and its native row-selection and Apply behavior.
+- **User-confirmed:** Results rows display; Select All is available; individual rows can be selected; native Apply transfers selected Parts to Modeling selection.
+- **Rule:** Do not override the native default Apply action with a callback that immediately reopens the browser. Do not reintroduce the unified host-shell/browser-parent embedding design that caused matching searches to fail.
+
+## TD-004 – Separate filter logic from result presentation
+
+- **Date:** 2026-11-13
+- **Decision:** Keep property acquisition and predicate evaluation independent from Graphical Browser tree/table construction.
+- **Rationale:** Future property types and filter conditions should not require replacing the working Results Browser or selection hand-off.
+
+## TD-005 – Verification evidence must be explicit
+
+- **Date:** 2026-11-13
+- **Decision:** Static checks, API-reference review, successful loading, functional testing, and regression testing are different evidence levels.
+- **Rule:** Mark runtime behavior as confirmed only after a test in Modeling 18.1 or an explicit user report. Later-release documentation is not proof of 18.1 compatibility.
+
+## TD-006 – Documentation is part of each change
+
+- **Date:** 2026-11-13
+- **Decision:** Meaningful source changes must update the project context and relevant development/decision/issue/lesson/changelog records in the same work session.
+- **Rule:** Keep current state concise; do not duplicate every intermediate experiment across multiple documents.
