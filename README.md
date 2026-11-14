@@ -4,24 +4,27 @@ Version-controlled engineering workspace for custom tools targeting **PTC Creo E
 
 ## Current focus
 
-**H871 Part Filter – baseline restored and ready for the next feature definition (2026-11-14).**
+**H871 Part Filter ver-02 – mapped machining-process and material selection UI.**
 
-The current user-confirmed workflow is:
-- Select an Assembly and search using an exact Density Instance + Density Base pair.
-- View matching Parts in the dedicated Graphical Browser results table.
-- Select individual result rows or use Select All.
-- Use the native Apply action to transfer the selected Part(s) to Creo Modeling selection.
+The ver-02 candidate preserves the user-confirmed ver-01 filter engine and Results Browser behavior. Its dialog replaces the two numeric density inputs with fixed choices:
 
-The user has confirmed that the results list, Select All control, individual row selection, and Apply workflow work in Creo Elements/Direct Modeling 18.1. Do not regress this baseline.
+- Machining Process: CNC=1, KH=2, CG=3, COVER=4.
+- Material: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
+
+The selected numeric codes are still passed to the existing exact Density Instance + Density Base search. Adjacent code fields are display-only. The default selection remains CNC + SUS304 (1/304).
+
+**Important:** ver-02 source has been added on the feature branch but has not yet been loaded or functionally tested in Modeling 18.1. The confirmed ver-01 source remains unchanged on `main`.
 
 ## Repository map
 
-- `PROJECT_CONTEXT.md` – concise current state and handover notes.
-- `src/part-filter/` – Part Filter source and preserved diagnostic baseline.
-- `docs/TECHNICAL_DECISIONS.md` – active technical decisions and compatibility constraints.
-- `docs/KNOWN_ISSUES.md` – only unresolved or unverified items.
+- `PROJECT_CONTEXT.md` – current state, mappings, verification and next steps.
+- `src/part-filter/H871_PART_FILTER.lsp` – confirmed ver-01 baseline.
+- `src/part-filter/H871_PART_FILTER_VER_02.lsp` – ver-02 mapped-choice candidate.
+- `src/part-filter/H871_PART_FILTER_DIAG.lsp` – preserved diagnostic baseline.
+- `docs/TECHNICAL_DECISIONS.md` – active technical decisions.
+- `docs/KNOWN_ISSUES.md` – unresolved or unverified items.
 - `docs/LESSONS_LEARNED.md` – confirmed root causes and prevention rules.
-- `docs/DEVELOPMENT_LOG.md` – concise milestone history and verification evidence.
+- `docs/DEVELOPMENT_LOG.md` – milestone history and evidence.
 - `docs/CHANGELOG.md` – user-visible/source-level change summary.
 - `tests/` – repeatable tests and sanitized fixtures.
 
@@ -45,6 +48,10 @@ The user has confirmed that the results list, Select All control, individual row
 - **User-confirmed** – the user reported the behavior working in their target environment.
 - **Regression-tested** – existing confirmed behavior was retested after a change.
 
+## Deferred UI direction
+
+Preserve the user's next-stage idea: each search should create an independent result session, with multiple result sets available as browser-like tabs (for example, a material/process tab named SUS304-CNC). Do not implement this as part of ver-02; first validate the mapped filter dialog.
+
 ## Start a new development session
 
-Read `PROJECT_CONTEXT.md`, then the active decisions and known issues. Inspect the latest Part Filter source before implementation. Use the development log only for milestone history; detailed abandoned UI experiments have been condensed into the lessons and constraints that matter.
+Read `PROJECT_CONTEXT.md`, then the active decisions and known issues. Inspect the current Part Filter source before implementation.
