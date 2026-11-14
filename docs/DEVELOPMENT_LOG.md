@@ -28,3 +28,30 @@ The user clarified that the source model is native Creo Elements/Direct Modeling
 ### Verification status
 - User-confirmed runtime success for Part predicate, `:instance`, and `:contents` calls on the native model.
 - No claim yet that the production Assembly scan, result browser, double-click locate, or Add to Drawlist workflow has passed runtime testing.
+
+
+
+## 2026-11-14 – Second native Part confirms Density scale; filter normalized
+
+### Additional user runtime evidence
+A second native Part was tested: `010-plate_2.1.1.2.1.1`.
+- Part Properties: Density Instance = `2`, Density Base = `400`.
+- `(sd-inq-part-density part :instance)` returned `2000.0`.
+- `(sd-inq-part-density part :contents)` returned `400000.0`.
+- Both calls returned `LONG-FLOAT`; `sd-inq-part-p` returned `T`.
+
+Together with the first known Part (UI 1/304; API 1000/304000), this confirms the same exact 1000:1 ratio on two independent native Parts with different values.
+
+### Source update
+Updated `src/part-filter/H871_PART_FILTER.lsp`:
+- Added `h871-pf-density-display-value`, which divides numeric API Density values by 1000.0.
+- Exact-pair matching now compares normalized values against the dialog inputs.
+- Result-table Density columns now display normalized values matching Part Properties.
+- The result report includes both normalized display-scale values and raw API values for diagnosis.
+- Diagnostic samples continue to preserve raw API values and their Lisp types.
+
+### Verification status
+- Source change committed to GitHub; this is not yet a Creo runtime test.
+- Static source inspection is still required after this edit.
+- The complete Assembly traversal, result count, Graphical Browser creation, and row-selection interactions remain unverified in Creo 18.1.
+- Treat 1000 as an empirically confirmed conversion for the two tested Parts; if later testing reveals mixed units or exceptional values, isolate any adjustment in the normalization helper.
