@@ -44,3 +44,11 @@
 - Correction: do not assume this API is unavailable in 18.1. PTC's release-history page places the resizable UICT and browser-parent functions in older CoCreate Modeling history, before the 18.1 lineage.
 - Latest source adds a diagnostic message reporting browser existence/docked state, dialog-shell existence, and both grid-area handles before cleanup.
 - **Pending:** collect the diagnostic values from the user's Creo 18.1 run. Do not alter the parent API call speculatively until the actual UI object hierarchy is known.
+
+
+## 2026-11-14 – Root cause found for browser embedding failure
+
+- **Confirmed source defect:** the root resizable grid area `H871-PF-RESULTS-RG` was used as a parent before it had been created.
+- PTC UICT naming convention: a dialog shell with basename `H871-PF-RESULTS` creates client area `H871-PF-RESULTS-AA`.
+- Latest source now creates the root grid under that automatic client area, then creates the browser grid under the root grid.
+- Browser parenting still requires runtime verification after this hierarchy correction.
