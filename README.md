@@ -1,71 +1,50 @@
 # PTC Creo Elements/Direct Modeling – H871 Upgrade Tools
 
-A version-controlled workspace for developing, testing, documenting, and maintaining custom tools for **PTC Creo Elements/Direct Modeling 18.1**.
+Version-controlled engineering workspace for custom tools targeting **PTC Creo Elements/Direct Modeling 18.1**.
 
-The repository is intended to be the engineering source of truth for:
-- LISP utilities and related source code.
-- Technical decisions and implementation constraints.
-- Development history, test evidence, known issues, and lessons learned.
-- Reusable test files and sample data that do not contain confidential customer information.
+## Current focus
 
-## Project status
+**H871 Part Filter – baseline restored and ready for the next feature definition (2026-11-14).**
 
-**Part Filter development in progress – 2026-11-13.**
+The current user-confirmed workflow is:
+- Select an Assembly and search using an exact Density Instance + Density Base pair.
+- View matching Parts in the dedicated Graphical Browser results table.
+- Select individual result rows or use Select All.
+- Use the native Apply action to transfer the selected Part(s) to Creo Modeling selection.
 
-The repository contains the uploaded diagnostic baseline and an evolving Part Filter implementation. The current implementation candidate uses a dedicated Graphical Browser for BOM-like search results; it is not yet functionally verified in Creo 18.1. Existing behavior described in the project context is recorded as historical requirements, not as verified source-code behavior.
+The user has confirmed that the results list, Select All control, individual row selection, and Apply workflow work in Creo Elements/Direct Modeling 18.1. Do not regress this baseline.
 
 ## Repository map
 
-```text
-.
-├── README.md
-├── PROJECT_CONTEXT.md
-├── docs/
-│   ├── DEVELOPMENT_LOG.md
-│   ├── LESSONS_LEARNED.md
-│   ├── TECHNICAL_DECISIONS.md
-│   ├── KNOWN_ISSUES.md
-│   └── CHANGELOG.md
-├── src/
-│   └── README.md
-└── tests/
-    └── README.md
-```
+- `PROJECT_CONTEXT.md` – concise current state and handover notes.
+- `src/part-filter/` – Part Filter source and preserved diagnostic baseline.
+- `docs/TECHNICAL_DECISIONS.md` – active technical decisions and compatibility constraints.
+- `docs/KNOWN_ISSUES.md` – only unresolved or unverified items.
+- `docs/LESSONS_LEARNED.md` – confirmed root causes and prevention rules.
+- `docs/DEVELOPMENT_LOG.md` – concise milestone history and verification evidence.
+- `docs/CHANGELOG.md` – user-visible/source-level change summary.
+- `tests/` – repeatable tests and sanitized fixtures.
 
-## Development principles
+## Development rules
 
-1. **Inspect before changing.** Read the relevant source, project context, decisions, known issues, and recent history before editing.
-2. **Preserve working behavior.** Make focused changes; avoid unrelated refactoring.
-3. **Test in the target application.** Static inspection or successful file loading is not equivalent to functional verification in Creo Elements/Direct Modeling.
-4. **Report evidence honestly.** Every change must state what was tested, the environment, and what remains untested.
-5. **Record reusable knowledge.** Document root causes and prevention steps when a defect is understood.
-6. **Keep changes traceable.** Use clear commits and update the development log and changelog.
-7. **Protect confidential data.** Do not commit customer-sensitive models, credentials, proprietary drawings, or personal data without explicit approval.
+1. Inspect the current source, repository state, and relevant documentation before changing code.
+2. Preserve the working Results Browser, row-selection, Select All, and native Apply behavior.
+3. Make the smallest focused change; avoid unrelated UI or architecture rewrites.
+4. Target Modeling 18.1. Do not assume Creo Parametric APIs or later Elements/Direct APIs are compatible.
+5. Separate static checks, successful loading, functional tests, and regression tests.
+6. Record exact user-observed runtime results; never infer runtime success from source code alone.
+7. Update the relevant documentation with every meaningful implementation change.
+8. Keep customer models, proprietary drawings, credentials, and personal data out of this public repository.
 
-## Workflow for every new development session
+## Verification terminology
 
-1. Read this README and `PROJECT_CONTEXT.md`.
-2. Read the relevant sections of `docs/TECHNICAL_DECISIONS.md`, `docs/KNOWN_ISSUES.md`, `docs/LESSONS_LEARNED.md`, and `docs/DEVELOPMENT_LOG.md`.
-3. Inspect the current GitHub branch, recent commits, and relevant source/test files.
-4. Confirm the intended behavior and identify regression risks.
-5. Implement the smallest practical change.
-6. Test and record exact results. If Creo is not available to the assistant, mark in-application testing as **not performed** and provide steps for the user to run.
-7. Update the relevant documentation in the same change set.
+- **Implemented** – source has been changed.
+- **Static-checked** – source structure/syntax has been inspected; not proof of Creo compatibility.
+- **Loaded in Creo** – file loaded in the target application.
+- **Functionally tested** – behavior was exercised in Creo.
+- **User-confirmed** – the user reported the behavior working in their target environment.
+- **Regression-tested** – existing confirmed behavior was retested after a change.
 
-## Status terminology
+## Start a new development session
 
-- **Implemented:** source changes have been made.
-- **Static-checked:** source has been reviewed for syntax/structure, but not run in Creo.
-- **Loaded in Creo:** the file loaded successfully in the target application.
-- **Functionally tested:** the specified behavior was exercised in Creo with recorded test conditions.
-- **Regression-tested:** relevant existing behavior was retested after the change.
-
-Never describe a feature as functionally complete solely because code was written.
-
-## Current known project scope
-
-The first recorded tool requirement is a Part filter based on the exact **Instance** and **Base** values of Part properties such as Material and Density. See `PROJECT_CONTEXT.md` and `docs/TECHNICAL_DECISIONS.md`.
-
-## Contributing / handover
-
-When handing work to a new ChatGPT conversation or another developer, start with `PROJECT_CONTEXT.md`, then follow the workflow above. Keep this repository as the durable record; do not rely on chat history as the only source of technical decisions.
+Read `PROJECT_CONTEXT.md`, then the active decisions and known issues. Inspect the latest Part Filter source before implementation. Use the development log only for milestone history; detailed abandoned UI experiments have been condensed into the lessons and constraints that matter.
