@@ -150,6 +150,12 @@
                   :base-api base))))
     root))
 
+(defun h871-pf-apply-selected ()
+  ;; Transfer the current browser selection to Modeling, then restore
+  ;; the same Results Browser so repeated Apply operations are possible.
+  (sd-browser-exec-cmd *h871-pf-browser-name* :select-and-execute)
+  (sd-show-graphical-browser *h871-pf-browser-name*))
+
 (defun h871-pf-select-all ()
   (sd-browser-exec-cmd *h871-pf-browser-name* :select-all))
 
@@ -202,6 +208,7 @@
       :maxHeight 760
       ;; Native footer controls in the original Graphical Browser window.
       :okButtonLabel "Apply"
+      :okButtonAction '(h871-pf-apply-selected)
       :abortButtonLabel "Select All"
       :abortButtonAction '(h871-pf-select-all)
       :buttonMenu
