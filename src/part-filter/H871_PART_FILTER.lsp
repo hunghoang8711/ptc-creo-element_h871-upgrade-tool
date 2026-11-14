@@ -198,15 +198,16 @@
         (format nil "Matched ~A Part(s). Select rows; Ctrl-click adds/removes."
           (length *h871-pf-results*))
       :minHeight 280
-      :maxWidth 1150
+      :maxWidth 900
       :maxHeight 760
       :buttonMenu
         '(("select-all"
            :label "Select All"
-           :push (sd-browser-exec-cmd "h871-pf-results" :select-all))
+           :push (h871-pf-select-all))
           ("clear-selection"
            :label "Clear Selection"
-           :push (sd-browser-exec-cmd "h871-pf-results" :clear-select-list)))
+           :push (h871-pf-clear-selection)))
+      :buttonMenuOffObjectOnly nil
       :topMenu
         '(("selection"
            :label "Selection"
