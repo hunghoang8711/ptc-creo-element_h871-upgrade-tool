@@ -76,3 +76,17 @@ The latest source adds `h871-pf-parent-diagnostic`, which reports:
 - Whether the nested browser-parent grid exists
 
 The diagnostic is displayed before the host shell is destroyed. Next action is to ask the user to load the latest source, run one search, and provide the complete `H871 EMBED DIAGNOSTIC` message. No runtime fix has yet been confirmed.
+
+
+## 2026-11-14 – Confirmed missing-parent defect in Part Filter UI
+
+The repeated `Could not embed the results browser` error was traced to an incomplete UICT hierarchy in source: the code tried to create the browser grid using `H871-PF-RESULTS-RG` as parent before creating that root grid.
+
+The latest source creates:
+1. Dialog shell basename `H871-PF-RESULTS`, whose client area is `H871-PF-RESULTS-AA`.
+2. Root resizable grid `H871-PF-RESULTS-RG` under the automatic client area.
+3. Browser resizable grid `H871-PF-BROWSER-RG` under the root grid.
+4. Footer Pushbuttons under the root grid.
+5. Graphical Browser parent set to the browser grid, with dialog basename `H871-PF-RESULTS`.
+
+Static validation is required; runtime embedding remains unconfirmed until user tests the new source.
