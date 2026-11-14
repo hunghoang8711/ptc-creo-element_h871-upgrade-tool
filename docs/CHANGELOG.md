@@ -6,3 +6,11 @@
 - Recorded compact column widths (28 / 13 / 12 / 42 characters) and the important API detail that Graphical Browser `:initial-width` is measured in characters.
 - Recorded repeat-search design: keep Assembly/Density inputs available after each run; create a separate closable results browser for each search.
 - Added verification discipline: distinguish static checks, API-reference assumptions, and user-confirmed runtime tests.
+
+
+## 2026-11-14 – Select All visibility follow-up
+- Added a dedicated `:modeMenu` action row containing visible-intent Select All and Clear Selection controls.
+- Bound actions directly to Graphical Browser `:select-all` and `:clear-select-list` commands.
+- Updated popup fallbacks to use `:browser-push-cmd` as shown in PTC Graphical Browser examples.
+- Preserved compact columns and the working manual multi-selection / Apply path.
+- Creo 18.1 runtime visibility and selection test pending.
