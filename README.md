@@ -11,7 +11,7 @@ The ver-02 candidate preserves the user-confirmed ver-01 filter engine and Resul
 - Machining Process: CNC=1, KH=2, CG=3, COVER=4.
 - Material: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
 
-The selected numeric codes are still passed to the existing exact Density Instance + Density Base search. Adjacent code fields are display-only. The default selection remains CNC + SUS304 (1/304).
+The selected numeric codes are still passed to the existing exact Density Instance + Density Base search. The corresponding code fields are display-only. The standard dialog currently places them in separate rows; a right-side same-row layout is deferred pending 18.1 UI verification. The default selection remains CNC + SUS304 (1/304).
 
 **Important:** ver-02 source has been added on the feature branch but has not yet been loaded or functionally tested in Modeling 18.1. The confirmed ver-01 source remains unchanged on `main`.
 
