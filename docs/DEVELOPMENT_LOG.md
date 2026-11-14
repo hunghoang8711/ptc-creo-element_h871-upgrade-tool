@@ -88,3 +88,24 @@ Updated `src/part-filter/H871_PART_FILTER.lsp`:
 - GitHub source update committed; this is a code change, not proof of runtime success.
 - Need user confirmation in Creo 18.1 that the keyword error is gone, the Select All button selects all visible result rows, and the filter dialog remains open after each search.
 - If Creo 18.1 rejects the new button-menu or deferred-dialog behavior, isolate those UI changes separately without disturbing the working result table.
+
+
+## 2026-11-14 – Make result selection controls visible and compact table columns
+
+### User feedback
+- The keyword-argument error is confirmed resolved in Creo 18.1.
+- The result browser still does not visibly expose Select All.
+- The Part Name / Density columns are too wide; Instance and Base are pushed far to the right.
+
+### Implementation
+- Kept the existing Graphical Browser and result data model.
+- Reworked the button-menu actions to call the named Select All and Clear Selection functions.
+- Set `:buttonMenuOffObjectOnly nil` so the selection controls are not restricted to blank-space context clicks.
+- Reduced browser maximum width from 1150 to 900.
+- Corrected column widths after checking the PTC API: `:initial-width` is measured in characters, not pixels. New widths are Part Name 28, Density Instance 13, Density Base 12, Assembly Path 42.
+- The three key columns should now fit together in a compact view; the path column remains available at a bounded width.
+
+### Verification
+- Source and documentation committed.
+- Need user runtime confirmation that the Select All / Clear Selection controls are now visible and that all result rows are selected when pressed.
+- Need visual confirmation that the density columns are visible without horizontal scrolling in Creo 18.1. These UI changes are not yet marked runtime-tested.
