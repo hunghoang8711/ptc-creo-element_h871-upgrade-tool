@@ -98,7 +98,7 @@ This file records chronological development work. Major features receive their o
 - Writes the returned selection items and their properties to the result report.
 
 ### Verification
-- PTC Integration Kit reference describes GET_SELECTION, :in_assembly, and :check_function behavior.
+- PTC Integration Kit reference describes GET_SELECTION, `:in_assembly`, and `:check_function` behavior.
 - Source updated on GitHub successfully.
 - Static balance/load checks: pending re-run after this update.
 - Creo 18.1 selection-list behavior: not yet tested.
@@ -149,7 +149,7 @@ This file records chronological development work. Major features receive their o
 
 ### Research
 - Reviewed PTC Structure Browser Search & Filter user documentation.
-- Reviewed PTC Integration Kit Graphical Browser concepts: BrowserNode data tree, client data, custom table columns, mouse handlers, selection queries, browser commands, and display/hide utilities.
+- Reviewed PTC Integration Kit Graphical Browser concepts: BrowserNode data tree, client data, custom table columns, mouse handlers, browser commands, selection queries, and display/hide utilities.
 - PTC describes default browser behavior including single-click select, Ctrl-click add/remove from selection list, double-click select-and-operate, and configurable click handlers.
 - Search results in the standard Structure Browser can expand the relevant branch, scroll to the object, and highlight it in Browser and viewport.
 
@@ -192,6 +192,7 @@ This file records chronological development work. Major features receive their o
 3. Confirm double-click locates/highlights the original model Part; this is not yet claimed as verified.
 4. Confirm selected result Parts can be passed to downstream commands such as Add to Drawlist.
 5. If the browser fails to build, capture the exact Creo LISP error and the first failing line; adjust the 18.1 API signature rather than reverting to Output-only behavior.
+
 
 ## 2026-11-14 – Investigate zero Density matches on Creo 18.1
 
@@ -278,4 +279,36 @@ This file records chronological development work. Major features receive their o
 - Creo 18.1 load and runtime: not yet tested.
 
 ### Next step
-- Reload this revision, run `H871_DENSITY_DIAG` on the same known Part, and send the new report. The exact error message will determine whether to use a legacy one-argument density inquiry, another Part-property API, or a different attribute route.
+- Reload this revision, run `H871_DENSITY_DIAG` on the same known Part, and send the new report. The exact recorded condition will determine whether to use a legacy one-argument density inquiry, another Part-property API, or a different attribute route.
+
+
+## 2026-11-14 – Replace invalid User Input Line tests with isolated file-based API tests
+
+### User feedback
+- The suggested `SEL_ITEM-P` test failed because `SEL_ITEM-P` is undefined in the user's Modeling 18.1 environment.
+- The user also confirmed that direct Lisp expressions cannot be executed in the User Input Line.
+
+### Correction
+- Do not use `SEL_ITEM-P` as an API or assume the User Input Line is a Lisp REPL.
+- The previous diagnostic's `IGNORE-ERRORS` / `FUNCALL` wrapper produced an `ESCAPE` result for every inquiry, so it did not isolate which direct API call was failing.
+
+### Files changed
+- Added `src/part-filter/H871_DENSITY_API_TEST.lsp`.
+
+### Implementation
+- Provides two separate dialog commands: `H871_DENSITY_TEST_PART_P` and `H871_DENSITY_TEST_ONE_ARG`.
+- Each dialog selects the same known Part and directly calls exactly one API: `sd-inq-part-p` or the legacy one-argument `sd-inq-part-density`.
+- Writes the object name/path/type, API availability, and return value/type to `H871_DENSITY_API_TEST.txt` in the user's home folder.
+- Deliberately avoids `SEL_ITEM-P`, `FUNCALL`, `LAMBDA`, and `IGNORE-ERRORS` so the next test does not repeat the earlier ambiguity.
+- This file is to be loaded using the same proven LISP file-loading method used for the existing H871 tools; its dialog commands must be launched through the Modeling command/menu mechanism, not entered as Lisp expressions in the User Input Line.
+
+### Verification
+- GitHub file creation succeeded.
+- Static syntax check: pending.
+- Creo 18.1 load and dialog execution: not yet tested.
+
+### Next step
+1. Load `H871_DENSITY_API_TEST.lsp`.
+2. Launch `H871_DENSITY_TEST_PART_P` from the same command mechanism used to launch `H871_PART_FILTER`.
+3. If successful, run `H871_DENSITY_TEST_ONE_ARG`.
+4. Send the generated TXT report and any exact Creo error message.
