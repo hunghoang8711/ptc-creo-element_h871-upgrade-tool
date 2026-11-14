@@ -200,13 +200,17 @@
       :minHeight 280
       :maxWidth 900
       :maxHeight 760
-      :buttonMenu
+      ;; MODE-MENU is the persistent row of action buttons above
+      ;; the browser menus. Use native browser commands directly.
+      :modeMenuLabel "Selection"
+      :modeMenu
         '(("select-all"
            :label "Select All"
-           :push (h871-pf-select-all))
+           :push (sd-browser-exec-cmd "h871-pf-results" :select-all))
           ("clear-selection"
            :label "Clear Selection"
-           :push (h871-pf-clear-selection)))
+           :push (sd-browser-exec-cmd "h871-pf-results" :clear-select-list)))
+      ;; Keep popup-menu fallbacks for right-click access.
       :buttonMenuOffObjectOnly nil
       :topMenu
         '(("selection"
@@ -214,10 +218,10 @@
            :contents
              (("select-all"
                :label "Select All"
-               :push (h871-pf-select-all))
+               :browser-push-cmd :SELECT-ALL)
               ("clear-selection"
                :label "Clear Selection"
-               :push (h871-pf-clear-selection))
+               :browser-push-cmd :CLEAR-SELECT-LIST)
               ("selection-summary"
                :label "Update Selection Count"
                :push (h871-pf-show-selection-summary))))))
