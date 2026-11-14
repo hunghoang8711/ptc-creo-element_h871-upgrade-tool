@@ -43,3 +43,31 @@ PTC Graphical Browser reference describes `:modeMenu` as a row of buttons displa
 
 ### Runtime verification required
 Reload the updated LISP and confirm a visible "Selection" row with "Select All" and "Clear Selection". Verify Select All highlights every result row and that Apply then operates on the complete selection. Also verify manual multi-row selection still works.
+
+
+## 2026-11-14 – Correct 18.1 browser sizing and move selection controls to UICT
+
+### Evidence from the user's latest screenshot
+- The Select All control is still absent from the Graphical Browser.
+- The first column still occupies most of the window; Density columns are pushed beyond the visible area.
+
+### Important compatibility correction
+- The earlier note that Graphical Browser `:initial-width` is measured in characters was incorrect for the later Browser Views API and is not the right setting to assume for Modeling 18.1.
+- PTC's 20.4 release notes explicitly state that `:sd-browser-define-table` changed the legacy column option `:max-width` to `:initial-width` in that later release. For the user's 18.1 target, use the legacy `:max-width` form instead.
+- The source now sets Part Name / Density Instance / Density Base / Assembly Path max widths to 22 / 8 / 8 / 30. These are target values to validate visually in 18.1, not a confirmed final layout.
+
+### Select All redesign
+- Removed reliance on the unverified `:modeMenu` action row.
+- Added a separate compact UI Construction Toolkit dialog with real Pushbutton controls for Select All and Clear Selection. The button callbacks call the same native Graphical Browser commands already used by the working manual selection / Apply workflow.
+- Retained the browser popup menu as a fallback.
+- UICT Pushbutton and dialog-shell API signatures are documented by PTC in later Integration Kit references; availability and exact compatibility in the user's 18.1 installation still require runtime testing.
+
+### Next runtime test
+Reload the latest source and verify:
+1. A small separate "H871 - SELECTION TOOLS" window appears beside the results browser.
+2. Select All highlights every result row; Apply then acts on all selected Parts.
+3. Clear Selection removes all row highlights.
+4. Part Name, Density Instance, and Density Base columns are visible without excessive horizontal scrolling.
+5. Manual multi-row selection remains functional.
+
+Do not mark the new controls or widths as runtime-passed until the user confirms them.
