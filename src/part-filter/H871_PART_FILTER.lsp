@@ -47,6 +47,14 @@
            parsed))))
     (t nil)))
 
+;; The user verified two native Parts in Modeling 18.1:
+;; UI Instance/Base values 1/304 -> API values 1000/304000,
+;; and UI values 2/400 -> API values 2000/400000.
+;; Normalize API density values to the Part Properties display scale.
+(defun h871-pf-density-display-value (api-value)
+  (when (numberp api-value)
+    (/ api-value 1000.0)))
+
 (defun h871-pf-numeric-equal-p (actual requested)
   (let ((a (h871-pf-as-number actual))
         (b (h871-pf-as-number requested)))
@@ -58,8 +66,12 @@
         (actual-base (sd-inq-part-density part :contents)))
     (and (not (null actual-instance))
          (not (null actual-base))
-         (h871-pf-numeric-equal-p actual-instance requested-instance)
-         (h871-pf-numeric-equal-p actual-base requested-base))))
+         (h871-pf-numeric-equal-p
+           (h871-pf-density-display-value actual-instance)
+           requested-instance)
+         (h871-pf-numeric-equal-p
+           (h871-pf-density-display-value actual-base)
+           requested-base))))
 
 ;; ------------------------------------------------------------
 ;; Filter engine - keep predicates separate from result UI
@@ -81,8 +93,12 @@
                 (type-of actual-base))
           *h871-pf-diagnostic-samples*))
       (when (and
-              (h871-pf-numeric-equal-p actual-instance requested-instance)
-              (h871-pf-numeric-equal-p actual-base requested-base))
+              (h871-pf-numeric-equal-p
+                (h871-pf-density-display-value actual-instance)
+                requested-instance)
+              (h871-pf-numeric-equal-p
+                (h871-pf-density-display-value actual-base)
+                requested-base))
         (push obj matches))))
   (dolist (child (sd-inq-obj-children obj))
     (setf matches
@@ -137,8 +153,10 @@
                   :part part
                   :name (h871-pf-name part)
                   :path path
-                  :instance instance
-                  :base base))))
+                  :instance (h871-pf-density-display-value instance)
+                  :base (h871-pf-density-display-value base)
+                  :instance-api instance
+                  :base-api base))))
     root))
 
 (defun h871-pf-select-all ()
