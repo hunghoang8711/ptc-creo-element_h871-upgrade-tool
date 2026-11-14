@@ -26,3 +26,12 @@
 - **Correction to earlier sizing note:** the statement that the current Graphical Browser column widths were character counts was not adequately supported and is withdrawn. PTC's 20.4 release notes identify `:max-width` as the legacy option and say it was changed to `:initial-width` in 20.4. Modeling 18.1 source should therefore use `:max-width` unless the 18.1 local reference proves otherwise.
 - **Latest source:** uses `:max-width` values 22 / 8 / 8 / 30 and adds a separate UICT dialog with Select All / Clear Selection pushbuttons.
 - **Still unverified:** UICT control creation and column sizing must be tested in Creo 18.1. If the UICT window fails to appear, capture the exact LISP error before changing APIs again.
+
+
+## 2026-11-14 – Unified results-window implementation pending runtime test
+
+- **User requirement:** one window with bottom buttons in this order: Apply, Select All, Clear Selection, Close. Select All must select all rows and immediately execute the Apply hand-off.
+- **Latest source:** removed the separate Selection Tools shell; embeds the Graphical Browser in a resizable host shell using `sd-set-graphical-browser-parent`; adds the four UICT pushbuttons in the host footer.
+- **Select All action:** `:select-all` followed by `:select-and-execute`; this should hand all matched Parts to Modeling without a second Apply click.
+- **Compatibility risk:** the available PTC reference for browser-parent hosting is from a later Integration Kit release than Modeling 18.1. The source checks function availability and reports an error rather than silently opening a second window if the API is unavailable.
+- **Pending runtime checks:** all controls in one window; native table renders inside host; Apply / Select All / Clear Selection / Close; existing row multi-selection and Apply remain intact.
