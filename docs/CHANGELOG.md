@@ -1,122 +1,19 @@
+# Changelog
 
+Concise record of meaningful project milestones. See Git history for individual commits and intermediate experiments.
 
-## 2026-11-14 – Consolidate Part Filter implementation lessons
-- Recorded user-confirmed resolution of the keyword-argument error and working individual row selection.
-- Recorded latest Select All / Clear Selection menu declarations as an implementation awaiting Creo 18.1 confirmation, not as a verified feature.
-- Recorded compact column widths (28 / 13 / 12 / 42 characters) and the important API detail that Graphical Browser `:initial-width` is measured in characters.
-- Recorded repeat-search design: keep Assembly/Density inputs available after each run; create a separate closable results browser for each search.
-- Added verification discipline: distinguish static checks, API-reference assumptions, and user-confirmed runtime tests.
+## 2026-11-14 – Stabilize H871 Part Filter baseline
 
+- Confirmed the dedicated Graphical Browser displays matching Part rows in Creo Elements/Direct Modeling 18.1.
+- Confirmed Select All is available in the Results window.
+- Confirmed individual row selection and native Apply transfer selected Parts to Modeling selection.
+- Restored and retained the standalone Graphical Browser architecture.
+- Removed the custom Apply callback that interfered with native selection hand-off.
+- Corrected status-text keyword arguments using `:value`.
+- Consolidated technical decisions, known issues, lessons, and development history to remove contradictory intermediate UI states.
 
-## 2026-11-14 – Select All visibility follow-up
-- Added a dedicated `:modeMenu` action row containing visible-intent Select All and Clear Selection controls.
-- Bound actions directly to Graphical Browser `:select-all` and `:clear-select-list` commands.
-- Updated popup fallbacks to use `:browser-push-cmd` as shown in PTC Graphical Browser examples.
-- Preserved compact columns and the working manual multi-selection / Apply path.
-- Creo 18.1 runtime visibility and selection test pending.
+## 2026-11-13 – Establish Part Filter foundation
 
-
-## 2026-11-14 – 18.1 compatibility correction and dedicated selection controls
-- Replaced the prior `:modeMenu` attempt with a separate UI Construction Toolkit selection-tools dialog containing Select All and Clear Selection pushbuttons.
-- Switched table column sizing from `:initial-width` to legacy `:max-width` for the Modeling 18.1 target; set max widths to 22 / 8 / 8 / 30.
-- Preserved the native browser row selection and Apply workflow.
-- Runtime validation in Creo 18.1 is pending.
-
-
-## 2026-11-14 – Single-window Part Filter controls
-- Removed the separate Selection Tools dialog.
-- Added a resizable host shell with the Graphical Browser embedded in its browser area.
-- Added a unified footer ordered Apply, Select All, Clear Selection, Close.
-- Select All now runs `:select-all` then `:select-and-execute` so the complete result set is handed to Modeling immediately.
-- Clear Selection only clears browser row selection.
-- Modeling 18.1 compatibility and runtime behavior remain pending user verification.
-
-
-## 2026-11-14 – Browser embedding diagnostics
-- Added runtime diagnostics for `sd-set-graphical-browser-parent` failure.
-- Reports whether the browser, dialog shell, host grid, and nested browser-parent grid exist, plus browser docked state.
-- Diagnostic runs before cleanup; no functional fix is claimed yet.
-
-
-## 2026-11-14 – Corrected unified results dialog hierarchy
-- Create root resizable grid area under the dialog shell's automatic `-AA` client area.
-- Create the browser grid as a child of the root grid.
-- Footer buttons remain in the root grid beside the browser area.
-- Fix addresses the confirmed missing-parent defect; runtime test pending.
-
-
-## 2026-11-14 – Results-window stage diagnostics
-- Replaced the generic unified-window creation error with a numbered diagnostic for each UICT creation step.
-- Isolated checks for dialog shell, root grid, browser child grid, and each footer button.
-- Removed duplicate generic error reporting.
-- No change to Density matching or Graphical Browser parenting behavior; Creo 18.1 runtime diagnosis pending.
-
- 
-## 2026-11-14 – Roll back unified results-window regression
-
-### User report
-After merging Apply / Select All / Clear Selection / Close into one window, searches that find Parts no longer open the results UI. The no-match path still works.
-
-### History comparison
-- Last known-good standalone browser source: commit `3e9f3c1`, blob `2d65e613708e8ef8721c5cd58c50d950b89488b3`.
-- The standalone implementation creates the Graphical Browser, defines the BOM table, calls `sd-browser-set-active-table`, switches to table mode, then calls `sd-show-graphical-browser`.
-- The unified-window implementation introduced a host dialog/grid hierarchy and the additional `sd-set-graphical-browser-parent` call. This path was not present in the known-good source and is the regression boundary.
-- The Density collector and result-tree construction are retained from the known-good source.
-
-### Rollback
-Restored the complete LISP source to the exact known-good standalone-browser implementation from `3e9f3c1`. This intentionally prioritizes restoring the working results browser and manual row selection / Apply flow over the unverified single-window footer.
-
-### Runtime verification
-- Static source restored from the historical Git blob.
-- User must reload this version and confirm the results browser opens again for a matching Assembly.
-- Select All / Clear Selection visibility remains a separate unresolved enhancement; do not reintroduce browser-parent hosting until a Modeling 18.1-compatible method is proven.
-
- 
-## 2026-11-14 – Standalone Select All tool restored
-
-- Added a compact separate UICT Selection Tools window with a single Select All pushbutton.
-- Reused the previously tested UICT dialog/grid/pushbutton construction pattern from revision `c06f5b8`.
-- Removed Clear Selection from the current UI.
-- Preserved the standalone Graphical Browser and its existing manual selection / Apply workflow; did not reintroduce browser embedding.
-- Static LISP checks passed. Creo 18.1 runtime verification is pending.
-
- 
-## 2026-11-14 – Select All placed in Filter Results window
-
-- Removed the separate Selection Tools dialog.
-- Added a native Graphical Browser **Select All** button in the Results window using its abort-button label/action slot.
-- Kept the native OK/Apply action and standalone browser creation path.
-- Did not reintroduce Graphical Browser parent embedding.
-- Static checks passed; Creo 18.1 runtime verification is pending.
-
-
-## 2026-11-14 – Independent Apply / Select All footer buttons
-- Replaced Graphical Browser Abort-button reuse with two independent UICT pushbuttons in one host window.
-- Apply transfers selected rows through `:select-and-execute`; Select All selects every result row and keeps the window open.
-- Browser is instantiated before reparenting into the host's resizable browser area.
-- Added stage-specific diagnostics and standalone-browser fallback.
-- Static checks pass; Creo 18.1 runtime verification is pending.
-
-
-## 2026-11-14 – Part Filter Results footer restored without host embedding
-
-- Restored the last known-good standalone Graphical Browser architecture.
-- Added native **Apply** and **Select All** footer labels/actions to the same browser.
-- Removed the oversized host Dialog Shell and browser reparenting.
-- Apply now performs the existing selection hand-off and re-shows the Results Browser.
-- Creo 18.1 runtime verification is pending.
-
-
-## 2026-11-14 – Part Filter: restore native Apply action
-
-- Removed the custom Apply callback that immediately reopened the Results Browser after :select-and-execute.
-- The visible Apply button now uses Creo Graphical Browser's native default OK action.
-- Select All and the standalone result table are retained.
-- Creo 18.1 runtime retest is pending; row selection and Apply are not yet marked fixed.
-
-
-## 2026-11-14 – Part Filter selection workflow verified
-
-- User confirmed in Creo Elements/Direct Modeling 18.1 that clicking a Part row selects it and Apply correctly transfers selected Parts to Modeling selection.
-- The native Graphical Browser Apply action is retained; the custom Apply callback remains removed.
-- The row-selection / Apply regression is resolved.
+- Added the initial Part property/Density investigation and diagnostic source.
+- Implemented an exact Density Instance + Density Base search path.
+- Added a BOM-like Graphical Browser result table with Part name, Density values, and Assembly path.
