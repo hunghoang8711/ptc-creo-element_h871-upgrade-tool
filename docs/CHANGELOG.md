@@ -14,3 +14,10 @@
 - Updated popup fallbacks to use `:browser-push-cmd` as shown in PTC Graphical Browser examples.
 - Preserved compact columns and the working manual multi-selection / Apply path.
 - Creo 18.1 runtime visibility and selection test pending.
+
+
+## 2026-11-14 – 18.1 compatibility correction and dedicated selection controls
+- Replaced the prior `:modeMenu` attempt with a separate UI Construction Toolkit selection-tools dialog containing Select All and Clear Selection pushbuttons.
+- Switched table column sizing from `:initial-width` to legacy `:max-width` for the Modeling 18.1 target; set max widths to 22 / 8 / 8 / 30.
+- Preserved the native browser row selection and Apply workflow.
+- Runtime validation in Creo 18.1 is pending.
