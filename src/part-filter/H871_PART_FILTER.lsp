@@ -287,9 +287,15 @@
       (dolist (part matches)
         (format s "~%PART: ~A~%" (h871-pf-name part))
         (format s "PATH: ~A~%" (h871-pf-path part))
-        (format s "DENSITY INSTANCE: ~A~%"
+        (format s "DENSITY INSTANCE (Part Properties scale): ~A~%"
+          (h871-pf-density-display-value
+            (sd-inq-part-density part :instance)))
+        (format s "DENSITY BASE (Part Properties scale): ~A~%"
+          (h871-pf-density-display-value
+            (sd-inq-part-density part :contents)))
+        (format s "DENSITY INSTANCE (raw API): ~A~%"
           (sd-inq-part-density part :instance))
-        (format s "DENSITY BASE: ~A~%"
+        (format s "DENSITY BASE (raw API): ~A~%"
           (sd-inq-part-density part :contents))))
     report))
 
