@@ -106,3 +106,12 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Browser embedding still depends on `sd-set-graphical-browser-parent` succeeding in Creo Elements/Direct Modeling 18.1.
 - Browser is shown before parent assignment. If embedding fails, a numbered diagnostic is displayed and the standalone browser is restored.
 - Do not mark the unified window as working until the user confirms one-window display, adjacent buttons, Select All behavior, Apply hand-off, and normal close behavior.
+
+
+## 2026-11-14 – Part Filter native footer runtime check pending
+
+- The oversized host-shell implementation has been removed from the current source.
+- Current source is based on the standalone Results Browser that previously displayed the result rows correctly.
+- Apply and Select All now use the Graphical Browser's native footer slots; Apply explicitly re-shows the browser after selection hand-off.
+- Pending Creo 18.1 checks: footer button order/placement, Select All without closing, Apply hand-off followed by browser restoration, and normal close.
+- The previous host-shell / browser-reparenting limitation is no longer part of the current implementation.
