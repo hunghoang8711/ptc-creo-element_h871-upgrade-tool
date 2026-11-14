@@ -200,7 +200,7 @@ This file records chronological development work. Major features receive their o
 
 ### Findings
 - Lisp numeric `=` already treats numeric 1 and 1.0 as equal. Numeric formatting alone is not a sufficient explanation.
-- PTC public Modeling 20.8 release notes indicate that separate Density values on Part Instance and Contents, and the `:instance` / `:contents` inquiry kind for `sd-inq-part-density`, were introduced in 20.8. This is a serious compatibility concern for the project's Modeling 18.1 target.
+- PTC's public Integration Kit documentation describes the density inquiry kinds; runtime behavior and returned values must be measured on the user's installed Modeling 18.1 build.
 - The actual 18.1 data source must be inspected before another production matcher change is justified.
 
 ### Source changes
@@ -220,3 +220,18 @@ This file records chronological development work. Major features receive their o
 
 ### Next engineering decision
 - Identify the actual 18.1 property/attribute source from the diagnostic before changing the production filter again.
+
+
+## 2026-11-14 – Fix density diagnostic unexpected end of input
+
+### User-reported error
+- Creo reported `Unexpected end of #<input stream ... H871_DENSITY_DIAG.lsp>` while loading the diagnostic.
+
+### Root cause and fix
+- Static parenthesis validation found one missing closing parenthesis at the end of `h871-density-diag-write-attributes`.
+- Added the missing close parenthesis in `src/part-filter/H871_DENSITY_DIAG.lsp`.
+
+### Verification
+- Full-file static scan: balanced parentheses (balance 0), no negative nesting, and no unterminated strings.
+- GitHub update committed successfully.
+- Creo 18.1 load/run: not yet tested; user should reload the corrected file and run the diagnostic.
