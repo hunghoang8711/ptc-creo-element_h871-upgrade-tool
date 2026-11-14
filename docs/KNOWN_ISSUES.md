@@ -91,3 +91,11 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - The button calls the existing Graphical Browser `:select-all` command. The Results Browser remains standalone; browser-parent embedding is not used.
 - **Static checks passed:** balanced parentheses, closed strings, no browser-parent API, and one Select All pushbutton.
 - **Pending runtime test:** verify the tool window appears, Select All highlights every row, and Apply transfers the complete selection. Do not treat static validation as Creo runtime verification.
+
+ 
+## 2026-11-14 – Select All moved into Filter Results window
+
+- Separate Selection Tools window has been removed in response to the user's correction.
+- Current source uses the Graphical Browser's native `:abortButtonLabel "Select All"` and `:abortButtonAction` to expose the action in the same Results window, while preserving the native OK/Apply action.
+- This avoids browser-parent embedding and keeps the standalone browser architecture.
+- **Pending Creo 18.1 runtime verification:** confirm button placement, selection behavior, browser remains open after Select All, Apply, and normal close behavior. PTC reference consulted is for a later release, so do not assume compatibility before testing.
