@@ -46,3 +46,13 @@
 - **Source correction:** both status-bar updates now pass `:value <string>`.
 - **Related UI changes:** added toolbar buttons for Select All and Clear Selection; kept the Assembly and Density input dialog active after a search using `sd-return-from-ok-action`.
 - **Runtime status:** pending user test in Modeling 18.1. The API reference consulted is for a later Integration Kit release; compatibility of the added toolbar/deferred-dialog behavior must be confirmed in the user's 18.1 installation.
+
+
+## 2026-11-14 – Result browser Select All visibility and oversized columns
+
+- **User-confirmed:** the earlier keyword-argument error is gone.
+- **Remaining symptom:** no visible Select All action in the Part Filter Results browser; Instance and Base columns are positioned too far to the right.
+- **Cause of oversized columns:** PTC Graphical Browser `:initial-width` is measured in character counts, not pixels. The previous widths (190 / 110 / 100 / 360) were therefore excessive.
+- **Source update:** reduced widths to 28 / 13 / 12 / 42 characters for Part Name / Density Instance / Density Base / Assembly Path, and reduced browser max width to 900.
+- **Selection controls:** changed the button-menu callbacks to named functions and set `:buttonMenuOffObjectOnly nil` to avoid limiting menu visibility to blank-space clicks.
+- **Pending:** verify the actual toolbar/button visibility and Select All behavior in Creo 18.1. If the button row is still not visible, implement a separate always-visible control in a supported browser UI surface rather than relying on the compatibility menu mapping.
