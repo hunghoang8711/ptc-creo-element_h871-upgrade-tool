@@ -2,33 +2,26 @@
 
 **Last updated:** 2026-11-14  
 **Target application:** PTC Creo Elements/Direct Modeling 18.1  
-**Current phase:** Part Filter ver-02 mapped-choice dialog candidate; awaiting user runtime test.
+**Current phase:** ver-03 independent multi-search Results Browser candidate; awaiting Modeling 18.1 runtime test.
 
 ## 1. Product goal
 
-Develop an advanced Part-filtering tool for Creo Elements/Direct Modeling. The long-term direction is to search Parts by model properties and return real selectable model objects, not merely generate a text report.
+Develop an advanced Part-filtering tool that searches Parts by model properties and returns real selectable model objects. Keep property-reading/filter logic independent from Results Browser presentation.
 
-Keep property-reading/filter logic separate from the Results Browser so additional properties and conditions can be introduced without replacing the working selection interface.
+## 2. Confirmed baseline
 
-## 2. Confirmed ver-01 baseline
+User-confirmed in Modeling 18.1:
+- Results Browser displays matching Part rows.
+- Individual rows can be selected.
+- Select All works.
+- Native Apply transfers selected Parts to Modeling selection.
+- ver-02 mapped-choice dialog produced a very good result in the user's test.
 
-The user has confirmed the following in Modeling 18.1:
+Preserve the standalone Graphical Browser and native Apply behavior. Do not reintroduce the failed unified host-shell/browser-reparenting approach or override native Apply with a callback.
 
-- The Filter Results Graphical Browser opens and displays matching Part rows.
-- Select All is available in the Results window.
-- Clicking an individual Part row selects that result.
-- Native Apply transfers the selected Part(s) to Creo Modeling selection.
-
-**Regression boundary:** preserve the standalone Graphical Browser architecture, native row-selection behavior, Select All action, and native default Apply hand-off. Do not replace native Apply with a custom callback that immediately reopens the browser. Do not reintroduce the failed unified host-shell/browser-reparenting architecture.
-
-Confirmed ver-01 source: `src/part-filter/H871_PART_FILTER.lsp` (unchanged).
-
-## 3. ver-02 intended dialog and mapping
-
-ver-02 replaces the numeric Density Instance/Base input fields with fixed user-facing choices. It does not add Material-property retrieval. It maps the selected convention codes onto the same Density properties used by ver-01.
+## 3. Filter conventions
 
 ### Machining Process → Density Instance
-
 | Display label | Numeric code |
 |---|---:|
 | CNC | 1 |
@@ -37,7 +30,6 @@ ver-02 replaces the numeric Density Instance/Base input fields with fixed user-f
 | COVER | 4 |
 
 ### Material → Density Base
-
 | Display label | Numeric code |
 |---|---:|
 | A6061 | 6061 |
@@ -50,41 +42,47 @@ ver-02 replaces the numeric Density Instance/Base input fields with fixed user-f
 | MIKA | 40 |
 | PU | 50 |
 
-- The corresponding code fields use Dialog Generator `:display-only`; users cannot edit them. In the standard parallel-dialog layout they appear as separate rows after their selectors, not on the same row to the right. A custom same-row layout is deferred until a compatible Modeling 18.1 method is verified.
-- The selected range values are numeric and are passed directly to `h871-pf-run`.
-- Default selection is CNC + SUS304, preserving the previous 1/304 default.
-- To revise conventions, edit the `:range` mappings in the ver-02 source.
-- The existing Density normalization (/1000), exact-pair matching, report, Results Browser, and native Apply code are retained.
+The selected numeric codes are passed to the existing exact Density Instance + Density Base matcher. This is a user-defined mapping, not actual Material-property retrieval. Default is CNC + SUS304 (1/304).
 
-**ver-02 source:** `src/part-filter/H871_PART_FILTER_VER_02.lsp`  
-**Command:** `H871_PART_FILTER_VER_02`  
-**Status:** source implemented and statically inspected; not yet loaded or tested in Modeling 18.1.
+## 4. ver-03 independent search sessions
 
-## 4. Results Browser baseline and deferred multi-tab idea
+Source: `src/part-filter/H871_PART_FILTER_VER_03.lsp`  
+Command: `H871_PART_FILTER_VER_03`
 
-The current ver-02 candidate still uses the existing single Results Browser behavior. A later feature should create independent search sessions and present them as browser-like tabs (e.g. SUS304-CNC). Each session must own its results data, Browser name, and Browser Tree. This idea is recorded for later; do not mix it into the ver-02 dialog change.
+Intended behavior:
+- Every successful search creates a new session; previous sessions are not destroyed or overwritten.
+- Each session has a unique Browser name and Browser Tree name.
+- Each session stores its own matched Part list, Assembly, filter values and diagnostic samples.
+- The tab label is derived from Material + Machining Process, e.g. `SUS304-CNC`. Repeated identical searches receive a unique suffix.
+- Select All, Clear Selection and selection summary actions target the Browser that owns the action.
+- Native Apply is intentionally left as the Graphical Browser default action; each Browser should hand off only its own selected rows.
+- Closing/hiding a Browser should not destroy other sessions.
 
-## 5. Source of truth
+Implementation notes:
+- Tree update callback routing currently uses `:update-args` to pass the Browser name.
+- Docked-tab creation uses `:createAsTab t` and `:tabname`.
+- These signatures are documented in later PTC Integration Kit references, not yet confirmed in Modeling 18.1. Treat ver-03 as a compatibility candidate.
 
-- Confirmed ver-01: `src/part-filter/H871_PART_FILTER.lsp`
-- ver-02 candidate: `src/part-filter/H871_PART_FILTER_VER_02.lsp`
-- Diagnostic baseline: `src/part-filter/H871_PART_FILTER_DIAG.lsp`
+## 5. Source roles
 
-Inspect the exact source before editing. Documentation records intent and evidence; source plus user runtime confirmation determine actual behavior.
+- `src/part-filter/H871_PART_FILTER.lsp` – confirmed ver-01 numeric baseline.
+- `src/part-filter/H871_PART_FILTER_VER_02.lsp` – user-confirmed mapped-choice dialog.
+- `src/part-filter/H871_PART_FILTER_VER_03.lsp` – multi-session/tab candidate.
+- `src/part-filter/H871_PART_FILTER_DIAG.lsp` – diagnostic baseline.
 
-## 6. Verification gaps
+## 6. ver-03 test plan
 
-- ver-02 `:range` labels, numeric values, `:after-input` synchronization and `:display-only` fields must be tested in Modeling 18.1.
-- Search tests must verify that CNC/SUS304 finds the same Parts as the previous numeric 1/304 search, and each other mapping passes the expected numeric pair.
-- The mapping is a user convention, not proof that the model's actual Material property has been read.
-- Material-property retrieval remains unverified.
-- Multi-session/multi-tab Results Browser behavior is deferred and not implemented.
+1. Load ver-03 and run `H871_PART_FILTER_VER_03`.
+2. Search SUS304-CNC; confirm one tab appears with the expected Parts.
+3. Change choices and search a different combination; confirm a second tab appears and the first result list remains unchanged.
+4. Switch between tabs; verify each tab shows only its own Part list.
+5. In the first tab, select one row and Apply; verify only that Part is transferred.
+6. In the second tab, use Select All and Apply; verify only that session's Parts are transferred.
+7. Repeat the same search; verify a unique tab label is generated and neither earlier session is overwritten.
+8. Hide/close one tab and verify the others remain available.
+9. Search with no matches; verify no empty Results Browser tab is created.
+10. Retest the ver-02 mapping dialog defaults and selection updates.
 
-## 7. Required development approach
+## 7. Verification terminology
 
-1. Load ver-02 in Modeling 18.1 and verify the dialog opens.
-2. Change each selection and verify its corresponding code field updates and cannot be edited.
-3. Run CNC + SUS304 and compare results with ver-01 numeric 1/304.
-4. Test at least one other process and material combination.
-5. Regression-test result rows, Select All, individual selection, and native Apply.
-6. Record exact user-observed results and update documentation.
+Static delimiter checks are not a Lisp compile or Creo runtime test. API references from later releases do not prove Modeling 18.1 compatibility. Record source/static checks separately from load, functional and regression tests.
