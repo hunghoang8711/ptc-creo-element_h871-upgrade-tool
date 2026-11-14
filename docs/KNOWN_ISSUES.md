@@ -25,8 +25,8 @@ Only unresolved or unverified items belong here. Remove an item when it is resol
 ## KI-005 – ver-02 dialog compatibility in Modeling 18.1
 
 - **Status:** Awaiting runtime test.
-- **Details:** ver-02 uses numeric `:range` choices with `:label`, `:after-input` synchronization, and `:display-only` code fields. The implementation follows the Dialog Generator pattern documented by PTC, but the available references are for later releases.
-- **Next step:** Load `H871_PART_FILTER_VER_02.lsp` in Modeling 18.1. Confirm dialog creation, default CNC/SUS304 values, code-field updates, non-editability, and numeric values passed to the search function.
+- **Details:** ver-02 uses numeric `:range` choices with `:label`, `:after-input` synchronization, and `:display-only` code fields. The implementation follows the Dialog Generator pattern documented by PTC, but the available references are for later releases. The code fields currently occupy separate rows after the selectors; same-row right-side placement is not yet implemented.
+- **Next step:** Load `H871_PART_FILTER_VER_02.lsp` in Modeling 18.1. Confirm dialog creation, default CNC/SUS304 values, code-field updates, non-editability, and numeric values passed to the search function. Then assess a compatible same-row layout for the selector and its code field.
 
 ## KI-006 – Independent search sessions / browser tabs
 
