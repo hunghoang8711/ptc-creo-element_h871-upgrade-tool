@@ -141,3 +141,31 @@ The previous implementation created the dialog shell, whose client area is autom
 ### Verification
 - Source structure statically checked after patch.
 - This corrects a definite parent/child construction error. Runtime embedding still needs confirmation in Modeling 18.1.
+
+
+## 2026-11-14 – Isolate unified results-window creation failure
+
+### Latest user runtime result
+The user reports that searches with no matching Parts still display the normal "not found" message, but searches with matching Parts now stop with:
+`H871: Could not create the unified results window.`
+
+This places the failure after the filter has found matches and entered the results UI creation path. It does not prove the density filter is failing.
+
+### Diagnostic source change
+- Replaced the single generic host-window failure with stage-specific errors.
+- The next Creo run will identify one of these stages:
+  1. API availability check
+  2. Create dialog shell
+  3. Create root grid under the automatic `-AA` client area
+  4. Create browser child grid
+  5. Create Apply button
+  6. Create Select All button
+  7. Create Clear Selection button
+  8. Create Close button
+- Removed the duplicate generic error so the user sees the exact failing stage.
+- No speculative change was made to the Density matching algorithm or browser-parent API.
+
+### Static validation and runtime boundary
+- Parenthesis balance: 0.
+- This patch improves fault localization only; it does not claim the host window is fixed.
+- Runtime verification is pending the exact stage message from Creo 18.1.
