@@ -96,3 +96,12 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Browser is instantiated before reparenting into the host's resizable browser area.
 - Added stage-specific diagnostics and standalone-browser fallback.
 - Static checks pass; Creo 18.1 runtime verification is pending.
+
+
+## 2026-11-14 – Part Filter Results footer restored without host embedding
+
+- Restored the last known-good standalone Graphical Browser architecture.
+- Added native **Apply** and **Select All** footer labels/actions to the same browser.
+- Removed the oversized host Dialog Shell and browser reparenting.
+- Apply now performs the existing selection hand-off and re-shows the Results Browser.
+- Creo 18.1 runtime verification is pending.
