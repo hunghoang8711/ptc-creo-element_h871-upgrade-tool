@@ -127,3 +127,14 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Static source restored from the historical Git blob.
 - User must reload this version and confirm the results browser opens again for a matching Assembly.
 - Select All / Clear Selection visibility remains a separate unresolved enhancement; do not reintroduce browser-parent hosting until a Modeling 18.1-compatible method is proven.
+
+ 
+## 2026-11-14 – Current Part Filter Select All implementation
+
+- User confirms the standalone Part Filter Results Browser works normally again after rollback.
+- Current source commit: `e8c818a38592134a47550b879e66a18349e48ccb`.
+- Added a compact separate UICT window, **H871 - SELECTION TOOLS**, with only one **Select All** button.
+- Reused the prior UICT pattern from revision `c06f5b8`; button callback calls `h871-pf-select-all` and native browser command `:select-all`.
+- Clear Selection has been removed.
+- Important: preserve the standalone Graphical Browser. Do not reintroduce `sd-set-graphical-browser-parent` or a unified host shell; that architecture previously caused matching searches to fail.
+- Static source checks pass. Await user runtime confirmation that the Selection Tools window appears, Select All selects all rows, and Apply hands off the full selection.
