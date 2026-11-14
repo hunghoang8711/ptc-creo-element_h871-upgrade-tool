@@ -167,3 +167,12 @@ Static source checks pass. Runtime behavior is still unverified in Creo Elements
 - Apply uses the established `:select-and-execute` selection hand-off, then re-shows the Results Browser to allow repeated operations.
 - No host shell, browser child grid, or `sd-set-graphical-browser-parent` remains.
 - Static source checks pass; user runtime verification in Creo Elements/Direct Modeling 18.1 is still pending.
+
+
+## 2026-11-14 – Part Filter Apply regression correction
+
+The user reported that the Results Browser displays its Part list and Select All button, but manual row selection and Apply no longer work. History review found that the latest source had overridden the Graphical Browser's native OK action with a custom callback that ran :select-and-execute and immediately reopened the browser. The source now removes that callback and preserves the visible Apply label so Creo's native default OK action handles selection hand-off. Select All and the standalone browser are unchanged.
+
+Source commit: ba2da0d72d29a53e36d4587a1b5abea3d9331c88.
+
+Static checks only. User must retest in Creo Elements/Direct Modeling 18.1. Manual row selection is still an open issue until explicitly confirmed.
