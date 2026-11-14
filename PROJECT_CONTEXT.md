@@ -50,7 +50,7 @@ ver-02 replaces the numeric Density Instance/Base input fields with fixed user-f
 | MIKA | 40 |
 | PU | 50 |
 
-- The two adjacent code fields use Dialog Generator `:display-only`; users cannot edit them.
+- The corresponding code fields use Dialog Generator `:display-only`; users cannot edit them. In the standard parallel-dialog layout they appear as separate rows after their selectors, not on the same row to the right. A custom same-row layout is deferred until a compatible Modeling 18.1 method is verified.
 - The selected range values are numeric and are passed directly to `h871-pf-run`.
 - Default selection is CNC + SUS304, preserving the previous 1/304 default.
 - To revise conventions, edit the `:range` mappings in the ver-02 source.
