@@ -57,3 +57,12 @@ Notable repository changes. Detailed implementation and test evidence lives in `
 - Added API availability checks and selected Part type/predicate information.
 - Recorded the 18.1 compatibility investigation: PTC documents the optional density `:kind` interface in later documentation, so the legacy one-argument call must be tested independently.
 - Creo 18.1 rerun remains pending.
+
+
+## 2026-11-14 – Isolated Density API test for Modeling 18.1
+
+- Added `src/part-filter/H871_DENSITY_API_TEST.lsp` with two independent dialogs to test `sd-inq-part-p` and the legacy one-argument `sd-inq-part-density` call.
+- Removed the invalid `SEL_ITEM-P` test instruction; that symbol is undefined in the user's installation.
+- Avoided direct Lisp expressions in the User Input Line and removed the previous diagnostic's generic `IGNORE-ERRORS` / `FUNCALL` wrapper from the isolated tests.
+- Static parenthesis/string validation passed.
+- File loading and API execution in Creo 18.1 are pending user verification.
