@@ -4,7 +4,9 @@ Version-controlled engineering workspace for custom tools targeting **PTC Creo E
 
 ## Current focus
 
-**H871 Part Filter ver-02 – mapped machining-process and material selection UI.**
+**H871 Part Filter ver-03 – independent multi-search Results Browser sessions (candidate).**
+
+ver-02's mapped Machining Process/Material dialog has now been user-confirmed as working in Creo Elements/Direct Modeling 18.1. ver-03 builds on that behavior and creates a separate Browser + Browser Tree for each successful search, with a tab label such as `SUS304-CNC`.
 
 The ver-02 candidate preserves the user-confirmed ver-01 filter engine and Results Browser behavior. Its dialog replaces the two numeric density inputs with fixed choices:
 
@@ -13,13 +15,14 @@ The ver-02 candidate preserves the user-confirmed ver-01 filter engine and Resul
 
 The selected numeric codes are still passed to the existing exact Density Instance + Density Base search. The corresponding code fields are display-only. The standard dialog currently places them in separate rows; a right-side same-row layout is deferred pending 18.1 UI verification. The default selection remains CNC + SUS304 (1/304).
 
-**Important:** ver-02 source has been added on the feature branch but has not yet been loaded or functionally tested in Modeling 18.1. The confirmed ver-01 source remains unchanged on `main`.
+**Verification boundary:** ver-01 and ver-02 behavior has been user-confirmed. ver-03 is a new compatibility candidate; its session isolation, tab docking, row selection and native Apply still require testing in Modeling 18.1.
 
 ## Repository map
 
 - `PROJECT_CONTEXT.md` – current state, mappings, verification and next steps.
 - `src/part-filter/H871_PART_FILTER.lsp` – confirmed ver-01 baseline.
-- `src/part-filter/H871_PART_FILTER_VER_02.lsp` – ver-02 mapped-choice candidate.
+- `src/part-filter/H871_PART_FILTER_VER_02.lsp` – user-confirmed mapped-choice dialog.
+- `src/part-filter/H871_PART_FILTER_VER_03.lsp` – independent Browser/Tree sessions and docked-tab candidate.
 - `src/part-filter/H871_PART_FILTER_DIAG.lsp` – preserved diagnostic baseline.
 - `docs/TECHNICAL_DECISIONS.md` – active technical decisions.
 - `docs/KNOWN_ISSUES.md` – unresolved or unverified items.
@@ -50,7 +53,7 @@ The selected numeric codes are still passed to the existing exact Density Instan
 
 ## Deferred UI direction
 
-Preserve the user's next-stage idea: each search should create an independent result session, with multiple result sets available as browser-like tabs (for example, a material/process tab named SUS304-CNC). Do not implement this as part of ver-02; first validate the mapped filter dialog.
+Current ver-03 candidate implements one independent session per successful search. Each session owns its result list, Browser name, Tree name and tab label. Tab docking uses `:createAsTab` / `:tabname`; update callback routing uses `:update-args`. These documented options were found in later PTC Integration Kit references, so Modeling 18.1 compatibility must be verified at runtime.
 
 ## Start a new development session
 
