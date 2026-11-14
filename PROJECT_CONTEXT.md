@@ -27,3 +27,19 @@ Confirm Select All and Clear Selection visibility/functionality, compact column 
 ## 2026-11-14 – Select All visibility implementation update
 
 The user confirms compact result columns and working manual multi-row selection followed by Apply. Select All remains absent from the visible result browser. The latest source therefore adds a dedicated `:modeMenu` row labelled "Selection" with Select All and Clear Selection buttons, calling native browser commands directly. The popup fallback uses PTC's documented `:browser-push-cmd` syntax. Preserve the working table and Apply behavior. This change is not runtime-confirmed: test button visibility, Select All, Clear Selection, and Apply in Creo Elements/Direct Modeling 18.1 before marking complete.
+
+
+## 2026-11-14 – Part Filter screenshot follow-up and compatibility correction
+
+The user's latest screenshot confirms Select All is still not visible and the first table column still pushes Density beyond the visible area.
+
+### Latest source update
+- Removed the `:modeMenu` dependency.
+- Added a separate UICT dialog, "H871 - SELECTION TOOLS", with Select All and Clear Selection pushbuttons calling native Graphical Browser selection commands.
+- Changed column sizing to the legacy `:max-width` option for the Modeling 18.1 target; current values are Part Name 22, Density Instance 8, Density Base 8, Assembly Path 30.
+
+### Corrected documentation lesson
+Do not describe the old `:max-width` sizing option as character-based. PTC's 20.4 release notes say `:max-width` was changed to `:initial-width` in that later release. For the 18.1 target, the legacy keyword is the appropriate compatibility candidate.
+
+### Verification status
+The user's manual multi-row selection and Apply workflow remains confirmed. The new UICT dialog and reduced column widths are implementation changes only; test them in Creo 18.1 before marking complete.
