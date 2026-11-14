@@ -39,11 +39,11 @@
     ((stringp value)
      (let ((*read-eval* nil))
        (multiple-value-bind (parsed position)
-           (ignore-errors (read-from-string (string-trim '(#\\Space #\\Tab #\\Newline) value) nil nil))
+           (ignore-errors (read-from-string (string-trim '(#\Space #\Tab #\Newline) value) nil nil))
          (when (and (numberp parsed)
                     (integerp position)
                     (= position
-                       (length (string-trim '(#\\Space #\\Tab #\\Newline) value))))
+                       (length (string-trim '(#\Space #\Tab #\Newline) value))))
            parsed))))
     (t nil)))
 
