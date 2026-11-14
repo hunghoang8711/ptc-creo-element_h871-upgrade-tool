@@ -5,7 +5,7 @@
 ;; Search: exact Density Instance + Density Base pair.
 ;; Results: dedicated Graphical Browser with BOM-like table.
 ;; Row selection: native Graphical Browser selection state.
-;; Select All: native Graphical Browser button in the Results window.
+;; Select All: dedicated UICT footer pushbutton beside Apply in one host window.
 ;;
 ;; IMPORTANT:
 ;; Graphical Browser APIs are documented in later PTC Integration
