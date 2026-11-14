@@ -82,3 +82,12 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Static source restored from the historical Git blob.
 - User must reload this version and confirm the results browser opens again for a matching Assembly.
 - Select All / Clear Selection visibility remains a separate unresolved enhancement; do not reintroduce browser-parent hosting until a Modeling 18.1-compatible method is proven.
+
+ 
+## 2026-11-14 – Select All button reintroduced without changing Results Browser architecture
+
+- **User-confirmed baseline:** the standalone Results Browser works normally again after rollback.
+- **Current implementation:** a compact separate UICT window contains one Select All button; Clear Selection has been omitted.
+- The button calls the existing Graphical Browser `:select-all` command. The Results Browser remains standalone; browser-parent embedding is not used.
+- **Static checks passed:** balanced parentheses, closed strings, no browser-parent API, and one Select All pushbutton.
+- **Pending runtime test:** verify the tool window appears, Select All highlights every row, and Apply transfers the complete selection. Do not treat static validation as Creo runtime verification.
