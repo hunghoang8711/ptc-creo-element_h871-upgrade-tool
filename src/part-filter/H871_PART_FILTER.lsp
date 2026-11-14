@@ -214,6 +214,18 @@
       :margin 0 :spacing 0 :cellSize 1,1)
     (return-from h871-pf-create-results-host nil))
 
+  ;; A dialog shell automatically creates its client area
+  ;; "<basename>-AA". Create the root resizable grid area inside it
+  ;; before creating any child grid areas or pushbuttons.
+  (unless
+    (sd-create-resizable-grid-area
+      *h871-pf-host-area*
+      (concatenate 'string *h871-pf-host-shell* "-AA")
+      :x 0 :y 0 :width 640 :height 430
+      :cellSize 1,1 :margin 0 :spacing 0)
+    (sd-destroy-dialog-shell *h871-pf-host-shell*)
+    (return-from h871-pf-create-results-host nil))
+
   (unless
     (sd-create-resizable-grid-area
       *h871-pf-browser-area*
