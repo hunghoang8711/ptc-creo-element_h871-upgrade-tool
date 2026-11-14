@@ -123,3 +123,21 @@ The user tested the unified host-window implementation and received:
 
 ### Next test
 Load the latest source and run the same search once. Send the complete `H871 EMBED DIAGNOSTIC` message. Use those exact flags to identify whether the failure is due to a missing UI object or browser docking/parent state before changing the parenting call.
+
+
+## 2026-11-14 – Fix missing root grid area in unified results dialog
+
+### Root cause confirmed by source inspection
+The previous implementation created the dialog shell, whose client area is automatically named `H871-PF-RESULTS-AA`, but attempted to create `H871-PF-BROWSER-RG` with `H871-PF-RESULTS-RG` as its parent before creating that parent. Therefore the required UI hierarchy was incomplete, explaining the browser-parent failure.
+
+### Corrected hierarchy
+- Dialog shell: `H871-PF-RESULTS-DS`
+- Automatic client area: `H871-PF-RESULTS-AA`
+- Root resizable grid area: `H871-PF-RESULTS-RG`, parent = `H871-PF-RESULTS-AA`
+- Browser resizable grid area: `H871-PF-BROWSER-RG`, parent = `H871-PF-RESULTS-RG`
+- Footer Pushbuttons remain children of the root resizable grid area.
+- Graphical Browser parent remains `H871-PF-BROWSER-RG`, dialog basename remains `H871-PF-RESULTS`.
+
+### Verification
+- Source structure statically checked after patch.
+- This corrects a definite parent/child construction error. Runtime embedding still needs confirmation in Modeling 18.1.
