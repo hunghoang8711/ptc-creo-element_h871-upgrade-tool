@@ -25,3 +25,9 @@
 - **Combined evidence:** first Part UI 1/304 maps to API 1000/304000; second Part UI 2/400 maps to API 2000/400000. Both independently establish a 1000:1 scale relationship for both fields.
 - **Status:** empirically confirmed on two native Parts. The source now normalizes API values by dividing by 1000.0 before exact matching and displays normalized values in the result table/report while retaining raw values in diagnostics.
 - **Remaining risk:** complete Assembly scan and Graphical Browser runtime behavior have not yet been tested. This code update must not be described as a successful end-to-end filter test.
+
+
+## 2026-11-14 — LISP load failure: invalid character literals
+- Symptom: `Octal digit expected`, followed by `misplaced right parenthesis`.
+- Cause found in `h871-pf-as-number`: character literals had two actual backslashes before `Space`, `Tab`, and `Newline`.
+- Fixed to standard Common Lisp character syntax. Runtime verification in Creo 18.1 is pending.
