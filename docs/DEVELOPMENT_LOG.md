@@ -250,3 +250,32 @@ This file records chronological development work. Major features receive their o
 - Full-file static scan: balanced parentheses and terminated strings.
 - GitHub source update completed.
 - Creo 18.1 parser/load remains unverified and requires a fresh test.
+
+
+## 2026-11-14 – Capture actual Creo API errors in Density diagnostic
+
+### User evidence
+- The selected Part is `010-plate_2.1.1.2.1`, with a valid object path.
+- The previous diagnostic printed the ambiguous text "NIL or inquiry raised an error" for all five inquiries.
+- The previous helper discarded the second value returned by Common Lisp `ignore-errors`, so it could not distinguish a normal NIL return from a signaled error.
+
+### Research finding
+- PTC's current Integration Kit reference documents `sd-inq-part-density` with an optional `:kind` argument (`:instance`, `:contents`, `:realized`). PTC's What's New material describes the instance/contents property-attribute extension in a later 20.x release, while its 18.1 What's New section does not list that extension. This makes 18.1 API compatibility a concrete suspect, but does not by itself prove which function or argument is failing on this installation.
+- PTC's current reference describes `sd-inq-item-attributes` using the `:attachment` keyword argument. Runtime availability must also be checked.
+
+### Files changed
+- Updated `src/part-filter/H871_DENSITY_DIAG.lsp`.
+
+### Implementation
+- The diagnostic now records the condition text and condition type separately from a genuine NIL return.
+- Added `fboundp` checks for `sd-inq-part-density` and `sd-inq-item-attributes`.
+- Added the selected object's Lisp type and `sd-inq-part-p` result.
+- Retained separate tests for the one-argument density call, `:instance`, `:contents`, and instance/contents attribute lists.
+
+### Verification
+- GitHub update succeeded.
+- Static syntax scan: pending.
+- Creo 18.1 load and runtime: not yet tested.
+
+### Next step
+- Reload this revision, run `H871_DENSITY_DIAG` on the same known Part, and send the new report. The exact error message will determine whether to use a legacy one-argument density inquiry, another Part-property API, or a different attribute route.
