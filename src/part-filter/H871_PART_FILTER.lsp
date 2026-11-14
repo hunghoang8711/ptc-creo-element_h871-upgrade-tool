@@ -170,7 +170,7 @@
   (let ((parts (h871-pf-selected-parts)))
     (sd-browser-set-status-text
       *h871-pf-browser-name*
-      (format nil "~A result row(s) selected." (length parts)))))
+      :value (format nil "~A result row(s) selected." (length parts)))))
 
 (defun h871-pf-open-results-browser ()
   ;; Recreate browser/tree so every search has a clean result set.
@@ -200,6 +200,13 @@
       :minHeight 280
       :maxWidth 1150
       :maxHeight 760
+      :buttonMenu
+        '(("select-all"
+           :label "Select All"
+           :push (sd-browser-exec-cmd "h871-pf-results" :select-all))
+          ("clear-selection"
+           :label "Clear Selection"
+           :push (sd-browser-exec-cmd "h871-pf-results" :clear-select-list)))
       :topMenu
         '(("selection"
            :label "Selection"
@@ -312,8 +319,8 @@
           (return-from h871-pf-run nil))
         (sd-browser-set-status-text
           *h871-pf-browser-name*
-          (format nil
-            "~A matching Part(s). Select rows; use Selection menu for Select All/Clear Selection."
+          :value (format nil
+            "~A matching Part(s). Select rows; use Select All/Clear Selection buttons."
             (length *h871-pf-results*)))))
     (values (length *h871-pf-results*) report)))
 
@@ -343,7 +350,11 @@
       :title "Density Base")
   )
   :ok-action
-  '(h871-pf-run assembly density_instance density_base))
+  '(progn
+     (h871-pf-run assembly density_instance density_base)
+     ;; Keep the input dialog active so the user can change the
+     ;; density pair and run another search without reopening it.
+     (sd-return-from-ok-action)))
 
 ;; LOAD:
 ;; (load "D:/HH871/05-TEST-LISP-PTC/H871_PART_FILTER.lsp")
