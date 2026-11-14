@@ -45,7 +45,7 @@ Active decisions that constrain implementation. Historical experiments supersede
 - **Decision:** ver-02 presents fixed Machining Process and Material choices while retaining Density Instance/Base as the underlying search properties.
 - **Machining Process → Density Instance:** CNC=1, KH=2, CG=3, COVER=4.
 - **Material → Density Base:** A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
-- **UI:** Use numeric `:range` values with human-readable `:label` text. Adjacent code fields are `:display-only` and synchronized by `:after-input`.
+- **UI:** Use numeric `:range` values with human-readable `:label` text. Corresponding code fields are `:display-only` and synchronized by `:after-input`. The standard dialog layout places variables vertically; a same-row right-side layout is not part of this first candidate and requires separate 18.1 UI verification.
 - **Default:** CNC + SUS304 (1/304), matching the previous dialog's default numeric pair.
 - **Rule:** Changing the mapping is a user-owned convention update in the ver-02 `:range` lists. Do not describe this as actual Material-property retrieval.
 - **Compatibility note:** Dialog Generator range labels and display-only behavior are supported by later PTC Integration Kit documentation; runtime compatibility must still be checked in Modeling 18.1.
