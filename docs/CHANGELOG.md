@@ -88,3 +88,11 @@ Restored the complete LISP source to the exact known-good standalone-browser imp
 - Kept the native OK/Apply action and standalone browser creation path.
 - Did not reintroduce Graphical Browser parent embedding.
 - Static checks passed; Creo 18.1 runtime verification is pending.
+
+
+## 2026-11-14 – Independent Apply / Select All footer buttons
+- Replaced Graphical Browser Abort-button reuse with two independent UICT pushbuttons in one host window.
+- Apply transfers selected rows through `:select-and-execute`; Select All selects every result row and keeps the window open.
+- Browser is instantiated before reparenting into the host's resizable browser area.
+- Added stage-specific diagnostics and standalone-browser fallback.
+- Static checks pass; Creo 18.1 runtime verification is pending.
