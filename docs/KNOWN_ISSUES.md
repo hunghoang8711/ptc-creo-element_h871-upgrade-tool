@@ -24,16 +24,17 @@ Only unresolved or unverified items belong here. Remove an item when it is resol
 
 ## KI-005 – ver-02 dialog compatibility in Modeling 18.1
 
-- **Status:** Awaiting runtime test.
-- **Details:** ver-02 uses numeric `:range` choices with `:label`, `:after-input` synchronization, and `:display-only` code fields. The implementation follows the Dialog Generator pattern documented by PTC, but the available references are for later releases. The code fields currently occupy separate rows after the selectors; same-row right-side placement is not yet implemented.
-- **Next step:** Load `H871_PART_FILTER_VER_02.lsp` in Modeling 18.1. Confirm dialog creation, default CNC/SUS304 values, code-field updates, non-editability, and numeric values passed to the search function. Then assess a compatible same-row layout for the selector and its code field.
+- **Status:** User-confirmed working.
+- **Details:** The user tested ver-02 and reported a very good result. The mapped-choice dialog is the accepted baseline for the next development stage.
+- **Remaining UI limitation:** Code fields appear in separate rows after selectors; same-row right-side placement remains a separate enhancement.
 
 ## KI-006 – Independent search sessions / browser tabs
 
-- **Status:** Deferred; not implemented.
-- **Details:** Current source uses shared result globals and fixed Browser/Tree names, and the current search path destroys the prior Browser/Tree. Multi-session support requires per-session result data and unique Browser/Tree identities before any tab UI is added.
-- **Next step:** After ver-02 dialog validation, prototype independent Browser/Tree instances and test native selection/Apply before tab docking.
+- **Status:** Implemented in ver-03 candidate; awaiting runtime test.
+- **Details:** ver-03 stores each search in a session registry and assigns unique Browser and Browser Tree names. Browser callbacks route selection actions by Browser name. Each successful search requests a docked tab with a Material-Process label.
+- **Compatibility risks:** `:update-args`, `:createAsTab` and `:tabname` were found in later PTC Integration Kit references; availability/behavior in Modeling 18.1 is not confirmed.
+- **Next step:** Test two different searches, switching tabs, per-tab row selection, Select All, native Apply, duplicate search labels and hiding one tab without affecting the others.
 
 ## Resolved baseline behavior
 
-The following are user-confirmed in Creo Elements/Direct Modeling 18.1: Results Browser opens and displays result rows; Select All is present; clicking a row selects it; native Apply transfers selected Parts to Modeling selection.
+The following are user-confirmed in Creo Elements/Direct Modeling 18.1: Results Browser opens and displays result rows; Select All is present; clicking a row selects it; native Apply transfers selected Parts to Modeling selection; ver-02 mapped-choice dialog produced a very good result.
