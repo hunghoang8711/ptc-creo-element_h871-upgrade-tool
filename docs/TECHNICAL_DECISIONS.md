@@ -79,5 +79,5 @@ Record decisions that constrain future implementation. Amend entries only when a
 - **Date:** 2026-11-14
 - **Decision:** Normalize numeric Density values before comparing. Accept numeric values and numeric strings; compare numerically with a small tolerance. This covers representations such as `1` and `1.0`.
 - **Rationale:** Lisp numeric equality already considers integer 1 and float 1.0 equal; text representations need parsing before numeric comparison.
-- **Compatibility finding:** PTC's public Modeling 20.8 release notes say separate Density attributes on Part Instance and Contents, and the `:instance` / `:contents` inquiry kind, were introduced in 20.8. The target environment is 18.1, so the current API assumption is not yet justified for that release.
+- **Compatibility finding:** PTC's Integration Kit Part Inquiries reference documents `sd-inq-part-density` with `:contents`, `:instance`, and `:realized`, returning a LONG-FLOAT or NIL. The property-attribute concept also appears in the older SolidDesigner 5.0 release history. Therefore the API is not assumed to be newer than 18.1; the exact values returned by the user's installed 18.1 build still need direct diagnosis.
 - **Next step:** Run `H871_DENSITY_DIAG.lsp` on a known Part and identify the 18.1 property/attribute source. Do not claim the filter is fixed based only on numeric normalization.
