@@ -16,6 +16,7 @@
 (in-package :oli)
 
 (defvar *h871-pf-results* nil)
+(defvar *h871-pf-diagnostic-samples* nil)
 (defvar *h871-pf-results-assembly* nil)
 (defvar *h871-pf-requested-instance* nil)
 (defvar *h871-pf-requested-base* nil)
@@ -40,6 +41,7 @@
        (multiple-value-bind (parsed position)
            (ignore-errors (read-from-string (string-trim '(#\\Space #\\Tab #\\Newline) value) nil nil))
          (when (and (numberp parsed)
+                    (integerp position)
                     (= position
                        (length (string-trim '(#\\Space #\\Tab #\\Newline) value))))
            parsed))))
@@ -65,9 +67,23 @@
 
 (defun h871-pf-collect (obj matches requested-instance requested-base)
   (when (sd-inq-part-p obj)
-    (when (h871-pf-density-pair-match
-            obj requested-instance requested-base)
-      (push obj matches)))
+    (let ((actual-instance (sd-inq-part-density obj :instance))
+          (actual-base (sd-inq-part-density obj :contents)))
+      ;; Keep a small raw-value sample in the report so a zero-match
+      ;; result reveals what Creo 18.1 actually returned.
+      (when (< (length *h871-pf-diagnostic-samples*) 30)
+        (push
+          (list (h871-pf-name obj)
+                (h871-pf-path obj)
+                actual-instance
+                (type-of actual-instance)
+                actual-base
+                (type-of actual-base))
+          *h871-pf-diagnostic-samples*))
+      (when (and
+              (h871-pf-numeric-equal-p actual-instance requested-instance)
+              (h871-pf-numeric-equal-p actual-base requested-base))
+        (push obj matches))))
   (dolist (child (sd-inq-obj-children obj))
     (setf matches
       (h871-pf-collect child matches requested-instance requested-base)))
@@ -246,6 +262,10 @@
       (format s "Assembly: ~A~%" (h871-pf-path assembly))
       (format s "Requested Density Instance: ~A~%" requested-instance)
       (format s "Requested Density Base: ~A~%" requested-base)
+      (format s "~%RAW DENSITY SAMPLE (first 30 Parts)~%")
+      (format s "Part | Path | Instance value/type | Base value/type~%")
+      (dolist (sample (reverse *h871-pf-diagnostic-samples*))
+        (format s "~S~%" sample))
       (dolist (part matches)
         (format s "~%PART: ~A~%" (h871-pf-name part))
         (format s "PATH: ~A~%" (h871-pf-path part))
@@ -256,6 +276,7 @@
     report))
 
 (defun h871-pf-run (assembly requested-instance requested-base)
+  (setf *h871-pf-diagnostic-samples* nil)
   (setf *h871-pf-results-assembly* assembly)
   (setf *h871-pf-requested-instance* requested-instance)
   (setf *h871-pf-requested-base* requested-base)
