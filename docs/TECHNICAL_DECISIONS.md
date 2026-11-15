@@ -1,43 +1,59 @@
 # Technical Decisions
 
-Active decisions that constrain implementation. Historical experiments superseded by these decisions are summarized in `DEVELOPMENT_LOG.md` and `LESSONS_LEARNED.md`.
+Active decisions that constrain implementation. Superseded experiments are recorded in `DEVELOPMENT_LOG.md` and `LESSONS_LEARNED.md`.
 
 ## TD-001 – Target platform
-
 - **Date:** 2026-11-13
 - **Decision:** Target PTC Creo Elements/Direct Modeling 18.1.
-- **Rule:** Do not assume Creo Parametric APIs or later Elements/Direct APIs are compatible. Verify functions, signatures, object types, and UI behavior in 18.1.
+- **Rule:** Do not assume Creo Parametric APIs or later Elements/Direct APIs are compatible. Verify function existence, signatures, object types and UI behavior in 18.1.
 
-## TD-002 – Current Density filter is an exact pair
+## TD-002 – Density filter is an exact pair
+- **Date:** 2026-11-13; clarified 2026-11-14
+- **Decision:** Match Density Instance and Density Base exactly; both conditions must be true (AND).
+- **Retrieval:** `sd-inq-part-density :instance` and `sd-inq-part-density :contents`.
+- **Normalization:** Current source divides returned API values by 1000.
+- **Evidence:** Tested UI 1/304 ↔ API 1000/304000; UI 2/400 ↔ API 2000/400000.
+- **Rule:** Do not generalize this conversion to other properties.
 
-- **Date:** 2026-11-13 (clarified 2026-11-14)
-- **Decision:** The current filter matches both Density Instance and Density Base exactly. Both conditions must be true.
-- **Retrieval:** `sd-inq-part-density` with `:instance` for Instance and `:contents` for Base.
-- **Normalization:** Current source divides returned API values by 1000 before comparing/displaying them.
-- **Evidence:** User-tested examples: UI 1/304 corresponds to raw API 1000/304000; UI 2/400 corresponds to raw API 2000/400000.
-- **Rule:** Do not reintroduce comparison operators or AND/OR controls into this exact-pair baseline unless the user changes the requirement.
-
-## TD-003 – Preserve the working Results Browser selection architecture
-
+## TD-003 – Preserve native Graphical Browser selection and Apply
 - **Date:** 2026-11-14
-- **Decision:** Keep the standalone Graphical Browser and its native row-selection and Apply behavior.
-- **User-confirmed:** Results rows display; Select All is available; individual rows can be selected; native Apply transfers selected Parts to Modeling selection.
-- **Rule:** Do not override the native default Apply action with a callback that immediately reopens the browser. Do not reintroduce the unified host-shell/browser-parent embedding design that caused matching searches to fail.
+- **Decision:** Preserve standalone Graphical Browser, native row selection, Select All and native Apply hand-off.
+- **User-confirmed:** Rows display, individual rows can be selected, Select All works and Apply transfers selected Parts to Modeling selection.
+- **Rule:** Do not replace native Apply with a custom callback that reopens the browser. Do not revive the failed host-shell/browser-reparenting architecture.
 
-## TD-004 – Separate filter logic from result presentation
-
+## TD-004 – Separate filter engine from presentation
 - **Date:** 2026-11-13
-- **Decision:** Keep property acquisition and predicate evaluation independent from Graphical Browser tree/table construction.
-- **Rationale:** Future property types and filter conditions should not require replacing the working Results Browser or selection hand-off.
+- **Decision:** Keep property acquisition/predicate evaluation separate from result presentation so future UI work does not rewrite the verified filter logic.
 
-## TD-005 – Verification evidence must be explicit
-
+## TD-005 – Explicit verification evidence
 - **Date:** 2026-11-13
-- **Decision:** Static checks, API-reference review, successful loading, functional testing, and regression testing are different evidence levels.
-- **Rule:** Mark runtime behavior as confirmed only after a test in Modeling 18.1 or an explicit user report. Later-release documentation is not proof of 18.1 compatibility.
+- **Decision:** Static review, API documentation review, loading, functional test and regression test are separate evidence levels.
+- **Rule:** Later-release documentation is not proof of Modeling 18.1 compatibility.
 
-## TD-006 – Documentation is part of each change
-
+## TD-006 – Documentation accompanies meaningful changes
 - **Date:** 2026-11-13
-- **Decision:** Meaningful source changes must update the project context and relevant development/decision/issue/lesson/changelog records in the same work session.
-- **Rule:** Keep current state concise; do not duplicate every intermediate experiment across multiple documents.
+- **Decision:** Update project context and relevant knowledge/decision/issue/lesson/log records when meaningful discoveries or implementation changes are made.
+
+## TD-007 – ver-02 user convention mappings
+- **Date:** 2026-11-14
+- **Decision:** ver-02 maps fixed Machining Process and Material labels to the existing Density Instance/Base inputs; it does not retrieve actual Material metadata.
+- **Machining Process → Density Instance:** CNC=1, KH=2, CG=3, COVER=4.
+- **Material → Density Base:** A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
+- **UI:** Numeric `:range` values with human-readable `:label`; display-only code fields synchronized by `:after-input`.
+- **Default:** CNC + SUS304 (1/304).
+- **Rule:** Treat mappings as the user's convention, not actual Material-property retrieval.
+
+## TD-008 – ver-03 is one Results window with internal tabs
+- **Date:** 2026-11-14; corrected and confirmed 2026-11-15
+- **Decision:** One separate Results Browser window contains multiple horizontal pages/tabs. Tabs are internal to that window, not separate Graphical Browsers and not Creo Browser Bar tabs.
+- **Identity:** One unique Density Instance + Density Base pair maps to one tab; caption uses mapped Material-Process labels.
+- **Refresh:** Repeating a pair refreshes its existing page; a different pair adds a page.
+- **Isolation:** Each page retains its own results and selection state where feasible; Apply operates only on the active page.
+- **No-match:** A no-match search does not silently erase existing valid tabs.
+- **Rule:** Do not implement as multiple Graphical Browser instances. The prior multi-browser ver-03 experiment is superseded.
+
+## TD-009 – Single shared main branch and version folders
+- **Date:** 2026-11-15
+- **Decision:** Use `main` as the shared development and knowledge branch. Do not create branches for each LISP version.
+- **Versioning:** Keep ver-01, ver-02, ver-03 etc. in separate source folders. Preserve user-confirmed versions; create a new version for architectural changes.
+- **Knowledge:** Consolidate requirements, technical findings, lessons, troubleshooting and reusable skills into shared docs on main so new chats/tools can bootstrap from one source.
