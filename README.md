@@ -58,3 +58,10 @@ The confirmed filter behavior is based on an exact Density Instance + Density Ba
 - **Functionally tested** – behavior exercised in Creo.
 - **User-confirmed** – user reported the behavior working in their target environment.
 - **Regression-tested** – existing confirmed behavior retested after a change.
+
+
+## Reusable Creo skill package
+
+The complete cross-chat skill package is in [`skills/creo-elements-direct-modeling/`](skills/creo-elements-direct-modeling/SKILL.md). It includes platform/language boundaries, recovered user-provided Annotation references, BOM and drawing macro analysis, Part Filter history, API evidence, debugging procedures and a reusable development workflow.
+
+Also see [API Verification Register](docs/API_VERIFICATION_REGISTER.md) and [User Reference Inventory](docs/USER_REFERENCE_INVENTORY.md). The package is designed to let a new chat continue after the original project conversation is unavailable.
