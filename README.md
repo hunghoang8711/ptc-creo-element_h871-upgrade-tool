@@ -4,47 +4,57 @@ Version-controlled engineering workspace for custom tools targeting **PTC Creo E
 
 ## Current focus
 
-**H871 Part Filter – baseline restored and ready for the next feature definition (2026-11-14).**
+**H871 Part Filter – ver-02 baseline preserved; ver-03 single-window multi-tab design specified, implementation pending.**
 
-The current user-confirmed workflow is:
-- Select an Assembly and search using an exact Density Instance + Density Base pair.
-- View matching Parts in the dedicated Graphical Browser results table.
-- Select individual result rows or use Select All.
-- Use the native Apply action to transfer the selected Part(s) to Creo Modeling selection.
+The confirmed filter behavior is based on an exact Density Instance + Density Base pair. The mapped UI uses Machining Process and Material convention labels, which map to those existing Density values; it does not read the model's actual Material property.
 
-The user has confirmed that the results list, Select All control, individual row selection, and Apply workflow work in Creo Elements/Direct Modeling 18.1. Do not regress this baseline.
+## Start here (AI / new development session)
+
+1. Read [AI_START_HERE](docs/AI_START_HERE.md) for the mandatory handover workflow.
+2. Read [PROJECT_CONTEXT](PROJECT_CONTEXT.md) for the current state and active feature.
+3. Read [ENGINEERING_KNOWLEDGE_BASE](docs/ENGINEERING_KNOWLEDGE_BASE.md) for consolidated APIs, mappings, failure causes, compatibility limits and engineering rules.
+4. Read [TECHNICAL_DECISIONS](docs/TECHNICAL_DECISIONS.md), [KNOWN_ISSUES](docs/KNOWN_ISSUES.md), and [LESSONS_LEARNED](docs/LESSONS_LEARNED.md).
+5. Inspect the exact versioned LISP source before editing.
 
 ## Repository map
 
-- `PROJECT_CONTEXT.md` – concise current state and handover notes.
-- `src/part-filter/` – Part Filter source and preserved diagnostic baseline.
-- `docs/TECHNICAL_DECISIONS.md` – active technical decisions and compatibility constraints.
-- `docs/KNOWN_ISSUES.md` – only unresolved or unverified items.
+- `docs/AI_START_HERE.md` – compact instructions for new chats and new tool development.
+- `PROJECT_CONTEXT.md` – live project state and handover.
+- `docs/ENGINEERING_KNOWLEDGE_BASE.md` – consolidated technical memory and reusable engineering skills.
+- `src/part-filter/ver-01/` – preserved ver-01 source.
+- `src/part-filter/ver-02/` – mapped-choice ver-02 source.
+- `src/part-filter/ver-03/` – target specification and future implementation; not yet implemented.
+- `src/part-filter/` root – legacy source paths retained for compatibility.
+- `docs/TECHNICAL_DECISIONS.md` – active decisions.
+- `docs/KNOWN_ISSUES.md` – unresolved or unverified items only.
 - `docs/LESSONS_LEARNED.md` – confirmed root causes and prevention rules.
-- `docs/DEVELOPMENT_LOG.md` – concise milestone history and verification evidence.
-- `docs/CHANGELOG.md` – user-visible/source-level change summary.
-- `tests/` – repeatable tests and sanitized fixtures.
+- `docs/DEVELOPMENT_LOG.md` – milestone history and verification evidence.
+- `tests/` – repeatable manual regression procedures.
+
+## Main-branch and version policy
+
+- `main` is the single shared development and knowledge branch.
+- Do not create a branch for each LISP version or routine feature iteration.
+- Keep each released/experimental LISP version in its own `ver-XX` folder.
+- Never overwrite a previously user-confirmed version; create the next version instead.
+- Update the shared context, knowledge base, decisions, issues, lessons and log whenever a meaningful discovery is made.
+- Experimental or superseded code must be clearly labelled and must never be presented as the active version.
 
 ## Development rules
 
-1. Inspect the current source, repository state, and relevant documentation before changing code.
-2. Preserve the working Results Browser, row-selection, Select All, and native Apply behavior.
-3. Make the smallest focused change; avoid unrelated UI or architecture rewrites.
-4. Target Modeling 18.1. Do not assume Creo Parametric APIs or later Elements/Direct APIs are compatible.
-5. Separate static checks, successful loading, functional tests, and regression tests.
-6. Record exact user-observed runtime results; never infer runtime success from source code alone.
-7. Update the relevant documentation with every meaningful implementation change.
-8. Keep customer models, proprietary drawings, credentials, and personal data out of this public repository.
+1. Inspect repository state, current source and relevant docs before changing code.
+2. Preserve confirmed Results Browser row selection, Select All and native Apply behavior.
+3. Target Modeling 18.1; never assume Creo Parametric or later Elements/Direct APIs are compatible.
+4. Make small, isolated changes and distinguish static checks from actual Creo runtime tests.
+5. Record exact user-observed results; never claim runtime success without evidence.
+6. Keep customer models, proprietary drawings, credentials and personal data out of this public repository.
 
 ## Verification terminology
 
+- **Specified** – requirement/design recorded; no implementation claim.
 - **Implemented** – source has been changed.
-- **Static-checked** – source structure/syntax has been inspected; not proof of Creo compatibility.
+- **Static-checked** – source structure/syntax inspected; not proof of Creo compatibility.
 - **Loaded in Creo** – file loaded in the target application.
-- **Functionally tested** – behavior was exercised in Creo.
-- **User-confirmed** – the user reported the behavior working in their target environment.
-- **Regression-tested** – existing confirmed behavior was retested after a change.
-
-## Start a new development session
-
-Read `PROJECT_CONTEXT.md`, then the active decisions and known issues. Inspect the latest Part Filter source before implementation. Use the development log only for milestone history; detailed abandoned UI experiments have been condensed into the lessons and constraints that matter.
+- **Functionally tested** – behavior exercised in Creo.
+- **User-confirmed** – user reported the behavior working in their target environment.
+- **Regression-tested** – existing confirmed behavior retested after a change.
