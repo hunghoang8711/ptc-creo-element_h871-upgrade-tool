@@ -155,3 +155,24 @@ Do not present these as implemented:
 - General dynamic filter-condition builder.
 - UICT internal tab control compatibility and Apply hand-off in Modeling 18.1.
 - New ver-03 implementation.
+
+
+## 10. Recovered Annotation and drawing knowledge
+
+A cross-chat skill package now records prior user-provided legacy sources and their reusable patterns:
+- `Docu_load_frame`, `Docu_create_sheet`, `Docu_replace_frame`, current-sheet switching and frame inquiry are summarized in `skills/creo-elements-direct-modeling/references/02-annotation-sheets-frames.md`.
+- BOM layout load/store and editing flows, plus attach-point patterns, are summarized in `references/03-bom-layouts-and-drawing-macros.md`.
+- `Arrange_sheets`, `Arrange_sheets2` and `Arrange_views` demonstrate enumerate/filter/bounds/calculate/move/restore/cleanup patterns.
+- These files use legacy Annotation/ME10 command language, not Modeling Lisp. Do not load them as Lisp or assume the commands are available outside Annotation.
+- The sources carry CoCreate Software GmbH confidential/copyright markings; public GitHub stores summaries, not full source dumps.
+
+## 11. Initial measurement/export and frame catalogue investigations
+
+- On 2026-10-09, drawing measurement, data export and Ribbon/menu access were discussed. `measure_export.lsp` and `measure_export_avail_cmds.cmd` were preliminary concepts; real measurement API calls were not verified.
+- On 2026-10-16, the user wanted multiple A4 frames in the Annotation workflow. The reviewed sheet/frame source proves frame loading, sheet creation and frame replacement, but does not reveal the UI frame catalogue registration mechanism.
+- `docu-register-frame` and `am_customize` were suggestions, not verified APIs; the user reported `am_customize` unavailable.
+- Do not use these as established facts. See API Verification Register and skill references.
+
+## 12. API evidence and language separation
+
+The canonical API status is maintained in `docs/API_VERIFICATION_REGISTER.md`. In particular, the user reported on 2026-11-14 that one-argument `sd-inq-part-density` returned `1000.0` (`LONG-FLOAT`) for Part `010-plate_2.1.1.2.1`; this does not alone establish the semantic mode. The explicit `:instance` and `:contents` calls remain the production filter's tested pattern.
