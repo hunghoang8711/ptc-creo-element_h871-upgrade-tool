@@ -35,3 +35,19 @@ Only unresolved or unverified items belong here. Move resolved root causes into 
 ## Resolved baseline behavior
 
 User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select All is present; clicking a row selects that Part; native Apply transfers selected Parts to Modeling selection.
+
+
+## KI-007 – Annotation frame catalogue registration
+- **Status:** Unresolved / not verified.
+- **Details:** The recovered `am_sheet.m`-style source loads, creates and replaces frames but does not show how the Annotation UI frame list is populated. `docu-register-frame` was only a hypothesis; user reported `am_customize` unavailable.
+- **Next step:** Trace the installed 18.1 frame selection dialog and built-in frame discovery mechanism before adding multiple A4 options.
+
+## KI-008 – Geometry measurement and export APIs
+- **Status:** Unverified.
+- **Details:** Initial measurement/export and command access concepts were discussed on 2026-10-09, but no real Modeling 18.1 geometry measurement API/signature/units were confirmed.
+- **Next step:** Build a minimal diagnostic on a known test part and verify one geometry inquiry at a time before implementing export.
+
+## KI-009 – Official 18.1 Integration Kit manual availability
+- **Status:** Not found in currently accessible Library inventory.
+- **Details:** Recovered user files are legacy Annotation macro sources and a Part Filter diagnostic; no standalone official 18.1 Integration Kit PDF was surfaced.
+- **Next step:** If an official manual exists in older chat storage or local files, retrieve it and record its exact release/source before using it as authority.
