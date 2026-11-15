@@ -17,3 +17,11 @@
 - Added initial Part property/Density investigation and diagnostic source.
 - Implemented recursive Assembly scan and exact Density pair search.
 - Added a BOM-like Graphical Browser result table.
+
+
+## 2026-11-15 – Cross-chat Creo knowledge and skill package
+- Added reusable `skills/creo-elements-direct-modeling/` skill with platform, language, Annotation, BOM, drawing, Part Filter, API and debugging references.
+- Added API Verification Register and User Reference Inventory.
+- Consolidated prior chats and user-provided Annotation macro sources from October 2026.
+- Recorded unverified measurement/export APIs and frame catalogue registration as unresolved, not as implemented facts.
+- Preserved source provenance and avoided mirroring confidential legacy source text into public GitHub.
