@@ -1,6 +1,6 @@
 # Part Filter ver-03 – Single Results Window with Internal Tabs
 
-<badge>Specified – implementation pending</badge>
+**Status: Specified – implementation pending.**
 
 ## Authoritative requirement
 
