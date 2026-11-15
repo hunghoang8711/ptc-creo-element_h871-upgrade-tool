@@ -1,48 +1,53 @@
 # Development Log
 
-Concise milestone history. Detailed abandoned UI iterations have been consolidated into `LESSONS_LEARNED.md`; Git commits retain the full source history.
+Milestone history. Reusable technical findings are consolidated in `ENGINEERING_KNOWLEDGE_BASE.md` and `LESSONS_LEARNED.md`; Git history retains source revisions.
 
-## 2026-11-13 – Initial Part Filter investigation
-
+## 2026-11-13 – Part Filter foundation
 - Targeted Creo Elements/Direct Modeling 18.1.
-- Established the need to find Parts in an Assembly by property values and return selectable model objects.
-- Explored Density Instance/Base retrieval and Graphical Browser result presentation.
-- Early experiments with `GET_SELECTION` and direct Structure Browser selection were not accepted as the final user workflow.
+- Explored recursive Assembly scan and Density retrieval.
+- Preserved diagnostic source separately.
+- Established that actual Material-property retrieval was not verified.
 
-## 2026-11-13 – Exact Density pair and Results Browser direction
+## 2026-11-13 to 2026-11-14 – ver-01 baseline stabilized
+User-confirmed:
+- Results Graphical Browser opens and displays matching Part rows.
+- Select All is available.
+- Clicking an individual row selects that Part.
+- Native Apply transfers selected Part(s) to Modeling selection.
 
-- Clarified that the current Material/physical-property direction should distinguish Instance and Base values; the implemented Density search became an exact Instance + Base pair.
-- Chose a dedicated BOM-like Graphical Browser so results can be inspected and selected before applying them to Modeling.
-- Kept property matching separate from result-table presentation.
-- Material retrieval remained unverified and was not included in the working Density implementation.
+Resolved:
+- Fixed `sd-browser-set-status-text` keyword usage with `:value`.
+- Removed custom Apply callback that broke selection hand-off.
+- Restored standalone Graphical Browser after unified host-shell embedding failed.
 
-## 2026-11-14 – Results Browser stabilized
+## 2026-11-14 – ver-02 mapped-choice dialog
+- Created ver-02 from the confirmed filter engine.
+- Added Machining Process choices: CNC=1, KH=2, CG=3, COVER=4.
+- Added Material convention choices: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
+- Retained Density Instance + Density Base as the actual search properties.
+- Default CNC + SUS304 (1/304).
+- User reported the result was very good. Preserve ver-02 as its own version.
+- Mapping is a convention only; no actual Material-property query was added.
 
-### User-confirmed in Creo Elements/Direct Modeling 18.1
-- Results Browser opens and displays matching Part rows.
-- Select All is available in the Results window.
-- Clicking individual rows selects the corresponding Part.
-- Native Apply transfers selected Part(s) to Creo Modeling selection.
+## 2026-11-14 – Superseded ver-03 multi-browser experiment
+- A prototype created a new Graphical Browser per search and used unique Browser/Tree names.
+- It attempted to dock each browser as a tab in Creo's Browser Bar.
+- This did not match the user's intended UI and is superseded. Do not load it as the intended ver-03.
 
-### Resolved defects
-- Corrected `sd-browser-set-status-text` keyword usage by passing the message with `:value`.
-- Removed a custom Apply callback that replaced native browser behavior and caused selection/Apply regression.
-- Restored the standalone Graphical Browser after the unified host-shell/browser-parent experiment caused matching searches to fail.
+## 2026-11-14 to 2026-11-15 – Corrected ver-03 specification
+- User clarified that there must be one separate Results Browser window with browser-like internal tabs.
+- Same Density pair refreshes its existing page; a different pair creates a new page.
+- Each page owns results and selection; Apply affects only the active page.
+- No-match must not silently erase existing valid pages.
+- The old multi-browser architecture was explicitly rejected.
+- UICT Tab Control is a research direction only; 18.1 compatibility and real Part Apply hand-off remain unverified.
 
-### Current baseline constraints
-- Preserve the standalone Results Browser.
-- Preserve native row selection and native default Apply behavior.
-- Preserve the working Select All action.
-- Do not reintroduce the failed host-shell/browser-parent embedding approach.
-- Density matching uses the exact normalized Instance + Base pair.
+## 2026-11-15 – Main-branch knowledge consolidation
+- User requested `main` as the shared development/knowledge branch, with no branch per LISP version.
+- Version-specific source folders and centralized AI handover/engineering knowledge docs are being established.
+- Runtime claims remain limited to user-confirmed Creo tests.
 
-## Current source at consolidation
-
-- Main source: `src/part-filter/H871_PART_FILTER.lsp`
-- Diagnostic baseline: `src/part-filter/H871_PART_FILTER_DIAG.lsp`
-- Main source blob: `e94a89547460e038b2669995f2136fc1dd835816`
-- Runtime evidence: user confirmation dated 2026-11-14, as listed above.
-
-## Next step
-
-No implementation task is pre-approved yet. Wait for the user's next feature idea, then update the project context and relevant technical decisions before changing source.
+## Current status
+- ver-01: user-confirmed baseline.
+- ver-02: mapped-choice source preserved; user reported very good results.
+- ver-03: design specified; implementation pending.
