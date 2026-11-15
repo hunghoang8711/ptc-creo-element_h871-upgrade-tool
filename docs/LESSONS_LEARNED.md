@@ -50,3 +50,20 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 - Retest result display, single-row selection, Select All and native Apply after Results UI changes.
 - Record exact source revision and user-observed outcome.
 - Update shared knowledge docs on `main`.
+
+
+## LL-009 – Do not confuse Modeling Lisp with Annotation/ME10 macros
+- **Lesson:** User-provided Annotation sources use command-language syntax such as `DEFINE`, `PARAMETER`, `LET`, `INQ`, `END_DEFINE`; this is not Lisp syntax.
+- **Prevention:** Identify the language and module before proposing a LOAD command or porting a macro. Port behavior deliberately instead of pasting code across interpreters.
+
+## LL-010 – A frame lifecycle macro is not a frame catalogue registration mechanism
+- **Lesson:** The reviewed Annotation source shows how to load/create/replace a frame on a sheet, but does not prove how frame choices are registered in the UI.
+- **Prevention:** Trace the actual frame picker/list population mechanism in the installed 18.1 customization files. Do not rely on unverified `docu-register-frame` or unavailable `am_customize`.
+
+## LL-011 – Preserve current edit context and clean temporary structures
+- **Lesson:** Legacy sheet/BOM arrangement macros repeatedly save the current part, switch to TOP/root/target sheet, create temporary LTABs or parts, then restore the prior context and delete temporary structures.
+- **Prevention:** Treat current-part restoration and temporary-object cleanup as explicit success and error-path acceptance criteria in new tools.
+
+## LL-012 – Units must be derived from the current environment
+- **Lesson:** The legacy Arrange_sheets2 macro reads a unit factor from `INQ_ENV 6` / `INQ 2` and converts a 25 mm spacing before arranging sheets.
+- **Prevention:** Never hard-code drawing/model distances without verifying active units and conversion direction.
