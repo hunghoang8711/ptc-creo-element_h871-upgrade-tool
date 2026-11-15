@@ -51,3 +51,13 @@ Resolved:
 - ver-01: user-confirmed baseline.
 - ver-02: mapped-choice source preserved; user reported very good results.
 - ver-03: design specified; implementation pending.
+
+
+## 2026-11-15 – Cross-chat Creo skill package
+- Recovered earlier project context for the 2026-10-09 measurement/export request and 2026-10-16 Annotation frame investigation.
+- Retrieved prior user-provided Library materials: Annotation sheet/frame macros (467 lines), BOM layout customization macros (580 lines), drawing sheet/view arrangement macros (311 lines), and Part Filter diagnostic prototype (3,389 bytes).
+- Reviewed and distilled their technical patterns into `skills/creo-elements-direct-modeling/references/`.
+- Added API Verification Register, User Reference Inventory and reusable skill instructions.
+- Kept full CoCreate confidential legacy macro source out of public GitHub; only summaries and provenance metadata are committed.
+- Did not find an accessible standalone official Creo Elements/Direct Modeling 18.1 Integration Kit PDF/manual in the Library inventory.
+- Explicitly recorded that measurement/export APIs and Annotation frame catalogue registration remain unverified.
