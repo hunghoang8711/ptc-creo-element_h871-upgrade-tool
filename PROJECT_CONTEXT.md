@@ -1,67 +1,106 @@
-# H871 Part Filter – Project Context
+# H871 Upgrade Tools – Project Context
 
-**Last consolidated:** 2026-11-14  
+**Last consolidated:** 2026-11-15  
 **Target application:** PTC Creo Elements/Direct Modeling 18.1  
-**Current phase:** Existing Part Filter baseline stabilized; awaiting the user's next feature idea.
+**Shared branch:** `main`  
+**Current focus:** Preserve Part Filter ver-01/ver-02 and prepare corrected ver-03 architecture.
 
 ## 1. Product goal
 
-Develop an advanced Part-filtering tool for Creo Elements/Direct Modeling. The long-term direction is to search Parts by model properties and return real selectable model objects, not merely generate a text report.
+Build reliable, reusable LISP tools for Creo Elements/Direct Modeling 18.1. The repository is both the source-code archive and the engineering knowledge base: requirements, API findings, failure causes, compatibility notes, test procedures and lessons must remain available across chats and future tools.
 
-Keep the property-reading/filter engine separate from the Results Browser so additional properties and conditions can be introduced without replacing the working selection interface.
+## 2. Part Filter version status
 
-## 2. Current user-confirmed baseline
+| Version | Purpose | Status |
+|---|---|---|
+| ver-01 | Numeric Density Instance + Base filter with standalone Graphical Browser | User-confirmed working baseline |
+| ver-02 | Machining Process + Material convention selectors mapped to Density values | Implemented; user reported very good results |
+| ver-03 | One Results Browser window containing internal browser-like tabs/pages | Design specified; new implementation not yet created |
 
-The user has confirmed the following in Modeling 18.1:
+Canonical version folders:
+- `src/part-filter/ver-01/H871_PART_FILTER_VER_01.lsp`
+- `src/part-filter/ver-02/H871_PART_FILTER_VER_02.lsp`
+- `src/part-filter/ver-03/README.md` (design and validation plan; no active LISP source yet)
 
-- The Filter Results Graphical Browser opens and displays matching Part rows.
-- Select All is available in the Results window.
-- Clicking an individual Part row selects that result.
-- Apply transfers the selected Part(s) to Creo Modeling selection.
+Legacy root paths are retained for compatibility with earlier instructions and LOAD paths.
 
-**Regression boundary:** preserve the standalone Graphical Browser architecture, native row-selection behavior, Select All action, and native default Apply hand-off. Do not replace the native Apply action with a custom callback that immediately reopens the browser. Do not reintroduce the failed unified host-shell/browser-reparenting architecture.
+## 3. Confirmed Part Filter behavior
 
-Clear Selection, repeat-search behavior, and other convenience features must not be described as verified unless the user separately confirms them.
+The user confirmed in Creo Elements/Direct Modeling 18.1:
+- Results Graphical Browser opens and displays matching Part rows.
+- Select All is available.
+- Clicking an individual result row selects that Part.
+- Native Apply transfers selected Part(s) to Modeling selection.
 
-## 3. Current filter behavior
+Preserve the standalone Graphical Browser architecture and native Apply hand-off in ver-01/ver-02. A custom Apply callback previously broke row selection/Apply and must not be reintroduced without a proven requirement and regression test.
 
-The current production candidate searches by an exact pair:
+## 4. Filter engine and numeric scale
 
-- Density Instance, read with `sd-inq-part-density :instance`.
-- Density Base, read with `sd-inq-part-density :contents`.
+The current search is an exact pair (AND):
+- Density Instance: `sd-inq-part-density :instance`
+- Density Base: `sd-inq-part-density :contents`
 
-Both values must match (AND). There are no comparison operators or OR logic in this current exact-pair dialog.
+The current implementation divides API values by 1000 to match the Part Properties scale. Confirmed sample pairs:
+- UI 1 / 304 ↔ API 1000 / 304000
+- UI 2 / 400 ↔ API 2000 / 400000
 
-The API returns values on a different scale from the Part Properties display. The current source normalizes the API values by dividing by 1000. User-provided examples:
+This conversion is specific to the tested Density workflow. Never apply it automatically to unrelated properties.
 
-| Part Properties display | API raw values |
-|---|---|
-| Instance 1, Base 304 | Instance 1000, Base 304000 |
-| Instance 2, Base 400 | Instance 2000, Base 400000 |
+## 5. ver-02 user convention mappings
 
-These examples are confirmed for the tested Parts; do not assume every property or model uses the same conversion without diagnosis.
+Machining Process → Density Instance:
+- CNC=1, KH=2, CG=3, COVER=4.
 
-## 4. Source of truth
+Material label → Density Base:
+- A6061=6061, SUS201=201, SUS304=304, SS400=400,
+- POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
 
-- Main implementation: `src/part-filter/H871_PART_FILTER.lsp`
-- Preserved diagnostic baseline: `src/part-filter/H871_PART_FILTER_DIAG.lsp`
-- Current main source blob at consolidation: `e94a89547460e038b2669995f2136fc1dd835816`
+Important: these are user-defined mapping conventions. ver-02 does **not** retrieve the actual Material property from a Part. Default is CNC + SUS304 (1/304). Code fields are display-only and synchronized by `:after-input`; they are vertically arranged in the standard dialog.
 
-Inspect the current file before editing. Documentation records intent and evidence; source plus user runtime confirmation determine actual behavior.
+## 6. Correct ver-03 requirement (authoritative)
 
-## 5. Not implemented / not yet verified
+The earlier interpretation of “multiple searches” as multiple Graphical Browser windows or Creo Browser Bar tabs was incorrect.
 
-- Material property retrieval/filtering has not been verified for Modeling 18.1.
-- Other physical, geometric, structural, and custom Part properties are future scope, not existing features.
-- A generalized dynamic condition builder (add/remove rows, operators, AND/OR groups) has not been implemented.
-- Clear Selection visibility/functionality and repeat-search lifecycle are not part of the confirmed baseline unless re-tested.
-- Later-release PTC browser/UICT references are investigation material only; validate exact APIs in 18.1.
+Required UI:
+- Exactly **one separate Results Browser window**.
+- That window contains its own horizontal tabs/pages, similar to desktop Chrome/Firefox.
+- Tabs are internal to the Results Browser window, not tabs in Creo Browser Bar.
+- One unique filter pair (Density Instance + Density Base) corresponds to one tab.
+- Caption uses mapped labels, e.g. `SUS304-CNC`, `A6061-KH`.
+- Searching the same pair again refreshes/overwrites that pair's existing tab; never creates a duplicate tab.
+- Searching a different pair creates a new tab in the same window.
+- Switching tabs preserves each page's result list and, if technically feasible, its selection state.
+- Each active page supports row selection, Select All and Apply.
+- Apply transfers only the selected Parts belonging to the active page.
+- A no-match search must not silently erase a previous valid tab/result set.
 
-## 6. Required development approach
+Do not revive the superseded experiment that creates one Graphical Browser per search and docks them as Creo Browser Bar tabs.
 
-1. Ask the user for the intended next feature before expanding scope.
-2. Inspect the exact current source and identify the smallest extension point.
-3. Preserve the confirmed Results Browser and selection hand-off.
-4. Verify every new property API with a small diagnostic on a known Part before integrating it into the filter engine.
-5. Test in Modeling 18.1 and record the exact result.
-6. Update this file and the relevant decision, issue, lesson, log, and changelog entries.
+## 7. ver-03 implementation status and technical caution
+
+- `src/part-filter/ver-03/` currently contains design/validation notes only.
+- A previous ver-03 prototype on `feature/part-filter-multi-browser-sessions` created separate Graphical Browser windows and duplicate-suffixed labels. It is explicitly superseded and is not the requested feature.
+- UICT Tab Control / Dialog Shell is a possible investigation path. Documentation found so far is for later releases; exact Modeling 18.1 availability and signatures must be verified.
+- A UICT display table's ability to select real Part objects and transfer them to Modeling selection is not proven.
+- Prototype in small stages: tabbed shell and synthetic rows; per-page selection; actual Part selection hand-off; only then integrate the filter engine and pair-key refresh logic.
+- Do not claim ver-03 implementation or runtime success until the source exists and the user tests it in Creo 18.1.
+
+## 8. Repository workflow
+
+- Work directly on `main`; do not create branches per version.
+- Keep each LISP version in its own `ver-XX` folder.
+- Keep prior versions unchanged once user-confirmed.
+- Update shared documentation on `main` in the same work session as meaningful code/knowledge changes.
+- At the start of a new chat/tool, read `docs/AI_START_HERE.md` and this file.
+- Before code edits, fetch and inspect current main-branch source and docs.
+- Record whether each change is specified, implemented, static-checked, loaded, functionally tested, user-confirmed or regression-tested.
+
+## 9. Other confirmed development lessons
+
+- `sd-browser-set-status-text` requires the `:value` keyword/value argument.
+- A custom Apply callback replacing the native default caused selection/Apply regression.
+- Embedding/reparenting the working Results Browser into a custom host shell failed with “Could not embed the results browser in its host window” / “Could not create the unified results window.”
+- Do not assume `HANDLER-CASE` or `SEL_ITEM-P` exists in this Modeling 18.1 Lisp environment; both were reported undefined.
+- A command entered directly in the user input line may not work as expected for some LISP tests; use a verified load/command invocation route.
+
+For the consolidated API findings, root causes and reusable procedures, see [ENGINEERING_KNOWLEDGE_BASE](docs/ENGINEERING_KNOWLEDGE_BASE.md).
