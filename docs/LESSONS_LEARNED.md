@@ -1,55 +1,52 @@
 # Lessons Learned
 
-Confirmed engineering knowledge and prevention rules for Creo Elements/Direct Modeling 18.1. Keep speculative ideas out of this file.
+Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direct Modeling 18.1. Keep speculative ideas out of this file.
 
-## LL-001 – Preserve the native Graphical Browser Apply action
+## LL-001 – Preserve native Graphical Browser Apply
+- **Symptom:** After a custom Apply callback was added, row selection and Apply stopped behaving correctly.
+- **Cause:** The callback replaced the native default OK/Apply action and reopened the browser immediately after selection hand-off.
+- **Resolution:** Remove the callback and retain native Apply. The user confirmed row selection and Apply worked again.
+- **Prevention:** Do not override native selection/Apply without a proven requirement and regression test. Do not immediately reopen after native hand-off.
 
-**Symptom:** After a custom Apply callback was added, clicking result rows no longer behaved correctly and Apply did not hand off the selection as expected.
+## LL-002 – Do not reparent the Results Browser into a host shell
+- **Symptom:** Matching searches failed with “Could not embed the results browser in its host window” or “Could not create the unified results window.”
+- **Cause:** The custom host-shell/browser-parent approach broke the working standalone browser path.
+- **Resolution:** Restore standalone Graphical Browser.
+- **Prevention:** Do not revive browser reparenting or a unified host shell merely to rearrange controls. Prove a minimal 18.1 example first.
 
-**Cause:** The custom callback replaced the Graphical Browser's native default OK/Apply action and immediately reopened the browser after `:select-and-execute`.
+## LL-003 – Supply status text using the keyword argument
+- **Symptom:** Creo displayed “Odd number of arguments for keywords.”
+- **Cause:** `sd-browser-set-status-text` was called without the required `:value` keyword/value pair.
+- **Resolution:** Pass the status string with `:value`; user confirmed the error disappeared.
+- **Prevention:** Check exact function signature and keyword pairing.
 
-**Resolution:** Remove the custom callback and retain the native default Apply action. The user then confirmed that row selection and Apply worked again in Modeling 18.1.
+## LL-004 – Density API values use a different scale
+- **Observation:** Tested UI values 1/304 and 2/400 corresponded to API raw values 1000/304000 and 2000/400000.
+- **Resolution:** Current Density workflow normalizes by dividing API values by 1000.
+- **Prevention:** Do not generalize the conversion to unrelated properties; inspect raw value/type/units first.
 
-**Prevention:** Do not override native browser selection/Apply behavior unless there is a proven requirement and a regression test. Do not immediately reopen the browser after the native selection hand-off.
+## LL-005 – Later-release docs are not proof of 18.1 compatibility
+- **Lesson:** PTC documentation for later releases is useful for investigation but does not prove a function exists or behaves identically in Modeling 18.1.
+- **Prevention:** Verify function existence, exact signature, object type and runtime behavior in the target installation.
 
-## LL-002 – Do not reparent the working Results Browser into a new host shell
+## LL-006 – Avoid assuming Common Lisp condition handlers or helper predicates exist
+- **Observed:** `HANDLER-CASE` and `SEL_ITEM-P` were reported as undefined in the user's Modeling 18.1 environment.
+- **Prevention:** Do not import generic Common Lisp assumptions or undocumented helper names into the LISP tool. Confirm each symbol in the actual environment before use.
 
-**Symptom:** Searches with matches failed to show results after the Results Browser was embedded in a custom unified host window.
+## LL-007 – Keep one Results Browser, not one browser per query
+- **Symptom:** The first ver-03 experiment created multiple Graphical Browser instances and docked them as tabs in Creo's Browser Bar.
+- **Cause:** The requirement was interpreted as multiple browser sessions rather than one Results Browser with internal pages.
+- **Correction:** User clarified the required UI: one separate Results window with its own horizontal tabs, each keyed by the filter pair.
+- **Prevention:** Read TD-008 before implementing any multi-search feature. The old multi-browser experiment is superseded.
 
-**Cause:** The host-shell/browser-parent approach introduced a failure path; an incomplete grid parent hierarchy was also found during investigation. Even after diagnosing the hierarchy, the unified architecture was rolled back in favor of the known-good standalone browser.
-
-**Resolution:** Restore the standalone Graphical Browser creation path.
-
-**Prevention:** Keep the current standalone browser. Do not reintroduce `sd-set-graphical-browser-parent` or a new host shell just to rearrange footer controls without first proving a minimal 18.1 test.
-
-## LL-003 – Supply keyword arguments in the documented form
-
-**Symptom:** Creo displayed `Odd number of arguments for keywords.`
-
-**Cause:** Calls to `sd-browser-set-status-text` supplied the status message without the required `:value` keyword/value pair.
-
-**Resolution:** Pass the status text using `:value` in both calls. The user confirmed the message disappeared.
-
-**Prevention:** Verify the exact function signature and pass every required keyword explicitly.
-
-## LL-004 – Density API values use a different scale from the UI examples
-
-**Observation:** For the two user-tested Parts, `sd-inq-part-density` returned Instance/Base values 1000/304000 and 2000/400000 while Part Properties displayed 1/304 and 2/400.
-
-**Resolution in current source:** Normalize returned numeric values by dividing by 1000 before matching/displaying.
-
-**Prevention:** Diagnose raw values and units on known Parts before applying conversion to other properties or models. Do not generalize this scale factor to unrelated APIs.
-
-## LL-005 – Separate verified behavior from API assumptions
-
-**Lesson:** Documentation for a later PTC release can guide investigation but does not prove compatibility with Modeling 18.1.
-
-**Prevention:** Validate function existence, signatures, object types, and actual UI behavior in the target installation. Record static checks and runtime evidence separately.
+## LL-008 – Preserve confirmed code as a versioned baseline
+- **Lesson:** Risky architectural experiments must not overwrite a user-confirmed source.
+- **Prevention:** Work on `main`, keep each LISP version in its own `ver-XX` directory, and preserve earlier versions unchanged.
 
 ## Development checklist
-
-- Preserve a known-good source revision before a risky change.
+- Inspect current source and relevant docs before editing.
 - Make one focused change at a time.
-- Test the exact failing and success paths in Modeling 18.1.
-- Retest result display, single-row selection, Select All, and native Apply after any Results Browser change.
-- Record the user's observed result and source revision.
+- Verify API names/signatures and object types in Modeling 18.1.
+- Retest result display, single-row selection, Select All and native Apply after Results UI changes.
+- Record exact source revision and user-observed outcome.
+- Update shared knowledge docs on `main`.
