@@ -1,0 +1,157 @@
+# H871 Engineering Knowledge Base
+
+A durable, cross-chat reference for Creo Elements/Direct Modeling 18.1 LISP development. This document consolidates reusable facts, API observations, verified workflows, failure causes and working practices. It is not a substitute for checking the actual source or target-version documentation.
+
+## 1. Environment and development principles
+
+- Target: **PTC Creo Elements/Direct Modeling 18.1** (not Creo Parametric).
+- Language: Creo/Elements Direct Lisp environment. Do not assume all ANSI Common Lisp functions or third-party helper symbols are available.
+- User's LISP experience: basic; provide clear LOAD command, command name, test steps and expected result when handing over code.
+- Prefer incremental changes and preserve a known-good source version.
+- Separate property retrieval, filtering logic, UI/result presentation and selection hand-off where practical.
+- Do not use customer models, drawings, credentials or private data in this public repo.
+
+## 2. Verified Part Filter facts
+
+### Density inquiry
+- Instance: `(sd-inq-part-density part :instance)`
+- Base/contents: `(sd-inq-part-density part :contents)`
+- Current exact-pair matching uses AND: both Instance and Base must match.
+- In the tested workflow, raw API values are 1000 times the Part Properties display values. Examples:
+  - UI Instance/Base 1/304 → API raw 1000/304000.
+  - UI Instance/Base 2/400 → API raw 2000/400000.
+- The current Part Filter normalizes these Density values by dividing by 1000.
+- Do not apply this conversion to any other property without independently checking its scale and units.
+
+### Assembly traversal and Part identification
+- The current implementation recursively traverses `(sd-inq-obj-children obj)`.
+- Part test in current source: `(sd-inq-part-p obj)`.
+- Name/path helpers in current source: `sd-inq-obj-basename`, `sd-inq-obj-pathname`.
+- These are source-observed calls in the current working implementation; verify signatures before reusing in a different context.
+
+### Results Graphical Browser
+- The user-confirmed workflow displays Part results in a dedicated Graphical Browser.
+- User-confirmed: individual row selection, Select All and native Apply hand-off to Modeling selection.
+- Browser row client data stores the actual Part object and display fields; current helper reads it through `browsernode-objclientdata`.
+- Current source uses `sd-create-browser-tree`, `sd-create-browsernode`, `sd-create-graphical-browser`, `sd-browser-define-table`, `sd-browser-set-active-table`, `sd-browser-exec-cmd`, `sd-show-graphical-browser`, `sd-query-browser`.
+- Treat these as source-observed API usage, not blanket guarantees for all 18.1 contexts. Preserve the tested call patterns.
+
+### Status text
+Correct form observed in working source:
+```lisp
+(sd-browser-set-status-text
+  browser-name
+  :value "Status message")
+```
+Omitting `:value` caused “Odd number of arguments for keywords.”
+
+## 3. ver-02 convention mapping
+
+The user-facing selectors map onto the existing Density fields:
+
+| Machining Process | Density Instance |
+|---|---:|
+| CNC | 1 |
+| KH | 2 |
+| CG | 3 |
+| COVER | 4 |
+
+| Material label | Density Base |
+|---|---:|
+| A6061 | 6061 |
+| SUS201 | 201 |
+| SUS304 | 304 |
+| SS400 | 400 |
+| POM | 10 |
+| Bakelit | 20 |
+| MC | 30 |
+| MIKA | 40 |
+| PU | 50 |
+
+- Default: CNC + SUS304 = 1/304.
+- Dialog Generator pattern in source: numeric `:range` entries with `:label`; display-only code fields updated by `:after-input`.
+- Important distinction: these are user conventions. No actual Material property is read from the model.
+
+## 4. User-confirmed behavior and regression boundary
+
+The following have been explicitly confirmed by the user in Modeling 18.1:
+1. Results Browser opens and displays matching Part rows.
+2. Select All is present.
+3. Clicking an individual row selects the corresponding Part.
+4. Native Apply transfers selected Parts to Modeling selection.
+
+Any Results UI change must retest these behaviors. Keep native Apply unless a replacement is proven to preserve the same selection semantics.
+
+## 5. Failure patterns and root causes
+
+### Custom Apply callback broke selection
+- Symptom: clicking rows and pressing Apply no longer worked.
+- Cause: custom callback replaced native Apply and reopened the Browser immediately after selection hand-off.
+- Fix: remove callback; retain native default Apply.
+- Prevention: do not override native Apply without a verified need and regression tests.
+
+### Unified host-shell / browser reparenting failed
+- Errors included:
+  - `Could not embed the results browser in its host window.`
+  - `Could not create the unified results window.`
+- Resolution: restore standalone Graphical Browser.
+- Prevention: do not revive the failed browser-parent architecture as a shortcut for UI rearrangement.
+
+### Keyword argument error
+- Error: `Odd number of arguments for keywords.`
+- Cause: status-text call omitted `:value`.
+- Fix: pass `:value` explicitly.
+
+### Undefined Lisp symbols
+- User observed `HANDLER-CASE` undefined.
+- User observed `SEL_ITEM-P` undefined in several diagnostic attempts.
+- Prevention: do not assume generic Common Lisp or undocumented Creo helper symbols exist. Verify in the target environment before using them.
+
+### User input line invocation
+- Some attempted LISP test calls did not work when entered directly on the user input line.
+- Prevention: provide a known LOAD procedure and a verified command entry point; do not assume arbitrary function forms are accepted as interactive commands.
+
+## 6. Correct multi-search design (ver-03)
+
+Authoritative user requirement:
+- One separate Results Browser window.
+- Multiple internal horizontal tabs/pages inside that same window.
+- One filter pair maps to one page.
+- Caption uses Material + Process, e.g. `SUS304-CNC`.
+- Same pair refreshes existing page; different pair creates a new page.
+- Switching pages preserves each result list and ideally its selection.
+- Select All and Apply are scoped to active page; Apply transfers only selected Parts from that page.
+- A no-match search must not silently erase a valid page.
+- Do not create one Graphical Browser per search or dock multiple windows as tabs in Creo Browser Bar.
+
+Potential UICT tab-control direction is research only. Validate Modeling 18.1 API signatures and actual Part-selection/Apply hand-off before integrating it. A safe prototype sequence is: tab shell with synthetic rows → page switching/state isolation → real Part selection → Apply hand-off → integrate filter engine and pair-key refresh.
+
+## 7. Compatibility and API research rules
+
+- Prefer official PTC Integration Kit documentation.
+- Record the exact release/version of every reference.
+- Later-release references are not proof that a symbol exists in 18.1.
+- Verify function existence, exact keyword names, required parent/container objects, callback calling convention, return values and object lifetime.
+- Avoid large UI architecture changes before a minimal proof-of-concept is tested.
+- If a symbol is undefined, do not keep retrying variants without evidence; isolate the environment and inspect supported references.
+
+## 8. Reusable development workflow
+
+1. Inspect `main`, current source and this knowledge base.
+2. Confirm the user requirement and current version.
+3. Preserve previous known-good code.
+4. Make one small change.
+5. Run static syntax/delimiter checks and inspect changed call signatures.
+6. Ask the user to load the exact file in Modeling 18.1.
+7. Capture exact error text or successful behavior.
+8. Update the shared knowledge docs and test checklist.
+9. Mark runtime status only at the evidence level actually achieved.
+
+## 9. Scope not yet verified
+
+Do not present these as implemented:
+- Actual Material-property inquiry.
+- Mass, Volume, bounding-box/dimension, custom attribute or other property filters.
+- General dynamic filter-condition builder.
+- UICT internal tab control compatibility and Apply hand-off in Modeling 18.1.
+- New ver-03 implementation.
