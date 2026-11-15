@@ -104,3 +104,17 @@ Do not revive the superseded experiment that creates one Graphical Browser per s
 - A command entered directly in the user input line may not work as expected for some LISP tests; use a verified load/command invocation route.
 
 For the consolidated API findings, root causes and reusable procedures, see [ENGINEERING_KNOWLEDGE_BASE](docs/ENGINEERING_KNOWLEDGE_BASE.md).
+
+
+## 10. Cross-chat skill package and recovered references (2026-11-15)
+
+A reusable skill package has been added at `skills/creo-elements-direct-modeling/`. It consolidates project conversations and recovered user-provided materials beyond Part Filter:
+- Annotation sheet/frame macros (`am_sheet.m`-style source, uploaded 2026-10-16): frame load/create/replace and current-sheet lifecycle.
+- Annotation BOM layout customization macros (2026-10-17): layout import/store/edit/accept/discard and flag attach points.
+- Annotation drawing arrangement macros (2026-10-17): Arrange_sheets, Arrange_sheets2 and Arrange_views patterns.
+- Initial measurement/export and command-access concept (2026-10-09), explicitly unverified.
+- Part Filter API/runtime evidence and failure history (2026-11-13/14).
+
+Top-level indexes: `docs/API_VERIFICATION_REGISTER.md` and `docs/USER_REFERENCE_INVENTORY.md`. The skill package distinguishes Modeling Lisp from legacy Annotation/ME10 command macros. User-provided Annotation sources contain CoCreate confidential/copyright headers; only technical summaries and provenance metadata are mirrored to this public repository, not full source dumps.
+
+The accessible Library search did not identify a standalone official Modeling 18.1 Integration Kit PDF/manual. Do not claim such a manual has been reviewed until it is retrievable and its release is verified.
