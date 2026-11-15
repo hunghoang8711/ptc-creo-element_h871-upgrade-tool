@@ -60,3 +60,10 @@ For a new tool in this repository:
 3. Reuse only APIs/lessons that are relevant and verified for Modeling 18.1.
 4. Add newly discovered reusable functions, compatibility notes and failure patterns to the Engineering Knowledge Base.
 5. Keep tool-specific implementation details in its own context/README; keep cross-tool engineering rules in the shared knowledge base.
+
+
+## Required skill package for all Creo work
+
+Before any Creo task (including a new tool), also read [`skills/creo-elements-direct-modeling/SKILL.md`](../skills/creo-elements-direct-modeling/SKILL.md) and its relevant references. This package includes knowledge recovered from prior chats and user-provided Annotation macro files, not only the current Part Filter thread.
+
+Use [API_VERIFICATION_REGISTER](API_VERIFICATION_REGISTER.md) to check symbol evidence and [USER_REFERENCE_INVENTORY](USER_REFERENCE_INVENTORY.md) to identify the historical source material. Do not confuse Lisp with Annotation/ME10 command language. Do not copy full CoCreate confidential legacy sources into this public repository.
