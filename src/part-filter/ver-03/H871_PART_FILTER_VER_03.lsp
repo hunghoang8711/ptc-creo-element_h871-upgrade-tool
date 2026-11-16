@@ -402,11 +402,19 @@
         "H871 Apply: Modeling rejected the native hand-off. See the trace file.")
       (return-from h871-pf-v03-native-apply nil))
     ;; The bridge must remain visible until Modeling completes the native
-    ;; selection hand-off. Once the hand-off succeeds, hide the temporary
-    ;; bridge so it does not remain as a second Results window.
-    (let ((hidden
-            (sd-hide-graphical-browser *h871-pf-v03-apply-browser*)))
-      (h871-pf-v03-trace "APPLY/HIDE-BRIDGE-AFTER-HANDOFF" hidden)))
+    ;; selection hand-off. The previous hide call returned without removing
+    ;; the visible window in the user's Modeling 18.1 test. Destroy the
+    ;; temporary browser after hand-off instead; the 3D selection has already
+    ;; been transferred and must remain untouched.
+    (let ((destroyed
+            (ignore-errors
+              (sd-destroy-graphical-browser *h871-pf-v03-apply-browser*))))
+      (h871-pf-v03-trace "APPLY/DESTROY-BRIDGE-AFTER-HANDOFF" destroyed))
+    (let ((tree-destroyed
+            (ignore-errors
+              (sd-destroy-browser-tree *h871-pf-v03-apply-tree*))))
+      (h871-pf-v03-trace "APPLY/DESTROY-BRIDGE-TREE-AFTER-HANDOFF"
+        tree-destroyed)))
   t)
 
 ;; A zero-input sequential Dialog Generator command runs its :ok-action
