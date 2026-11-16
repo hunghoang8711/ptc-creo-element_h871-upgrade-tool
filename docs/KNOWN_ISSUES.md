@@ -165,3 +165,15 @@ Correction committed in source: root and Part node IDs are now resolved using `s
 **Not verified:** whether the hidden temporary Browser bridge can transfer those selected Parts into Modeling's actual selection context. Previous investigations found hidden/offscreen Browser hand-off unreliable. A successful BrowserNode lookup or `:select-and-execute` status is not acceptance evidence. User must verify the selected Parts are visibly selected in the 3D viewport.
 
 Next test: load the updated ver-03 source in a fresh Modeling 18.1 session, search a known pair, select one row, Apply, then repeat with multiple rows. Capture `H871_PART_FILTER_VER_03_TRACE.txt` and report actual viewport selection. Do not change the ver-03 UI or filter collector while diagnosing this boundary.
+
+
+## Critical direction correction – UICT ver-03 is not the active base (2026-11-16)
+
+The prior note recommending continued development from UICT ver-03 is superseded. That path is associated with fatal exception `0xC00000FD` and must not be loaded as the current candidate. The attempted BrowserNode ID resolution in commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` only modifies the obsolete UICT hidden Apply bridge; it does not address the fatal search path and is not the active solution.
+
+Use these separate evidence boundaries:
+- Stage 0 native Graphical Browser: user-confirmed direct row selection, Select All and native Apply selecting actual Parts.
+- ver-04 single-Browser page-root diagnostic: user-confirmed page switching and restoring row selection for `CG-SS400`; its Apply trace status alone is not proof of viewport selection.
+- ver-05: integration candidate; horizontal page selector behavior in Modeling 18.1 remains unverified.
+
+Target is one standalone visible Results Browser combining Stage 0 native selection/Apply with ver-04 page-root logic. No intermediate-window workflow, UICT/hidden bridge, Browser Bar docking, extra Browser per search, or reparenting.
