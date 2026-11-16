@@ -100,3 +100,11 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 - **Observation:** VER-05's independent result Browser display, row selection and native Apply were user-confirmed, but a later Open action intended to show another Browser was reported to trigger fatal exception `0xc00000fd`.
 - **Evidence limit:** The exact UI control/action path and root cause are not yet isolated. The Manager Open handler currently calls `sd-show-graphical-browser` on the stored Browser name; this is a candidate for investigation, not a confirmed cause.
 - **Prevention:** Do not mark Browser reopen/lifecycle as verified merely because initial Browser creation and Apply work. Test reopen separately on a disposable Assembly copy, capture the last trace marker, and never overwrite the original customer model after a fatal exception.
+
+
+## LL-019 – Distinguish a proven component from the accepted overall UI architecture
+
+- **Observation:** VER-05 successfully demonstrated independent Graphical Browsers and native Apply, but each process/material pair opens a separate top-level Part List window.
+- **Requirement:** The accepted final design is one Results window with internal tabs, one tab per unique process/material pair. Re-filtering the same pair refreshes that tab; another pair adds a tab.
+- **Failure mode:** Treating a successful multi-Browser Apply test as completion of VER-05 overlooked the explicit single-window requirement.
+- **Prevention:** Verify both functional behavior and the agreed top-level UI architecture before declaring a version complete. A technically working alternative architecture is still a regression when it violates an explicit user constraint.
