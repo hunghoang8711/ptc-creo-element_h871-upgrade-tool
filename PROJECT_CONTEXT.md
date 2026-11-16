@@ -197,3 +197,17 @@ Correction: the previous note saying modeMenu is not a horizontal row was wrong.
 The user has explicitly selected ver-03 as the accepted interface: one Results window with internal tabs/pages per Density Instance + Density Base pair, multi-column Display Table, direct single/multi-row selection, Select All/Clear Selection and Apply. Continue development from ver-03. ver-04/ver-05 are diagnostic experiments only and must not redirect the product toward a single-Graphical-Browser UI or intermediate-window workflow.
 
 Apply source correction commit `068ee4123b5aadf6cde5bce54321f1ee031ea064`: resolve every `sd-create-browsernode` identifier through `sd-get-browsernode-struct` before passing nodes to `:set-object-selection`. Runtime hand-off to Modeling selection is still unverified; require visible viewport selection as proof.
+
+
+## Critical correction – Part Filter implementation direction (2026-11-16)
+
+The prior section describing UICT ver-03 as the active architecture is superseded. UICT ver-03 is the unstable path associated with Modeling fatal exception `0xC00000FD`; do not use its Display Table/hidden Browser Apply bridge as the implementation base.
+
+Recovered milestones:
+1. **Stage 0** (`src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`): user-confirmed native Graphical Browser. Results, Select All, individual row selection and native Apply selecting actual Parts worked.
+2. **ver-04 diagnostic**: one Browser with multiple page roots; user confirmed switching to `CG-SS400` and restoring its selected row. Earlier trace showed native Apply status `:SUCCESS` and a selection context, but did not conclusively prove viewport selection.
+3. **ver-05**: single-Browser multi-page integration candidate; page-selector UI still needs target-version verification.
+
+**Final target:** one visible standalone Results Browser, native selection and Apply from Stage 0, plus multiple Density-pair pages/page-root switching from ver-04. No intermediate-window workflow, no UICT Display Table or hidden Browser bridge, no Browser Bar docking, no separate Browser per search, and no host-shell reparenting. Keep Stage 0 immutable and integrate the page algorithm into the same Browser.
+
+Commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` modifies only the obsolete UICT Apply bridge and is not to be loaded as the active candidate.
