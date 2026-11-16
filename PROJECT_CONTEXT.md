@@ -190,3 +190,10 @@ The missing multi-page UI was traced to using :modeMenu as a horizontal tab stri
 
 
 Correction: the previous note saying modeMenu is not a horizontal row was wrong. PTC specifies modeMenu as a row of toggle buttons directly above buttonMenu, while both menus are also mapped to right-click popup entries for compatibility. The original modeMenu page selector is restored in source commit 7763d35, with trace markers for the evaluated mode-menu specification and Browser creation. The actual runtime cause of the missing page strip remains unresolved.
+
+
+## Part Filter – direction reaffirmed (2026-11-16)
+
+The user has explicitly selected ver-03 as the accepted interface: one Results window with internal tabs/pages per Density Instance + Density Base pair, multi-column Display Table, direct single/multi-row selection, Select All/Clear Selection and Apply. Continue development from ver-03. ver-04/ver-05 are diagnostic experiments only and must not redirect the product toward a single-Graphical-Browser UI or intermediate-window workflow.
+
+Apply source correction commit `068ee4123b5aadf6cde5bce54321f1ee031ea064`: resolve every `sd-create-browsernode` identifier through `sd-get-browsernode-struct` before passing nodes to `:set-object-selection`. Runtime hand-off to Modeling selection is still unverified; require visible viewport selection as proof.
