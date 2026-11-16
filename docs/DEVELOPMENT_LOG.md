@@ -246,3 +246,11 @@ Resolved:
 - Static checks passed: balanced parentheses/strings; :clear-table-roots present; native :okButtonLabel "Apply" remains default with no :okButtonAction; all Density mappings unchanged.
 - PTC 20.6 reference documents the command sequence. Modeling 18.1 runtime compatibility remains unverified.
 - Remaining acceptance gaps: horizontal page button strip rendering and callback, root count exactly one after each switch, page-local selection save/restore, same-pair refresh, no-match preservation, Select All/Clear Selection, and actual 3D viewport Apply.
+
+
+### ver-05 page-switch fail-safe refinement
+
+- Added explicit return checks for :clear-table-roots and :change-table-root. If either operation fails, activation stops rather than risking a mixed-page table and unsafe Apply.
+- Wrapped the :number-of-table-roots trace query in ignore-errors because it is diagnostic-only and its Modeling 18.1 availability is not independently verified.
+- Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4.
+- Static checks passed; Modeling 18.1 runtime remains pending.
