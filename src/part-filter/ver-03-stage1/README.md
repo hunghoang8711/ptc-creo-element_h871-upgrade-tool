@@ -28,7 +28,7 @@ Retain the verified Stage 0 native Graphical Browser workflow while allowing mul
 
 ## Compatibility caution
 
-The `:createAsTab` option and Browser Tree `:update-args` are documented in later-version PTC Integration Kit references. Exact behavior in Modeling 18.1 is not established by documentation alone. This is an isolated compatibility test, not a runtime-confirmed feature.
+The `:createAsTab` option is documented in later-version PTC Integration Kit references; exact behavior in Modeling 18.1 remains unverified. The first Stage 1 test produced `0xC00000FD` immediately after Search OK, while Modeling remained usable after the message was closed. The source has now been changed to avoid Browser Tree `:update-args`: each tree receives a unique zero-argument callback, matching the callback shape used by the user-confirmed Stage 0. A trace file now records Search and Browser creation milestones. This is a targeted compatibility correction, not a runtime-confirmed fix.
 
 ## Stage 1 test protocol
 
@@ -44,7 +44,7 @@ Use a disposable model copy only.
 8. In each tab, verify double-click single-Part selection, Select All, Clear Selection, and Apply.
 9. Confirm closing/hiding one browser tab does not destroy other tabs.
 
-Record exact behavior and any Modeling 18.1 error. Do not proceed to Stage 2 until the user confirms Stage 1.
+After testing, if the exception appears, close the message and inspect `%USERPROFILE%/H871_PART_FILTER_STAGE1_TRACE.txt`. Report the last line in that file. Also record exact behavior. Do not proceed to Stage 2 until the user confirms Stage 1.
 
 ## Next stages (not yet implemented)
 
