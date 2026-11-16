@@ -83,3 +83,12 @@ Regression test: load the latest source after a prior ver-03 session where old p
 - Confirm numeric search remains Density Instance `1`, Density Base `304`, with `/1000.0` normalization and caption `CNC-SUS304`.
 - Verify other mapped pairs and existing-tab refresh after the first successful Results creation.
 - Runtime test pending in Modeling 18.1.
+
+
+## 2026-11-16 – partial UICT initialization regression
+
+1. Reproduce after the previous failed ver-03 run, without manually deleting the existing dialog shell.
+2. Load the latest ver-03 source and search CNC + SUS304.
+3. Expected: the code independently detects/recreates a missing Results grid area or tab control even when the dialog shell already exists; first results page is inserted successfully.
+4. Repeat the search in the same session; expected: existing shell/grid/tab are reused and the matching page refreshes.
+5. If the same NIL-is-not-of-type-STRING error remains, record the last visible message and whether the Results shell/grid/tab were already present. Do not change the numeric Density filter path as part of this diagnosis.
