@@ -89,3 +89,12 @@ A new self-contained candidate has been added:
 
 The ver-05 Browser now builds a dynamic Graphical Browser `:modeMenu` row with one page button per Density pair and sets `:modeMenuInitialButton` to the active page. This is intended to provide horizontal, in-window page switching while preserving one Browser's native Apply. Previous/Next helper functions remain in source as diagnostic fallbacks; the current toolbar button row is Select All/Clear Selection. PTC's detailed modeMenu reference is from a later release, so Modeling 18.1 compatibility and mutual-exclusion behavior must be tested before confirmation.
 
+
+
+### ver-05 page-isolation correction (2026-11-16)
+
+A source review after the first ver-05 handoff found a critical page-switch defect: h871-pf-v05-activate-page changed the table root without first clearing the previous table root. Graphical Browser tables can retain multiple table roots; this risks showing rows from multiple Density pages at once and makes Select All/native Apply page scope unsafe.
+
+The ver-05 activation path now buffers redraw, clears the current selection and all table roots, sets exactly the requested page root, resumes redraw, and traces the resulting table-root count. This is based on the documented Graphical Browser command sequence (:BUFFER-DISPLAY, :CLEAR-TABLE-ROOTS, :CHANGE-TABLE-ROOT) in the PTC 20.6 reference; Modeling 18.1 runtime compatibility still requires testing.
+
+Do not call ver-05 complete: page strip rendering/callbacks, page isolation, page-local selection restore and actual viewport Apply remain unverified in Modeling 18.1. The horizontal modeMenu is a candidate page-button strip, not a confirmed native tab control. Keep one visible Results Browser; no UICT launcher, hidden Browser bridge or second Results window.
