@@ -97,3 +97,10 @@ Treat sd-destroy-graphical-browser and sd-destroy-browser-tree behavior as requi
 When a diagnostic temporarily replaces a working UICT Results window with a native Graphical Browser, a Close action that restores UICT is only half of the navigation. The user also needs a persistent entry point in the restored UICT shell to reopen the native Browser without typing the diagnostic command again.
 
 For this pattern, install one uniquely named pushbutton in the existing UICT grid, guard creation with `sd-control-p`, and route its push action to the Browser rebuild entry point. Rebuild from the latest UICT page registry so new searches are reflected. Verify placement and callback in the target Modeling release; do not infer runtime success from static code checks.
+
+## LL-016 – Keep native selection and multi-page data in the same Browser (2026-11-16)
+
+The user's final requirement is not a sequence of windows or a two-stage hand-off. The one Results Graphical Browser must own the visible Part rows, selected BrowserNodes, active Density-pair page and native Apply action. ver-03 UICT page data cannot be treated as equivalent to native Browser selection; the hidden Browser bridge did not reproduce ver-02 behavior. ver-04's switch-to-native / return-to-UICT flow is diagnostic only.
+
+ver-05 therefore moves search and page ownership into one standalone Browser implementation, reusing ver-02's search/mapping and native Apply pattern. The current page navigation is a same-window popup plus Previous/Next; horizontal tabs still require a separately verified 18.1-compatible UI mechanism. Never add an extra Results-window transition merely to imitate tabs.
+
