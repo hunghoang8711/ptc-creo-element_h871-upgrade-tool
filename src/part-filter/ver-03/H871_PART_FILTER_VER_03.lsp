@@ -269,6 +269,14 @@
   (unless (sd-get-browsernode-struct *h871-pf-v03-apply-tree* :root)
     (h871-pf-v03-build-apply-tree))
 
+  ;; Mirror ver-02: make the bridge root's direct Part children the table rows.
+  (sd-browser-exec-cmd *h871-pf-v03-apply-browser* :set-table-mode)
+  (let ((root
+          (sd-get-browsernode-struct *h871-pf-v03-apply-tree* :root)))
+    (when root
+      (sd-browser-exec-cmd
+        *h871-pf-v03-apply-browser* :change-table-root root t)))
+
   ;; Programmatically select each real Part-backed BrowserNode.
   (dolist (node *h871-pf-v03-apply-nodes*)
     (sd-browser-exec-cmd
