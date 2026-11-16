@@ -84,3 +84,11 @@ Resolved:
 - PTC 20.7 references confirm Display Table/logical-table/multi-row selection APIs, but exact Modeling 18.1 compatibility is unverified.
 - The ver-02 native Apply pattern is user-confirmed; the new hidden Display Table-to-BrowserNode bridge is not runtime-tested yet.
 - ver-01 and ver-02 remain unchanged as regression baselines.
+
+
+## 2026-11-16 – ver-03.2 logical-table refresh recovery
+- User reported runtime error after choosing Process/Material and pressing OK: `A logical table with name "" does not exist`, followed by the generic result-table refresh error.
+- Source review identified a stale in-memory page-record compatibility case: page registry globals survive LISP reloads, while older page entries may lack the `:logical-table` key.
+- Refresh now derives the table name from the stable page ID, validates it, recreates missing logical tables, checks the Display Table binding, and restores the control if stale.
+- Error message now includes the concrete logical-table name for further diagnosis.
+- Committed to main; Modeling 18.1 retest pending. ver-01/ver-02 untouched.
