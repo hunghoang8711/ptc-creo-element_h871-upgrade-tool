@@ -305,3 +305,24 @@ Recovered project milestones:
 - ver-05 is the single-Browser integration candidate; page-selector UI is not yet confirmed in Modeling 18.1.
 
 Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver-04 page-root/page-selection algorithm into the same visible Browser, then verify page navigation in 18.1. No intermediate-window workflow, UICT Display Table/hidden bridge, Browser Bar docking, extra Browser per search, or host-shell reparenting.
+
+
+
+
+## 2026-11-16 – ver-06 Stage 0 + ver-04 integration candidate
+
+Created `src/part-filter/ver-06/H871_PART_FILTER_VER_06.lsp` on branch `integration/ver-06-stage0-native-multipage`.
+
+- Used the user-confirmed Stage 0 native Graphical Browser source as the code base; Stage 0 source itself remains unchanged.
+- Preserved the Stage 0 recursive collector, Density normalization, exact Instance AND Base matching, report generation, table display callbacks, and native Graphical Browser Apply setup. Static comparison confirms the collector and Density helper functions are identical after the isolated prefix rename.
+- Integrated the ver-04 page-root hierarchy, per-page selected-path save/restore, `:change-table-root`, and `:set-object-selection` pattern.
+- Added Previous/Next navigation and a Results Pages context-menu submenu.
+- Deliberately did not use the unverified ver-05 `:clear-table-roots` sequence.
+- No UICT Display Table, hidden Browser bridge, reparenting, Browser Bar docking, or intermediate Results window was introduced.
+- Added `src/part-filter/ver-06/README.md` with lineage, constraints, and runtime acceptance steps.
+
+Static verification: Lisp parentheses balanced (depth 0, no premature close); collector and Density helpers compare identical after prefix rename. Runtime status: **NOT TESTED** in Creo 18.1. Stage 0 native Apply and ver-04 page switching were verified separately; their combined behavior in ver-06 still requires a disposable-model test, especially visible viewport selection after Apply.
+
+Branch source commit: `bc47d097cec12edcb42a0c2bafb34a637dad27f0`. README commit: `ed700410598c32758ce3774981aa205e209ecc67`.
+
+**Do not test on the original/customer Assembly.**
