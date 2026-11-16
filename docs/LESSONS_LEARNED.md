@@ -104,3 +104,7 @@ The user's final requirement is not a sequence of windows or a two-stage hand-of
 
 ver-05 therefore moves search and page ownership into one standalone Browser implementation, reusing ver-02's search/mapping and native Apply pattern. The current page navigation is a same-window popup plus Previous/Next; horizontal tabs still require a separately verified 18.1-compatible UI mechanism. Never add an extra Results-window transition merely to imitate tabs.
 
+### LL-016 follow-up – horizontal page selector inside the native Browser
+
+PTC's Graphical Browser API documents a `:modeMenu` row of mode buttons and an initial active button. This is a promising way to render page selectors inside the same native Browser, unlike Browser Bar docking tabs. The detailed reference currently available is for a later release; therefore it is an implementation candidate, not verified Modeling 18.1 behavior. Keep the actual Part BrowserNodes and native Apply in the same Browser regardless of which page-selector UI proves compatible.
+
