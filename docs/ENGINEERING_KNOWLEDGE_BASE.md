@@ -195,3 +195,12 @@ The first Modeling 18.1 test confirmed that the ver-04 diagnostic can hide the v
 A second diagnostic invocation failed because the named Browser Tree already existed. The source had no normal successful-run teardown path. The revised diagnostic adds h871-pf-v04-reset-browser-objects: hide/destroy the Browser, then destroy its Tree, clear node maps, and trace the cleanup attempt. It runs before rebuilding and from Close Results. Close Results restores the ver-03 UICT shell. Recovery command: H871_PF_V04_RESTORE_UICT_RESULTS.
 
 The cleanup patch is static-checked only. Do not infer that the destroy APIs work correctly in Modeling 18.1 until retested. The one-Browser native Apply hypothesis remains unverified until the user sees the actual Part selected in the 3D viewport. Do not change ver-01/ver-02/ver-03 production code or Density mapping while validating this lifecycle fix.
+
+
+## 15. ver-04 persistent return path and page-navigation tracing (2026-11-16)
+
+The first runtime feedback confirmed Close Results restores the old ver-03 UICT shell. The missing usability step was reopening the native Browser without re-running a command. ver-04 now installs a uniquely named `Open Native Results` pushbutton in the existing UICT grid. Its callback calls the Browser rebuild function, which snapshots the latest UICT pages and selections before resetting/recreating the native Browser. The launcher is installed only if `sd-control-p` reports that its control name does not already exist.
+
+Previous/Next callbacks now log `PAGE/NAVIGATION-REQUEST` and `PAGE/NAVIGATION-TARGET`, allowing a runtime trace to distinguish actual button callback invocation from the initial page activation during Browser startup. Existing right-click Results Pages submenu remains.
+
+Static source check passed, but target-version runtime verification is still required for button placement, pushAction callback, repeat close/reopen, page navigation and viewport Apply. A non-NIL `SELECT-AND-EXECUTE-SUCCESS-CONTEXT` is diagnostic evidence only, not proof that the viewport selection changed.
