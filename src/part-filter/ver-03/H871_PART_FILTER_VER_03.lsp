@@ -374,21 +374,35 @@
             *h871-pf-v03-apply-browser* :get-selected-objects)
           nil)))
 
-  ;; IMPORTANT: Do not invoke :select-and-execute programmatically here.
-  ;; The ver-02 baseline relies on the Graphical Browser's native OK button
-  ;; to perform the selection hand-off. A previous visible-bridge test proved
-  ;; that pressing this native Apply button selects the intended Part(s).
-  ;; Programmatic :select-and-execute returned :SUCCESS but did not provide
-  ;; evidence of viewport selection; destroying the browser immediately after
-  ;; that call could discard the user's opportunity to perform the native OK.
-  ;; Leave the selected bridge visible and let its built-in Apply button run
-  ;; the same native action as ver-02.
-  (h871-pf-v03-trace "APPLY/READY-FOR-NATIVE-OK"
-    (list (length *h871-pf-v03-apply-parts*)
+  ;; AUTO-APPLY EXPERIMENT (safe fallback retained):
+  ;; The bridge is already visible and its BrowserNodes are selected.
+  ;; Attempt the same native hand-off used by the Graphical Browser's Apply
+  ;; button. Unlike the failed earlier experiment, DO NOT immediately hide or
+  ;; destroy the bridge after this call. If Modeling does not transfer the
+  ;; selection, the user can still press the visible native Apply button.
+  ;; A :SUCCESS return is diagnostic only; viewport selection must be
+  ;; confirmed in Creo before this path is considered successful.
+  (let ((selected-count
           (sd-query-browser
             *h871-pf-v03-apply-browser* :number-of-selected-objects)))
-  (sd-display-message
-    "H871: Select the highlighted Parts using Apply in the H871 Native Apply Bridge window.")
+    (h871-pf-v03-trace "APPLY/AUTO-HANDOFF/BEFORE" selected-count)
+    (if (and (numberp selected-count) (> selected-count 0))
+        (let ((handoff
+                (sd-browser-exec-cmd
+                  *h871-pf-v03-apply-browser* :select-and-execute)))
+          (h871-pf-v03-trace "APPLY/AUTO-HANDOFF/RETURN" handoff)
+          (h871-pf-v03-trace "APPLY/AUTO-HANDOFF/AFTER"
+            (list
+              (sd-query-browser
+                *h871-pf-v03-apply-browser* :number-of-selected-objects)
+              (sd-query-browser
+                *h871-pf-v03-apply-browser* :get-selected-objects)))
+          (sd-display-message
+            "H871: Automatic Apply was attempted. Verify the 3D selection; if it did not select the Parts, use Apply in the still-open Native Apply Bridge."))
+      (progn
+        (h871-pf-v03-trace "APPLY/AUTO-HANDOFF/SKIPPED" selected-count)
+        (sd-display-message
+          "H871: No native bridge rows are selected. Use Apply in the Native Apply Bridge after selecting rows."))))
 
   t)
 
