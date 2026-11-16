@@ -211,3 +211,18 @@ Recovered milestones:
 **Final target:** one visible standalone Results Browser, native selection and Apply from Stage 0, plus multiple Density-pair pages/page-root switching from ver-04. No intermediate-window workflow, no UICT Display Table or hidden Browser bridge, no Browser Bar docking, no separate Browser per search, and no host-shell reparenting. Keep Stage 0 immutable and integrate the page algorithm into the same Browser.
 
 Commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` modifies only the obsolete UICT Apply bridge and is not to be loaded as the active candidate.
+
+
+
+
+## Part Filter – ver-06 integration candidate (2026-11-16)
+
+Branch: `integration/ver-06-stage0-native-multipage`.
+
+Source: `src/part-filter/ver-06/H871_PART_FILTER_VER_06.lsp`.
+
+ver-06 combines the user-confirmed Stage 0 native Graphical Browser selection/Apply path with the user-confirmed ver-04 multi-page page-root and page-local selection restore algorithm. It is a standalone native Results Browser; no UICT Display Table, hidden Browser bridge, intermediate Results window, Browser Bar docking, or reparenting.
+
+Stage 0 collector, Density normalization, exact Instance AND Base predicate, report logic, table callbacks and native Apply setup are preserved. Static comparison confirms the collector and Density helper functions are identical after the prefix rename. Page navigation uses Previous/Next and a Results Pages context-menu submenu. The unverified ver-05 `:clear-table-roots` sequence is not used.
+
+**Status: static integration candidate only; not runtime-tested in Modeling 18.1.** Test on a disposable Assembly copy. Confirm page isolation, page-local selection restoration, Select All/Clear Selection, and most importantly actual Part selection in the 3D viewport after native Apply. Do not modify the Stage 0 source. Do not load the obsolete UICT ver-03 Apply bridge or commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` as the active candidate.
