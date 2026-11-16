@@ -71,3 +71,12 @@ References:
 - No Creo 18.1 runtime test is possible from the development environment.
 - Do not call ver-03.1 production-verified until Display Table creation, multi-row selection, and Apply hand-off all pass the above tests.
 - If Apply does not transfer Parts, report the exact error and whether the temporary bridge appeared; ver-02 remains the known-good fallback.
+
+
+## 2026-11-16 – ver-03.2 stale logical-table recovery
+
+- User runtime-tested the mapped parameter dialog and reported: `A logical table with name "" does not exist`, followed by `H871 ver-03: Could not refresh the result table.`
+- Diagnosis: the per-page registry is stored in global variables and can persist across LISP reloads. A page record retained from an earlier revision may not contain the newer `:logical-table` property, causing refresh to pass NIL/empty name to the logical-table API.
+- Updated refresh logic to derive the deterministic logical-table name from the page ID when metadata is missing; reject blank names; check `sd-logical-table-p`; recreate a missing logical table; verify the Display Table's logical-table binding; and recreate a stale Display Table control when necessary.
+- Improved the refresh error to include the actual logical-table identifier.
+- Static source update committed; requires a fresh Modeling 18.1 runtime test. No claim of runtime resolution until user confirms.
