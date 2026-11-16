@@ -75,3 +75,11 @@ Active decisions that constrain implementation. Superseded experiments are recor
 - Navigation prototype: Previous/Next toolbar buttons and a dynamic Results Pages popup submenu. This is not yet the required horizontal tab strip; it is intended to validate the single-Browser Apply architecture first.
 - Apply: Keep :okButtonLabel "Apply" and do not override :okButtonAction; use the native Graphical Browser default.
 - Scope: Diagnostic only. Do not change the ver-03 production source, collector, Density mappings, normalization, or ver-02 baseline until runtime tests prove the candidate.
+
+
+## TD-012 – Persistent two-way navigation between UICT and native Results Browser (diagnostic stage)
+
+- Date: 2026-11-16
+- Decision: Keep one visible Results window at a time. Close Results returns to the existing ver-03 UICT shell; a persistent `Open Native Results` button in that shell reopens the native Browser using the latest UICT page state.
+- Implementation: ver-04 installs the uniquely named button in the existing ver-03 grid and routes it to the diagnostic rebuild function. The Browser is rebuilt rather than merely shown, so searches made in UICT after returning are captured.
+- Scope: diagnostic only; this does not yet implement horizontal tabs inside the native Browser. Verify UICT control placement, callback and repeat open/close in Modeling 18.1 before adopting this as final UI.
