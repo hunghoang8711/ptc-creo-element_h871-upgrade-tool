@@ -16,14 +16,14 @@
 
 (in-package :oli)
 
-(defvar *h871-pf-rb-rb-results* nil)
-(defvar *h871-pf-rb-rb-diagnostic-samples* nil)
-(defvar *h871-pf-rb-rb-results-assembly* nil)
-(defvar *h871-pf-rb-rb-requested-instance* nil)
-(defvar *h871-pf-rb-rb-requested-base* nil)
+(defvar *h871-pf-rb-results* nil)
+(defvar *h871-pf-rb-diagnostic-samples* nil)
+(defvar *h871-pf-rb-results-assembly* nil)
+(defvar *h871-pf-rb-requested-instance* nil)
+(defvar *h871-pf-rb-requested-base* nil)
 
-(defvar *h871-pf-rb-rb-browser-name* "h871-pf-rb-results")
-(defvar *h871-pf-rb-rb-tree-name* "h871-pf-rb-results-tree")
+(defvar *h871-pf-rb-browser-name* "h871-pf-rb-results")
+(defvar *h871-pf-rb-tree-name* "h871-pf-rb-results-tree")
 
 (defun h871-pf-rb-name (obj)
   (or (sd-inq-obj-basename obj) "<NO NAME>"))
@@ -75,7 +75,7 @@
           (actual-base (sd-inq-part-density obj :contents)))
       ;; Keep a small raw-value sample in the report so a zero-match
       ;; result reveals what Creo 18.1 actually returned.
-      (when (< (length *h871-pf-rb-rb-diagnostic-samples*) 30)
+      (when (< (length *h871-pf-rb-diagnostic-samples*) 30)
         (push
           (list (h871-pf-rb-name obj)
                 (h871-pf-rb-path obj)
@@ -83,7 +83,7 @@
                 (type-of actual-instance)
                 actual-base
                 (type-of actual-base))
-          *h871-pf-rb-rb-diagnostic-samples*))
+          *h871-pf-rb-diagnostic-samples*))
       (when (and
               (h871-pf-rb-numeric-equal-p
                 (h871-pf-rb-density-display-value actual-instance)
@@ -126,17 +126,17 @@
   ;; Called by the Graphical Browser when its tree is built/refreshed.
   (let ((root
           (sd-create-browsernode
-            :tree *h871-pf-rb-rb-tree-name*
+            :tree *h871-pf-rb-tree-name*
             :parent nil
             :objPath "/H871_RESULTS"
             :objPname "H871 Part Filter Results"
             :objClientData (list :kind :root))))
-    (dolist (part (reverse *h871-pf-rb-rb-results*))
+    (dolist (part (reverse *h871-pf-rb-results*))
       (let ((instance (sd-inq-part-density part :instance))
             (base (sd-inq-part-density part :contents))
             (path (h871-pf-rb-path part)))
         (sd-create-browsernode
-          :tree *h871-pf-rb-rb-tree-name*
+          :tree *h871-pf-rb-tree-name*
           :parent root
           :objPath path
           :objPname (h871-pf-rb-name part)
@@ -152,16 +152,16 @@
     root))
 
 (defun h871-pf-rb-select-all ()
-  (sd-browser-exec-cmd *h871-pf-rb-rb-browser-name* :select-all))
+  (sd-browser-exec-cmd *h871-pf-rb-browser-name* :select-all))
 
 (defun h871-pf-rb-clear-selection ()
-  (sd-browser-exec-cmd *h871-pf-rb-rb-browser-name* :clear-select-list))
+  (sd-browser-exec-cmd *h871-pf-rb-browser-name* :clear-select-list))
 
 (defun h871-pf-rb-selected-parts ()
   (let ((parts nil))
     (dolist (node
               (sd-query-browser
-                *h871-pf-rb-rb-browser-name* :get-selected-objects))
+                *h871-pf-rb-browser-name* :get-selected-objects))
       (let ((data (h871-pf-rb-row-data node)))
         (when (eq (getf data :kind) :part)
           (push (getf data :part) parts))))
@@ -170,21 +170,21 @@
 (defun h871-pf-rb-show-selection-summary ()
   (let ((parts (h871-pf-rb-selected-parts)))
     (sd-browser-set-status-text
-      *h871-pf-rb-rb-browser-name*
+      *h871-pf-rb-browser-name*
       :value (format nil "~A result row(s) selected." (length parts)))))
 
 (defun h871-pf-rb-open-results-browser ()
   ;; Recreate browser/tree so every search has a clean result set.
   (ignore-errors
-    (sd-hide-graphical-browser *h871-pf-rb-rb-browser-name*))
+    (sd-hide-graphical-browser *h871-pf-rb-browser-name*))
   (ignore-errors
-    (sd-destroy-graphical-browser *h871-pf-rb-rb-browser-name*))
+    (sd-destroy-graphical-browser *h871-pf-rb-browser-name*))
   (ignore-errors
-    (sd-destroy-browser-tree *h871-pf-rb-rb-tree-name*))
+    (sd-destroy-browser-tree *h871-pf-rb-tree-name*))
 
   (unless
     (sd-create-browser-tree
-      *h871-pf-rb-rb-tree-name*
+      *h871-pf-rb-tree-name*
       :update-events oli:*SD-CHANGE-OBJECT-TREE-EVENT*
       :update-func 'h871-pf-rb-build-results-tree)
     (sd-display-error "H871: Could not create the results data tree.")
@@ -192,12 +192,12 @@
 
   (unless
     (sd-create-graphical-browser
-      *h871-pf-rb-rb-browser-name*
-      :tree *h871-pf-rb-rb-tree-name*
+      *h871-pf-rb-browser-name*
+      :tree *h871-pf-rb-tree-name*
       :topLabel "H871 - PART FILTER RESULTS"
       :treeStatusBar
         (format nil "Matched ~A Part(s). Select rows; Ctrl-click adds/removes."
-          (length *h871-pf-rb-rb-results*))
+          (length *h871-pf-rb-results*))
       :minHeight 280
       :maxWidth 900
       :maxHeight 760
@@ -235,7 +235,7 @@
 
   (unless
     (sd-browser-define-table
-      *h871-pf-rb-rb-browser-name*
+      *h871-pf-rb-browser-name*
       :table-name "h871-pf-rb-bom"
       :with-name-column nil
       :column-definition
@@ -260,15 +260,15 @@
     (return-from h871-pf-rb-open-results-browser nil))
 
   (sd-browser-set-active-table
-    *h871-pf-rb-rb-browser-name* :table-name "h871-pf-rb-bom")
-  (sd-browser-exec-cmd *h871-pf-rb-rb-browser-name* :set-table-mode)
-  (sd-show-graphical-browser *h871-pf-rb-rb-browser-name*)
+    *h871-pf-rb-browser-name* :table-name "h871-pf-rb-bom")
+  (sd-browser-exec-cmd *h871-pf-rb-browser-name* :set-table-mode)
+  (sd-show-graphical-browser *h871-pf-rb-browser-name*)
 
   ;; Root node is the table root; the table displays all matching Parts.
-  (let ((root (sd-get-browsernode-struct *h871-pf-rb-rb-tree-name* :root)))
+  (let ((root (sd-get-browsernode-struct *h871-pf-rb-tree-name* :root)))
     (when root
       (sd-browser-exec-cmd
-        *h871-pf-rb-rb-browser-name* :change-table-root root t)))
+        *h871-pf-rb-browser-name* :change-table-root root t)))
   t)
 
 ;; ------------------------------------------------------------
@@ -291,7 +291,7 @@
       (format s "Requested Density Base: ~A~%" requested-base)
       (format s "~%RAW DENSITY SAMPLE (first 30 Parts)~%")
       (format s "Part | Path | Instance value/type | Base value/type~%")
-      (dolist (sample (reverse *h871-pf-rb-rb-diagnostic-samples*))
+      (dolist (sample (reverse *h871-pf-rb-diagnostic-samples*))
         (format s "~S~%" sample))
       (dolist (part matches)
         (format s "~%PART: ~A~%" (h871-pf-rb-name part))
@@ -309,18 +309,18 @@
     report))
 
 (defun h871-pf-rb-run (assembly requested-instance requested-base)
-  (setf *h871-pf-rb-rb-diagnostic-samples* nil)
-  (setf *h871-pf-rb-rb-results-assembly* assembly)
-  (setf *h871-pf-rb-rb-requested-instance* requested-instance)
-  (setf *h871-pf-rb-rb-requested-base* requested-base)
-  (setf *h871-pf-rb-rb-results*
+  (setf *h871-pf-rb-diagnostic-samples* nil)
+  (setf *h871-pf-rb-results-assembly* assembly)
+  (setf *h871-pf-rb-requested-instance* requested-instance)
+  (setf *h871-pf-rb-requested-base* requested-base)
+  (setf *h871-pf-rb-results*
     (h871-pf-rb-collect
       assembly nil requested-instance requested-base))
   (let ((report
           (h871-pf-rb-write-report
-            assembly *h871-pf-rb-rb-results*
+            assembly *h871-pf-rb-results*
             requested-instance requested-base)))
-    (if (null *h871-pf-rb-rb-results*)
+    (if (null *h871-pf-rb-results*)
         (sd-display-message
           (format nil
             "No Parts matched Density Instance ~A and Density Base ~A.~%Report: ~A"
@@ -329,11 +329,11 @@
         (unless (h871-pf-rb-open-results-browser)
           (return-from h871-pf-rb-run nil))
         (sd-browser-set-status-text
-          *h871-pf-rb-rb-browser-name*
+          *h871-pf-rb-browser-name*
           :value (format nil
             "~A matching Part(s). Select rows; use Select All/Clear Selection buttons."
-            (length *h871-pf-rb-rb-results*)))))
-    (values (length *h871-pf-rb-rb-results*) report)))
+            (length *h871-pf-rb-results*)))))
+    (values (length *h871-pf-rb-results*) report)))
 
 ;; ------------------------------------------------------------
 ;; Dialog entry point - ver-03-rebuild baseline
