@@ -113,3 +113,17 @@ Diagnostic interpretation:
 - Compare with ver-02's `sd-query-browser :get-selected-objects` pattern.
 - Regression boundary: do not change Density filtering, logical table data, Results window, or ver-02 while repairing Apply.
 - Retest: select one row and Apply; select multiple rows and Apply; verify only selected real Parts become the Modeling selection.
+
+## 2026-11-16 – Apply BrowserNode ID resolution retest
+
+The Apply bridge now resolves the symbolic ID returned by `sd-create-browsernode` through `sd-get-browsernode-struct` before calling `:set-object-selection`.
+
+Run in Modeling 18.1:
+1. Load the latest `H871_PART_FILTER_VER_03.lsp`.
+2. Search a pair with multiple matching Parts.
+3. Select exactly one row and press Apply. Expected: no `#:NODE... is not of type "BROWSERNODE"` error; only that Part enters Modeling selection.
+4. Clear selection, select two or more rows, and press Apply. Expected: exactly those Parts enter Modeling selection.
+5. Repeat after switching to a different tab to verify page-scoped selection.
+6. If it fails, capture the complete error and whether it occurs during node creation, node lookup, `:set-object-selection`, or `:select-and-execute`.
+
+Do not mark Apply resolved until these tests pass in the user's Modeling 18.1 session.
