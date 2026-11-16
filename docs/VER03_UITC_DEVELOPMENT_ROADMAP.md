@@ -363,3 +363,30 @@ Next experiment proposal:
 4. Test exactly one selected row first. Record `:is-object-displayed`, selected count and `:select-and-execute` return.
 5. If the visible bridge succeeds, investigate whether its native Apply can be invoked/closed without exposing a second window, or whether a different native selection bridge is required. If it still fails, investigate active-command context in Modeling 18.1.
 6. Runtime status: latest hidden-bridge Apply and double-click = **failed**; diagnostic trace = **user-supplied and conclusive for the intermediate states**; root cause = **narrowed to native hand-off, final cause not yet proven**.
+
+
+## 17. Visible native Apply bridge diagnostic candidate — 2026-11-16
+
+Implemented on `feature/ver03-uict-apply`:
+
+- Source commit: `5629a274a080c6b6db3608656eabf64fb79653ae`
+- Source blob: `25a0470c2a69dc3bb54c39bdea28ad234e163bca`
+- File: `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`
+- Change: after creating the bridge Browser, building its BrowserNodes, setting table mode and changing the table root, call `sd-show-graphical-browser` immediately before the existing per-node displayed/selected checks and `:select-and-execute`.
+- New trace checkpoint: `APPLY/SHOW-BRIDGE-RETURN`.
+
+Scope guard:
+- No changes to UICT Results shell, internal page/tab lifecycle, collector, Density mapping/normalization, logical/display table schema, selection payload, or callback routing.
+- No changes to the native hand-off command itself.
+- This is explicitly a diagnostic candidate. It may briefly display the temporary native bridge window during Apply; it is not the intended final UI.
+
+Static validation:
+- Parentheses balanced.
+- No unterminated strings.
+- Source re-fetched from GitHub after commit and insertion verified.
+
+Runtime validation:
+- **Not yet tested by user in Creo Modeling 18.1.**
+- Do not mark Apply or double-click fixed until the user tests this exact commit.
+- Expected diagnostic distinction: compare `APPLY/NODE-STATE` displayed values before/after showing the bridge, then check `APPLY/SELECT-AND-EXECUTE-RETURN`.
+- First test one selected row via double-click or selecting one row and pressing Apply. If the temporary bridge appears, allow it to complete and note whether the Part becomes selected in the 3D model.
