@@ -108,11 +108,12 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 
 ## KI-014 – Stage 1 Search fatal exception and diagnostic reset
 
-- **Status:** Diagnostic baseline passed; original multi-browser failure remains isolated but unresolved.
+- **Status:** Stage 0-equivalent baseline passed; isolated `:createAsTab t` compatibility test pending.
 - **Runtime evidence:** User reports Fatal Exception `0xC00000FD` immediately after Search OK; Results Browser does not appear. Removing Browser Tree `:update-args` and using unique zero-argument callbacks did not resolve it.
 - **Trace finding:** `H871_PART_FILTER_STAGE1_TRACE.txt` was created once but remained 0 KB and was not updated on a subsequent search. The trace writer used `ignore-errors`, so it can silently fail. An empty trace is inconclusive and must not be used to infer the last executed stage.
 - **Current isolation step:** Active Stage 1 source is now a mechanical clone of the user-confirmed Stage 0 source, with only the helper/global prefix and dialog command renamed. Multi-browser sessions, callback closures, `:createAsTab`, `:tabname`, and file tracing have been removed.
 - **User runtime result (2026-11-16):** User loaded and tested the current Stage 1 diagnostic source in Creo Modeling 18.1. Search completed successfully, and its functionality is the same as Stage 0. The user explicitly confirmed that no new feature is present yet.
 - **Conclusion:** The Stage 0-equivalent Stage 1 source and its renamed command/helper prefix work in the user's environment. The earlier `0xC00000FD` is therefore associated with one or more removed multi-browser/tab-related changes, but the exact failing API/expression is not yet identified.
-- **Next step:** Reintroduce only one tab-related API change at a time, starting with the smallest isolated experiment. After each source update, have the user test before adding another change. If a test fails, revert that one experiment immediately to the confirmed diagnostic baseline.
+- **Current experiment:** Added only `:createAsTab t` to the single existing `sd-create-graphical-browser` call in Stage 1. It still uses one Browser Tree and one Graphical Browser; no multi-browser behavior or other callback/selection changes were introduced.
+- **Next step:** User tests this one-option revision in Modeling 18.1 on a disposable model. If it works, record whether the browser is docked/presented as a tab and verify native selection/Apply. If it fails, remove only `:createAsTab t` and return to the confirmed baseline before trying a different API.
 - **Preservation:** Stage 0, ver-01 and ver-02 source files remain unchanged. The current Stage 1 single-browser baseline is now user-runtime-confirmed.
