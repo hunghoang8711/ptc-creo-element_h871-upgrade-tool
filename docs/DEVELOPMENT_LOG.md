@@ -190,3 +190,15 @@ Resolved:
 - No changes to UICT Results tables, page tabs, selection extraction, Density matching, or ver-01/ver-02.
 - Commit: `db0c48de331e565b955728d33a9d2b7ec4608bbc`.
 - Runtime status: NOT TESTED yet in Modeling 18.1. Do not mark Apply fixed until the actual matching Parts are visibly selected in the 3D viewport. Test only on a disposable Assembly copy.
+
+
+
+## 2026-11-16 – ver-03 Apply confirmed; hide bridge after hand-off
+
+- User runtime-tested the visible-bridge diagnostic in Creo Elements/Direct Modeling 18.1.
+- Confirmed result: the temporary Apply bridge appears; pressing its Apply action selects the intended Part in the 3D viewport. This is the first user-confirmed proof that the native `:select-and-execute` hand-off works when the bridge Browser is displayed.
+- Root-cause direction is now confirmed: the bridge cannot remain hidden during native selection hand-off. The earlier trace's `:SUCCESS` alone was insufficient; the viewport result is the acceptance evidence.
+- Follow-up refinement committed on the same isolated branch: keep the bridge visible through `:select-and-execute`, then call `sd-hide-graphical-browser` only after the hand-off returns without the explicit `:error` status. Added trace marker `APPLY/HIDE-BRIDGE-AFTER-HANDOFF`.
+- Intended result: temporary bridge is shown only while Apply runs and disappears immediately after a successful hand-off, leaving the 3D Part selection intact. This refinement is NOT YET runtime-tested; verify viewport selection remains after the bridge hides and that repeated Apply still works.
+- Source commit: `0076b6cbca7e6b18d823db4f8dc7f84082795f27`.
+- Do not merge to main until the post-handoff hide behavior and repeat-Apply behavior are confirmed in Modeling 18.1.
