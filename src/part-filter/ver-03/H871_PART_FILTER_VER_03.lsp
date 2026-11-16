@@ -341,9 +341,14 @@
         (sd-browser-exec-cmd
           *h871-pf-v03-apply-browser* :change-table-root root t))))
 
-  ;; Keep the bridge hidden: the user-facing Results window must remain
-  ;; the only window. Native hand-off is attempted inside Modeling's command
-  ;; wrapper below rather than by exposing a second Graphical Browser.
+  ;; DIAGNOSTIC EXPERIMENT:
+  ;; Show the bridge before querying displayed-state and before native hand-off.
+  ;; Earlier traces showed DISPLAYED=NIL for every resolved BrowserNode.
+  ;; This isolates whether the hidden bridge is the reason Modeling does not
+  ;; transfer the selected Parts into the active 3D selection.
+  (let ((shown
+          (sd-show-graphical-browser *h871-pf-v03-apply-browser*)))
+    (h871-pf-v03-trace "APPLY/SHOW-BRIDGE-RETURN" shown))
 
   ;; Resolve each symbolic ID to a BrowserNode structure, then record whether
   ;; Modeling considers it displayed and whether it enters the browser selection.
