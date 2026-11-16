@@ -160,3 +160,11 @@ For ver-05, use :buttonMenu to render Density-pair page navigation buttons. Keep
 ### Correction to section I – modeMenu UI placement
 
 PTC Graphical Browser documentation explicitly defines modeMenu as a row of toggle buttons directly above buttonMenu. It separately states that buttonMenu provides a row of toggle buttons directly above topMenu. The statement that modeMenu is only a right-click popup was incorrect; the compatibility note means these menu definitions are also mapped into right-click popup entries. Both are visible UI rows. ver-05 restores page selectors to modeMenu and logs the evaluated specification, initial button and Browser creation stage.
+
+
+## 2026-11-16 – BrowserNode creation ID versus structure in ver-03 Apply
+
+- API use: `sd-create-browsernode` creates a node and returns an identifier; `:set-object-selection` expects a BrowserNode structure.
+- Source correction: resolve the root and each created Part node with `sd-get-browsernode-struct` before using them in Browser selection commands.
+- Static source check: balanced Lisp parentheses after commit `068ee4123b5aadf6cde5bce54321f1ee031ea064`.
+- Runtime status: not yet verified in Modeling 18.1. In particular, this does not establish that a hidden Graphical Browser can hand off selection to Modeling. Acceptance requires observing the intended Part(s) selected in the viewport.
