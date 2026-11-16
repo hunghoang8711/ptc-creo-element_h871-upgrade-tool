@@ -139,3 +139,8 @@ The Apply bridge now captures the symbolic ID returned by `sd-create-browsernode
 The lookup function is also already used by the preserved ver-02 source to obtain the tree root. PTC's official 20.7 reference explicitly documents the symbolic return value and this exact resolution pattern. This is strong API-contract evidence, but it does not prove all Apply bridge behavior in Modeling 18.1. Runtime test is still required.
 
 `CNC-SUS304` is the current caption convention; numeric search remains Density Instance=1 and Density Base=304.
+
+
+## ver-05 integration lesson – page root isolation
+
+The single-Browser ver-05 candidate must clear all previous table roots before activating a new Density-pair page. :change-table-root is not a replacement operation by itself; a Browser can retain multiple roots. The ver-05 source now uses the buffered clear-selection/clear-roots/set-root/resume sequence and records the active root count. This fix is not a ver-03 source change and does not alter ver-03's user-confirmed UI behavior.
