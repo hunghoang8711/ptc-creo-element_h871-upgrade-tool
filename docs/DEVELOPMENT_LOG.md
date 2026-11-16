@@ -293,3 +293,15 @@ Source audit found a mismatch between an earlier log entry and the actual ver-03
 Commit: `068ee4123b5aadf6cde5bce54321f1ee031ea064`.
 
 Static verification: Lisp parentheses balanced (depth 0; no premature close; no unterminated string). Runtime status: NOT TESTED in Creo Elements/Direct Modeling 18.1. The hidden Browser hand-off is still the unresolved risk; only visible selection of the intended Part(s) in the Modeling viewport proves Apply.
+
+
+## 2026-11-16 – correction: restore Stage 0 + ver-04 integration direction
+
+The immediately preceding assistant change incorrectly resumed the obsolete UICT ver-03 Apply bridge. User objected that the project had already moved beyond this approach and that the UICT ver-03 path was associated with fatal exception `0xC00000FD`. The source commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` only changed that obsolete bridge and must not be treated as the active candidate or loaded for testing.
+
+Recovered project milestones:
+- Stage 0 source `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`: user-confirmed native Graphical Browser, direct row selection, Select All and Apply to actual Parts.
+- ver-04 `src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp`: user-confirmed page-root switching and row-selection restoration for `CG-SS400`. Apply trace status was `:SUCCESS`, but prior record does not establish actual viewport selection.
+- ver-05 is the single-Browser integration candidate; page-selector UI is not yet confirmed in Modeling 18.1.
+
+Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver-04 page-root/page-selection algorithm into the same visible Browser, then verify page navigation in 18.1. No intermediate-window workflow, UICT Display Table/hidden bridge, Browser Bar docking, extra Browser per search, or host-shell reparenting.
