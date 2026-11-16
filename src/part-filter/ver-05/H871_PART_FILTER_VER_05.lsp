@@ -389,8 +389,8 @@
           (setf (getf entry :selected-paths) nil)
           (setf (getf entry :label)
             (format nil "~A-~A"
-              (h871-pf-v05-material-label base)
-              (h871-pf-v05-process-label instance)))
+              (h871-pf-v05-process-label instance)
+              (h871-pf-v05-material-label base)))
           (getf entry :page))
       (let* ((page-name
                (format nil "H871-PF-V05-PAGE-~A"
@@ -399,8 +399,8 @@
                (list :instance instance :base base
                      :label
                        (format nil "~A-~A"
-                         (h871-pf-v05-material-label base)
-                         (h871-pf-v05-process-label instance))
+                         (h871-pf-v05-process-label instance)
+                         (h871-pf-v05-material-label base))
                      :page page-name :results results :selected-paths nil)))
         (push new-entry *h871-pf-v05-pages*)
         page-name))))
