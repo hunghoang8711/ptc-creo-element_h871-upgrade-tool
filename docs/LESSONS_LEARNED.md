@@ -130,3 +130,8 @@ LL-016 follow-up: treat clear-roots and set-root return values as mandatory gate
 ## LL-017 – Distinguish Graphical Browser modeMenu from buttonMenu
 
 PTC Graphical Browser :modeMenu is mapped to right-click popup entries for compatibility; it is not the visible horizontal row. :buttonMenu creates the visible horizontal button row. Never infer UI placement from the names. Verify the exact PTC parameter description and example before implementing a visible tab/page strip. For Density pages, create dynamic page buttons in :buttonMenu and validate the rendered UI in the target Modeling version.
+
+
+### Correction to LL-017 – modeMenu is a visible horizontal row
+
+PTC's reference says modeMenu provides a row of toggle buttons directly above buttonMenu; both are additionally mapped to right-click popup entries for compatibility. Do not state that modeMenu is popup-only. It is a valid page-selector row in principle. When it fails to appear, inspect the actual evaluated menu specification, initial button name, Browser creation result and runtime trace instead of switching parameters based on an incomplete reading.
