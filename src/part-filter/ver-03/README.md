@@ -39,6 +39,10 @@ An additional hidden/unshown untyped `:part-object` column stores the actual Par
 - Re-running the same Density pair refreshes its table and clears its previous selection to avoid stale object references.
 - Selection state in other tabs is independent.
 
+## Logical-table recovery (ver-03.2)
+
+A Modeling 18.1 runtime test exposed: `A logical table with name "" does not exist`, followed by the Results refresh error. The page registry is held in global variables and can survive a LISP reload; older in-memory page records may therefore lack the newer `:logical-table` field. The refresh path now derives the logical-table name from the stable page ID when that field is missing, validates the name, recreates a missing logical table, verifies the Display Table binding, and restores the Display Table control if its binding is stale. The refresh error now reports the concrete logical-table name rather than hiding it behind a generic message.
+
 ## Apply implementation
 
 Apply reads selected row values using `sd-get-display-table-selection`, retrieves the hidden `:part-object` column, and builds BrowserNodes for those Part objects using their Modeling paths. It then uses the native Graphical Browser commands `:set-object-selection` and `:select-and-execute`, matching the known-good ver-02 selection hand-off pattern.
