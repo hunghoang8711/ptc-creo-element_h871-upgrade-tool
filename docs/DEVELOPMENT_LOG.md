@@ -313,3 +313,18 @@ After the user confirmed native multi-Browser selection and Apply, the next repo
 Changed only the Manager grid area's pixel dimensions to 1120 × 820. Kept the cell size, control coordinates, row arrangement, filter logic, per-Browser callbacks, independent Graphical Browser windows and native Apply path unchanged.
 
 The sizing change is committed but awaits user runtime confirmation in Modeling 18.1. Acceptance: Manager displays all populated rows and Open buttons without clipping and the text is readable; verify Browser selection and native Apply still behave exactly as before.
+
+
+## 2026-11-16 – VER-05 audit and Open-action fatal exception follow-up
+
+A fresh source/documentation audit was performed on branch `rebuild/ver05-ver03-filter-native-multi-browser`.
+
+- Audited source: `src/part-filter/ver-05/H871_PART_FILTER_VER_05_MULTI_BROWSER.lsp`, 590 lines, blob SHA `5f69073e223a69267c7fec8fa350c4b4604c3189`.
+- Static checks: balanced parentheses (final depth 0; no negative depth), no unterminated strings, 35 local DEFUN definitions with no duplicate names, native `:okButtonLabel "Apply"` retained, exact matching still checks both Density Instance and Density Base, existing `/1000.0` normalization retained, per-Browser callback closure retained, and no UICT Display Table/logical-table or Apply-Bridge calls found.
+- The collector remains recursive. This was deliberately retained from the VER-03 search engine; the earlier `0xc00000fd` fatal exception is not considered fixed.
+- Runtime-confirmed baseline remains: independent result Browsers, individual/double-click row selection, Select All and native Apply to the 3D viewport.
+- Manager grid-area correction is now runtime-confirmed at the specific level the user reported: the H871 Graphic window became larger. Full readability/all rows and buttons still need a complete visual check.
+- User reported a fatal `0xc00000fd` exception after clicking an Open action intended to show another Browser. The exact UI control/action path has not yet been isolated. Current source's Manager Open handler calls `sd-show-graphical-browser` on the stored Browser name; this is a candidate path to inspect, not a proven cause. Do not claim the exception is fixed or attribute it conclusively to recursion/callbacks.
+- Safe handling: do not repeat the failing Open action on the only/original customer model. If reproducing, use a disposable Assembly copy and preserve the trace/crash details.
+
+No production LISP code was changed in this audit. This entry records status and evidence only.
