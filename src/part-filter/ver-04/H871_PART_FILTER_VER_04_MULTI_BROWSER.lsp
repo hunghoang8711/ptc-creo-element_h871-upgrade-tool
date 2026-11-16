@@ -354,6 +354,11 @@
   (let ((entry (h871-pf-v04-find-pair instance base)))
     (if entry
         (progn
+          ;; Restore this Browser's data context before showing it. This is a
+          ;; defensive measure if Modeling requests a tree refresh on reopen.
+          (setf *h871-pf-v04-active-instance* instance)
+          (setf *h871-pf-v04-active-base* base)
+          (setf *h871-pf-v04-active-parts* (getf entry :results))
           (sd-show-graphical-browser (getf entry :browser))
           t)
       (sd-display-message
@@ -423,7 +428,8 @@
           (push
             (list :instance requested-instance :base requested-base
                   :count (length matches) :browser browser :tree tree
-                  :assembly (h871-pf-v04-path assembly))
+                  :assembly (h871-pf-v04-path assembly)
+                  :results matches)
             *h871-pf-v04-pairs*))
         (h871-pf-v04-refresh-manager)
         (values (length matches) report)))))
