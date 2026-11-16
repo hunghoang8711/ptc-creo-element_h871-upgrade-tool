@@ -177,3 +177,15 @@ Resolved:
 - Rolled active ver-03 source back to the last revision associated with user-confirmed Results UI appearance (`8c0a1cd56f25f125958080b3ab6316e55827b141`). The iterative traversal candidate is retained in Git history, not active.
 - Updated Known Issues with a strict evidence requirement: obtain the trace file and use its last marker to localize the failing stage before making another code change.
 - No runtime success is claimed. ver-01 and ver-02 remain untouched.
+
+
+## 2026-11-16 – Start ver-03 rebuild from the user-confirmed ver-02 baseline
+
+- User approved rebuilding ver-03 from the last known-good ver-02 workflow instead of continuing speculative fixes in the unstable UICT-based implementation.
+- Created isolated branch `rebuild/ver-03-from-ver-02`, based on the current `main`; no changes were made to `main`.
+- Added `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp` as a mechanical clone of `src/part-filter/ver-02/H871_PART_FILTER_VER_02.lsp`.
+- Isolated helper/global symbol names with the `h871-pf-rb-` prefix and assigned the new dialog command `H871_PART_FILTER_VER_03_REBUILD`, so loading the rebuild does not redefine ver-02's symbols/dialog.
+- Stage 0 intentionally retains ver-02's Filter dialog, numeric Density Instance/Base mapping, search traversal, native Graphical Browser, row selection, Select All, Clear Selection and native Apply behavior.
+- No UICT Display Table, logical table, internal tabs, or hidden Apply bridge has been carried into the rebuild.
+- ver-01, ver-02 and the unstable original ver-03 source are untouched.
+- Static source inspection only; no Modeling 18.1 runtime test has been performed by the assistant. Stage 0 must be tested by the user on a disposable model copy before any feature is added.
