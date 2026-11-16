@@ -1,10 +1,10 @@
 # Part Filter ver-03 – Single Results Window with Internal Tabs
 
-**Status: Specified – implementation pending.**
+**Status: UICT prototype implemented; static-checked; Creo 18.1 runtime validation pending. Native Apply hand-off not implemented yet.**
 
 ## Authoritative requirement
 
-Build exactly one separate Results Browser window. Inside that window, provide horizontal tabs/pages similar to a desktop browser. Do not create multiple Graphical Browser windows and do not use Creo Browser Bar tabs.
+Build exactly one separate Results window. Inside that window, provide horizontal tabs/pages similar to a desktop browser. Do not create multiple Graphical Browser windows and do not use Creo Browser Bar tabs.
 
 ## Page identity and lifecycle
 
@@ -12,15 +12,15 @@ Build exactly one separate Results Browser window. Inside that window, provide h
 - Caption: mapped Material + Machining Process, e.g. `SUS304-CNC`.
 - First search for a pair creates its page.
 - Repeating the same pair refreshes/replaces the existing page; no duplicate tab.
-- A different pair creates a new page in the same Results window.
-- Each page owns its result list and selection state where feasible.
-- Switching pages must not mix rows or selections.
-- Apply transfers only selected Part objects from the active page.
+- A different pair creates a new page in the same window.
+- Each page owns its result list and selection state.
+- Each page has its own multi-select list, Select All and Clear Selection controls.
 - A no-match search does not silently erase a previously valid page.
+- **Apply to Modeling selection is still pending**; do not use ver-03 as a production selection tool until that hand-off is implemented and tested.
 
 ## Source baseline
 
-Start from ver-02 source. Preserve:
+Start from ver-02 behavior. Preserve:
 - Assembly selection and recursive scan.
 - Density Instance + Base exact pair matcher and normalization.
 - Material/Process mapping.
@@ -29,25 +29,38 @@ Start from ver-02 source. Preserve:
 
 Do not modify ver-01 or ver-02.
 
-## Superseded experiment
+## Implemented prototype
 
-The former file `H871_PART_FILTER_VER_03.lsp` on branch `feature/part-filter-multi-browser-sessions` created one Graphical Browser per search and requested Creo Browser Bar docking. That is the wrong architecture and must not be copied into this version folder or loaded as the intended ver-03.
+Canonical source:
+`H871_PART_FILTER_VER_03.lsp`
 
-## Technical investigation / staged prototype
+The source now integrates the ver-02 search engine with one UICT Dialog Shell, one internal horizontal Tab Control and per-page List Controls. It maintains page state by Density pair, refreshes existing pages, creates pages for new pairs and keeps previous pages when a search has no matches.
 
-UICT Tab Control and Dialog Shell may be a candidate, but current research references are from later PTC releases. Confirm exact Modeling 18.1 function availability and signatures.
+The prototype stores the actual Part object against each displayed row internally. The current list selection API returns display labels/positions, however, and a safe Modeling 18.1 operation to transfer the selected Part objects into Modeling selection has not yet been verified. Therefore the Apply action is deliberately not wired.
 
-Prototype in this order:
-1. Minimal single-window tab shell with synthetic data only.
-2. Verify create/add/switch/refresh/remove page operations.
-3. Verify table row selection and Select All are isolated per page.
-4. Verify selection can represent real Part objects.
-5. Verify Apply transfers only active-page selected Parts to Modeling selection.
-6. Integrate the ver-02 filter engine and pair-key refresh logic.
-7. Test no-match behavior and all ver-01/ver-02 regressions.
+## Technical compatibility boundary
 
-If real-Part selection/Apply cannot be grounded, stop at a diagnostic shell prototype and document the blocker. Do not claim full implementation.
+UICT Tab Control / Dialog Shell / List Control patterns were found in PTC Integration Kit documentation for releases 20.7/20.8. Exact Modeling 18.1 availability and signatures are not established. The first runtime load/test in Modeling 18.1 is required before treating these calls as compatible.
 
-## Acceptance tests
+See [VER03_IMPLEMENTATION_NOTES](../../../docs/VER03_IMPLEMENTATION_NOTES.md) for API references, static-check results and test instructions.
 
-See `tests/README.md` section “ver-03 internal-tab validation plan”.
+## First runtime test
+
+1. Load `H871_PART_FILTER_VER_03.lsp` in Modeling 18.1.
+2. Run `H871_PART_FILTER_VER_03`.
+3. Search CNC + SUS304; expect one Results window with tab `SUS304-CNC`.
+4. Search KH + A6061; expect a second tab `A6061-KH` in the same window.
+5. Search CNC + SUS304 again; expect the existing tab to refresh, not duplicate.
+6. Switch tabs; confirm result lists and selection are isolated.
+7. Test row multi-selection, Select All and Clear Selection.
+8. Search a no-match pair; verify existing tabs/results remain unchanged.
+
+Do not test Apply yet; it is not connected in this prototype.
+
+## Acceptance tests before production
+
+1. All runtime tests above pass in Creo Elements/Direct Modeling 18.1.
+2. Selection state remains page-specific across tab switches and refresh.
+3. A verified Modeling 18.1 mechanism transfers only selected real Parts from the active page into Modeling selection.
+4. Apply behavior is regression-tested without replacing the proven ver-01/ver-02 native Apply path prematurely.
+5. ver-01/ver-02 regression checklist passes.
