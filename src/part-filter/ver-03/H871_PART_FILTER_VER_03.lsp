@@ -284,6 +284,8 @@
     root))
 
 (defun h871-pf-v03-native-apply (parts)
+  (h871-pf-v03-trace "APPLY/NATIVE-BEGIN"
+    (list (length parts) (mapcar #'type-of parts)))
   (when (null parts)
     (sd-display-message "H871: Select one or more Part rows before Apply.")
     (return-from h871-pf-v03-native-apply nil))
@@ -323,52 +325,79 @@
   ;; The browser update callback may also rebuild them when the browser opens.
   (unless (sd-get-browsernode-struct *h871-pf-v03-apply-tree* :root)
     (h871-pf-v03-build-apply-tree))
+  (h871-pf-v03-trace "APPLY/NODES-BUILT"
+    (list (length *h871-pf-v03-apply-nodes*)
+          (mapcar #'type-of *h871-pf-v03-apply-nodes*)))
 
   ;; Mirror ver-02: make the bridge root's direct Part children the table rows.
-  (sd-browser-exec-cmd *h871-pf-v03-apply-browser* :set-table-mode)
+  (h871-pf-v03-trace "APPLY/SET-TABLE-MODE"
+    (sd-browser-exec-cmd *h871-pf-v03-apply-browser* :set-table-mode))
   (let ((root
           (sd-get-browsernode-struct *h871-pf-v03-apply-tree* :root)))
+    (h871-pf-v03-trace "APPLY/ROOT-STRUCT" (type-of root))
     (when root
-      (sd-browser-exec-cmd
-        *h871-pf-v03-apply-browser* :change-table-root root t)))
+      (h871-pf-v03-trace "APPLY/CHANGE-TABLE-ROOT"
+        (sd-browser-exec-cmd
+          *h871-pf-v03-apply-browser* :change-table-root root t))))
 
-  ;; sd-create-browsernode returns a SYMBOLIC node ID (e.g. #:NODE289),
-  ;; while :set-object-selection requires a BrowserNode structure.
-  ;; Resolve every child ID against the temporary tree before passing it on.
+  ;; Resolve each symbolic ID to a BrowserNode structure, then record whether
+  ;; Modeling considers it displayed and whether it enters the browser selection.
   (dolist (node-id *h871-pf-v03-apply-nodes*)
-    (let ((node-struct
-            (sd-get-browsernode-struct *h871-pf-v03-apply-tree* node-id)))
-      (unless node-struct
-        (sd-display-error
-          (format nil
-            "H871 Apply: Could not resolve BrowserNode ID ~S in tree ~A."
-            node-id *h871-pf-v03-apply-tree*))
-        (return-from h871-pf-v03-native-apply nil))
-      (sd-browser-exec-cmd
-        *h871-pf-v03-apply-browser* :set-object-selection node-struct t)))
+    (let* ((node-struct
+             (sd-get-browsernode-struct *h871-pf-v03-apply-tree* node-id))
+           (displayed
+             (and node-struct
+                  (sd-query-browser
+                    *h871-pf-v03-apply-browser* :is-object-displayed node-struct)))
+           (selected
+             (and node-struct
+                  (sd-browser-exec-cmd
+                    *h871-pf-v03-apply-browser*
+                    :set-object-selection node-struct t))))
+      (h871-pf-v03-trace "APPLY/NODE-STATE"
+        (list node-id (type-of node-struct) displayed selected))))
+  (h871-pf-v03-trace "APPLY/SELECTED-COUNT"
+    (sd-query-browser *h871-pf-v03-apply-browser* :number-of-selected-objects))
+  (h871-pf-v03-trace "APPLY/SELECTED-NODES"
+    (mapcar #'type-of
+      (or (sd-query-browser
+            *h871-pf-v03-apply-browser* :get-selected-objects)
+          nil)))
 
   ;; Native ver-02 hand-off: selected objects enter Modeling's select list.
-  (unless
-    (sd-browser-exec-cmd
-      *h871-pf-v03-apply-browser* :select-and-execute)
-    (sd-display-message
-      "H871 Apply: No objects were handed to Modeling. Check the active command.")
-    (return-from h871-pf-v03-native-apply nil))
+  (let ((handoff
+          (sd-browser-exec-cmd
+            *h871-pf-v03-apply-browser* :select-and-execute)))
+    (h871-pf-v03-trace "APPLY/SELECT-AND-EXECUTE-RETURN" handoff)
+    (unless handoff
+      (sd-display-message
+        "H871 Apply: No objects were handed to Modeling. Check the active command.")
+      (return-from h871-pf-v03-native-apply nil)))
   t)
 
 ;; Display Table double-click callback. UICT passes the table name;
 ;; route the action to the owning page so only that page's selected Part(s)
 ;; are handed to Modeling.
 (defun h871-pf-v03-double-click (table-name)
+  (h871-pf-v03-trace "APPLY/DOUBLE-CLICK-CALLBACK" table-name)
   (let ((entry (h871-pf-v03-page-by-table table-name)))
+    (h871-pf-v03-trace "APPLY/DOUBLE-CLICK-PAGE"
+      (and entry (getf entry :page)))
     (when entry
       (h871-pf-v03-apply (getf entry :page)))))
 
 (defun h871-pf-v03-apply (page-name)
   (let* ((entry (h871-pf-v03-page-by-name page-name))
-         (selection (sd-get-display-table-selection (getf entry :table)))
+         (selection (and entry
+                         (sd-get-display-table-selection (getf entry :table))))
          (columns (if selection (cadr selection) nil))
          (parts (if columns (getf columns :part-object) nil)))
+    (h871-pf-v03-trace "APPLY/UICT-SELECTION"
+      (list page-name (and entry (getf entry :table))
+            (and selection (type-of selection))
+            (and columns (type-of columns))
+            (and parts (length parts))
+            (and parts (mapcar #'type-of parts))))
     (if (null parts)
         (sd-display-message
           "H871: No Part rows selected. Select rows or use Select All, then press Apply.")
