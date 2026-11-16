@@ -247,3 +247,8 @@ ver-05 page captions use PROCESS-MATERIAL order (CNC-SUS304, CG-SS400), matching
 ### ver-05 page-selector UI root cause
 
 The first ver-05 page strip was invisible because the implementation put Density page entries in Graphical Browser :modeMenu. PTC's reference identifies :buttonMenu as the visible horizontal button row; :modeMenu is mapped to right-click popup menu entries for compatibility. The corrected ver-05 source dynamically generates Density page buttons in :buttonMenu, followed by Select All and Clear Selection. Runtime confirmation in Modeling 18.1 is mandatory.
+
+
+### Correction – modeMenu is a visible horizontal row
+
+PTC's reference explicitly states modeMenu is a row of toggle buttons directly above buttonMenu; buttonMenu is a separate row above topMenu. Both are also exposed as right-click popup entries for compatibility. The earlier interpretation that modeMenu is popup-only was incorrect. ver-05 retains modeMenu for page selectors and adds trace diagnostics to inspect the generated button definitions and Browser creation.
