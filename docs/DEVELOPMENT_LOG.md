@@ -258,3 +258,17 @@ Resolved:
 - A `:SUCCESS` return is not proof of 3D viewport selection. This branch is a runtime experiment only; it is not production-validated and must not be merged to `main` without user confirmation.
 - Runtime test: select one Part in Results and press Results Apply. First verify whether the Part is already selected in the 3D viewport. If not, press Apply in the still-open Native Apply Bridge and verify the fallback still selects it. Repeat with multiple Parts and confirm no unrelated Part is selected.
 
+
+
+## 2026-11-16 – VER-04 experiment: UICT Results Manager with one native Graphical Browser per Density pair
+
+- New isolated branch: `experiment/ver04-uict-multi-graphical-browser`, based on the VER-03 automatic Apply experiment. VER-02 and VER-03 source files are unchanged.
+- Added `src/part-filter/ver-04/H871_PART_FILTER_VER_04_MULTI_BROWSER.lsp`.
+- Architectural change: UICT is now intended to be a summary/management table only. It stores one row per numeric Density Instance + Density Base pair and exposes an Open Selected Browser action. It does not store Part objects and does not perform Apply.
+- Each pair receives deterministic independent names, e.g. `H871-PF-BROWSER-1-304` and `H871-PF-TREE-1-304`. The Graphical Browser uses the VER-02 native table and native **Apply** button.
+- Re-filtering an existing pair destroys/recreates only that pair's Browser/Tree and updates its manager row. A no-match result leaves the previous Browser and manager row unchanged. The latest Assembly path is recorded in the in-memory manager registry.
+- Filter matching remains exact on BOTH Density Instance and Density Base, with the established numeric convention (e.g. 1-304 = CNC-SUS304). No changes to the mapping table.
+- Static review only: source includes multiple named Browser/Tree handles and keeps native Browser Apply. No Creo Modeling 18.1 runtime execution has been performed.
+- Runtime risks explicitly requiring verification: whether `:update-events nil` is accepted for snapshot trees; when the Browser Tree update callback is invoked; whether UICT selection returns hidden numeric key columns; multiple simultaneous Graphical Browser instances; and safe replacement of one pair without affecting another.
+- Do not merge to main or treat as working until the user completes the runtime checklist in the source header.
+- Commits: `507317e75030eed2df792539b12abcc44f068510` (initial VER-04 source), `bbe2974f4ad97a1fd1876a34597d8d8f6726ec25` (use multi-row manager selection).
