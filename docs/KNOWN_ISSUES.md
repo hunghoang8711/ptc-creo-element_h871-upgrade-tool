@@ -88,3 +88,16 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - **Test requirement:** Load and test only on a disposable model copy. Verify one known filter pair, one-row Apply, multi-row selection, Select All, Clear Selection, and normal dialog close.
 - **Gate:** Do not add tabs or other new features until the user confirms Stage 0 works in Creo Modeling 18.1.
 - **No runtime claim:** Creating the source clone and static review do not establish that it works in the user's installation.
+
+
+## KI-013 – Stage 1 native multi-filter tabs compatibility
+
+- **Status:** Implemented; Modeling 18.1 runtime validation pending.
+- **Baseline:** Stage 0 was user-confirmed working on 2026-11-16: Results display, Select All, Apply, and double-click single-Part selection.
+- **New source:** `src/part-filter/ver-03-stage1/H871_PART_FILTER_VER_03_STAGE1.lsp`.
+- **Design:** One dedicated native Graphical Browser and Browser Tree per unique numeric Density Instance/Base pair, requested as a docked Browser Bar tab using `:createAsTab t`.
+- **Isolation:** Each browser has its own tree and browser name. Same pair replaces only its own browser/tree; different pairs retain separate tabs; no-match leaves previous tabs untouched.
+- **Selection:** Native browser Apply and double-click remain unchanged. Select All/Clear Selection callbacks receive the owning browser name to avoid cross-tab targeting.
+- **Compatibility risk:** PTC later-version documentation describes `:createAsTab` and `:update-args`; exact Modeling 18.1 behavior is not yet confirmed. PDS session preferences may override the initial dock/tab setting according to the documented API.
+- **Required test:** Verify two distinct pairs create two usable tabs; repeated pair refreshes only itself; no-match preserves tabs; per-tab double-click, Select All, Clear Selection, and Apply all work.
+- **Safety:** Use a disposable model copy. Stage 0, ver-01, and ver-02 source files remain unchanged. Do not proceed to Stage 2 until user confirms.
