@@ -251,3 +251,13 @@ Resolved:
 - Purpose: isolate whether Modeling 18.1 accepts the tab-presentation option before attempting multiple result sessions.
 - Static check: balanced parentheses and exactly one `:createAsTab t` occurrence; runtime test pending.
 - User test: run one CNC-SUS304 search in a disposable model, report whether Results opens, whether it appears as a tab, and whether selection/Apply remain functional. If it fails, remove this one option and restore the confirmed baseline.
+
+
+## 2026-11-16 – Stage 1 createAsTab basic runtime test passed
+
+- User tested Stage 1 with the single added `:createAsTab t` option.
+- User reports that Stage 1 runs successfully and retains the same functionality as Stage 0. No fatal exception was reported.
+- This establishes basic runtime compatibility of `:createAsTab t` with the existing single Graphical Browser workflow in the user's Modeling 18.1 environment.
+- The user has not yet explicitly confirmed a visible tab presentation; same functionality as Stage 0 may mean the Browser still appears as a normal separate window. Keep this distinction unresolved rather than assuming the tab UI was created.
+- No multi-browser sessions, second Browser Tree, `:tabname`, callback changes, search changes, or selection/Apply changes have been added.
+- Next step: ask whether the Results Browser is visibly displayed as a tab or as a separate window. Only after confirming the presentation should the next isolated API experiment be selected.
