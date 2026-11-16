@@ -217,3 +217,15 @@ Resolved:
 - Remaining unverified API: `:createAsTab` still relies on later-version PTC documentation and requires Modeling 18.1 runtime validation.
 - Runtime status: **fix not yet confirmed**. User must test only on a disposable model copy and report either successful Results display or the last trace line if the exception persists.
 - Stage 0, ver-01 and ver-02 source files were not modified.
+
+
+## 2026-11-16 – Stage 1 trace inconclusive; reset to Stage 0-equivalent diagnostic
+
+- User confirmed `H871_PART_FILTER_STAGE1_TRACE.txt` was created once, remained 0 KB, and was not recreated/updated after another Search attempt.
+- Reviewed the trace function: it wraps file open/write/flush in `ignore-errors`, which can silently suppress a path, stream, or write failure. Therefore the empty file is not evidence that the Search function was never entered.
+- The previous Stage 1 correction (unique zero-argument Browser Tree callbacks instead of `:update-args`) did not change the fatal exception. That hypothesis is not confirmed and must not be treated as a fix.
+- Replaced the active Stage 1 source with a mechanical clone of the user-confirmed Stage 0 source. Only helper/global symbol prefix and dialog command/title are changed; single Browser/Tree, collector, report, native selection, Select All, Clear Selection and Apply follow Stage 0.
+- Removed multi-browser sessions, generated callback closures, `:createAsTab`, `:tabname`, and the unreliable trace writer from the active diagnostic source.
+- Static validation: 420 lines; opening/closing parenthesis counts match; no multi-tab options or trace writer remain; Stage 1 command and isolated helper prefix remain.
+- Next user test: one CNC-SUS304 search in a fresh Modeling 18.1 session using a disposable model. Do not test multiple pairs until this baseline is confirmed.
+- Stage 0, ver-01 and ver-02 sources remain unchanged. No runtime success is claimed.
