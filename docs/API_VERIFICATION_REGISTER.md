@@ -102,3 +102,19 @@ Documented resolution pattern:
 ```
 
 The ver-03 Apply bridge now follows this pattern. The PTC reference establishes the return/lookup contract for the documented release; ver-02's existing root lookup provides additional project evidence. Do not label the full ver-03 Apply workflow as 18.1 runtime-confirmed until the user tests it.
+
+
+## G. VER-04 multi-Graphical-Browser experiment – NOT runtime verified
+
+New isolated source: `src/part-filter/ver-04/H871_PART_FILTER_VER_04_MULTI_BROWSER.lsp`.
+
+| API / behavior | Evidence | Notes |
+|---|---|---|
+| UICT manager logical table and Display Table | Reused from VER-03 source pattern; Modeling 18.1 runtime not verified for this exact manager schema | Manager rows summarize Density pairs and store hidden numeric pair keys. |
+| Multiple Graphical Browsers with unique names | Unverified proposal | One Browser/Tree pair per numeric Density Instance + Density Base. |
+| Per-pair Browser/Tree destroy and recreate | Existing destroy calls observed in VER-02/VER-03; multi-instance isolation unverified | Re-filtering one pair must not close or alter another pair. |
+| Snapshot Tree with `:update-events nil` | Unverified proposal | Intended to prevent a later global object-tree event from rebuilding a Browser using another pair's active global context. |
+| UICT hidden key-column selection | Pattern source-observed in VER-03 | VER-03 reads hidden `:part-object` from selection; VER-04 similarly expects hidden `:instance` and `:base` values. Exact selection result must be checked in 18.1. |
+| Native Apply in each independent Browser | Native Apply confirmed in VER-02 for one Browser; multiple independent Browser instances not tested | Each result Browser retains its own native Apply button. |
+
+VER-04 must pass: two distinct pairs open at once; each displays only its own Parts; re-filtering one pair updates only that pair; no-match leaves prior data intact; native Apply from each Browser selects the intended Parts in the 3D viewport; manager selection reopens the correct Browser. A command return or Browser visibility is not proof of viewport selection.
