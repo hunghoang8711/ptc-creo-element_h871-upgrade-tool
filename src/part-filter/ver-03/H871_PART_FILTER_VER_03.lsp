@@ -398,7 +398,7 @@
               (sd-query-browser
                 *h871-pf-v03-apply-browser* :get-selected-objects)))
           (sd-display-message
-            "H871: Automatic Apply was attempted. Verify the 3D selection; if it did not select the Parts, use Apply in the still-open Native Apply Bridge."))
+            "H871: Automatic Apply was attempted. Verify the 3D selection; if it failed, use Apply in the bridge if it remains open, or press Results Apply again to reopen it."))
       (progn
         (h871-pf-v03-trace "APPLY/AUTO-HANDOFF/SKIPPED" selected-count)
         (sd-display-message
