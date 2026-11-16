@@ -240,3 +240,14 @@ Resolved:
 - Diagnostic conclusion: the former `0xC00000FD` is associated with one or more changes removed from the multi-browser experiment, but the precise failing API/expression remains unknown.
 - Next implementation rule: introduce one tab-related API difference per revision, test it in Modeling 18.1, and revert immediately if the fatal exception returns. Do not combine tab creation, multiple Browser Trees, callback changes, and selection changes in one patch.
 - Stage 0, ver-01 and ver-02 remain unchanged. Current Stage 1 single-browser source is a user-confirmed runtime baseline.
+
+
+## 2026-11-16 – Stage 1 isolated tab-presentation experiment
+
+- After the user confirmed that the Stage 0-equivalent Stage 1 source runs successfully, prepared the first feature/API experiment.
+- Added only `:createAsTab t` to the existing single `sd-create-graphical-browser` call in Stage 1.
+- Kept one Browser Tree, one Graphical Browser, Density search/collection, report generation, table columns, native row selection, Select All, Clear Selection, double-click behavior and Apply logic unchanged.
+- Did not add a second browser, per-pair browser registry, `:tabname`, callback closures, or any multi-tab lifecycle logic.
+- Purpose: isolate whether Modeling 18.1 accepts the tab-presentation option before attempting multiple result sessions.
+- Static check: balanced parentheses and exactly one `:createAsTab t` occurrence; runtime test pending.
+- User test: run one CNC-SUS304 search in a disposable model, report whether Results opens, whether it appears as a tab, and whether selection/Apply remain functional. If it fails, remove this one option and restore the confirmed baseline.
