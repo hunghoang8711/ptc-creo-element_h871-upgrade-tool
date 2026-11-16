@@ -168,3 +168,18 @@ Next diagnostic experiment must first validate the output mechanism independentl
 5. If file output cannot be validated, use an alternative visible diagnostic channel with a small number of explicit stage checkpoints. Avoid high-volume messages and avoid changing filtering or UICT behavior.
 
 This is a diagnostic-infrastructure failure, not evidence that the filter or Apply logic has changed. Search root cause remains unknown.
+
+
+## 10. Standalone trace-writer test prepared — 2026-11-16
+
+Added `src/diagnostics/H871_TRACE_WRITE_TEST.lsp` on this branch.
+
+- Command: `H871_PF_V03_TRACE_WRITE_TEST`
+- Expected output: `H871_TRACE_WRITE_TEST.txt` in `(user-homedir-pathname)`.
+- Expected content: `H871 TRACE WRITE TEST OK - Modeling 18.1`
+- Uses `with-open-file`, `format`, and `force-output`; the stream is closed before success is displayed.
+- No `ignore-errors`: failures should surface as actual LISP errors.
+- Does not load or modify the Part Filter source.
+- Static inspection only; user runtime validation is pending.
+
+After this test passes, integrate the same proven writer into ver-03 and add a few stage checkpoints. Then use those checkpoints to isolate Search. Only after Search is stable should Apply be changed.
