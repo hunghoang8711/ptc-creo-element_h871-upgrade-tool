@@ -313,6 +313,14 @@
   (unless (sd-get-browsernode-struct *h871-pf-v03-apply-tree* :root)
     (h871-pf-v03-build-apply-tree))
 
+  ;; Fail closed: never hand off a partial selection if any node ID could not
+  ;; be resolved to a BrowserNode structure.
+  (unless (= (length *h871-pf-v03-apply-nodes*)
+             (length *h871-pf-v03-apply-parts*))
+    (sd-display-error
+      "H871 Apply: Could not resolve every selected Part to a BrowserNode.")
+    (return-from h871-pf-v03-native-apply nil))
+
   ;; Mirror ver-02: make the bridge root's direct Part children the table rows.
   (sd-browser-exec-cmd *h871-pf-v03-apply-browser* :set-table-mode)
   (let ((root
