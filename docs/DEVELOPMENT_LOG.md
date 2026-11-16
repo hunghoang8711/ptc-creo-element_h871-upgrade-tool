@@ -282,3 +282,14 @@ Resolved:
 - Restored page navigation to modeMenu and added trace markers UI/MODE-MENU-SPEC, UI/INITIAL-MODE-BUTTON and UI/BROWSER-CREATED.
 - Source commit: 7763d35f74850090a9853a059a5294edc27aaa47.
 - Actual cause of the missing page buttons is still unknown; require trace and runtime observation.
+
+
+## 2026-11-16 – Resume ver-03 and correct Apply node resolution
+
+User feedback: the investigation had drifted from the accepted ver-03 UI into ver-05, which continued to resemble ver-02 and did not deliver the intended multi-tab Results interface. User reaffirmed ver-03 as the product direction: one Results window, internal Density-pair tabs, direct selection in each result list, and Apply to Modeling Parts.
+
+Source audit found a mismatch between an earlier log entry and the actual ver-03 LISP: the source still stored raw `sd-create-browsernode` return IDs and passed them directly to `:set-object-selection`. Updated `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp` so it resolves the root and each Part node ID through `sd-get-browsernode-struct`, stores only resolved BrowserNode structures, traces the conversion and checks that all selected Parts resolved before continuing.
+
+Commit: `068ee4123b5aadf6cde5bce54321f1ee031ea064`.
+
+Static verification: Lisp parentheses balanced (depth 0; no premature close; no unterminated string). Runtime status: NOT TESTED in Creo Elements/Direct Modeling 18.1. The hidden Browser hand-off is still the unresolved risk; only visible selection of the intended Part(s) in the Modeling viewport proves Apply.
