@@ -125,3 +125,13 @@ PTC reference:
 The documented Graphical Browser reference says sd-browser-add-popup-entry creates push/toggle/submenu entries and that functions receive (BrowserNode, browser-name) or (BrowserNode, browser-name, string-client-data) when client data is supplied. Modeling 18.1 compatibility and the full page-switch/selection-restore flow still require runtime testing.
 
 The previously attempted sd-set-graphical-browser-parent host-shell integration is not used by this diagnostic. Earlier project attempts to reparent the Browser into a UICT host shell failed; do not retry that route without isolating and proving the exact failure cause.
+
+
+## H. Graphical Browser and Browser Tree lifecycle – ver-04 recovery
+
+| API | Evidence | Status |
+|---|---|---|
+| sd-destroy-graphical-browser | Already used in ver-04 diagnostic failure cleanup; now used by normal reset/Close Results | Modeling 18.1 teardown behavior still needs runtime confirmation |
+| sd-destroy-browser-tree | Already used in ver-04 diagnostic failure cleanup; now used after Browser destruction | Modeling 18.1 teardown behavior still needs runtime confirmation |
+
+User's first ver-04 test confirmed the Browser Tree name remains registered after the first diagnostic run: a second sd-create-browser-tree call returned the “already exists” failure. The revised source attempts teardown in the required order (hide/destroy Browser, then destroy Tree) before creating the same names again. This is a targeted recovery candidate, not yet a verified 18.1 API contract. Close Results invokes the same teardown and then shows the existing ver-03 UICT shell. The recovery command H871_PF_V04_RESTORE_UICT_RESULTS invokes that action explicitly.
