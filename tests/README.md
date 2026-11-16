@@ -51,3 +51,13 @@ Source: `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`
 - ver-01/ver-02 remain the known-good fallback and must not be overwritten.
 
 No automated Creo runtime harness or sanitized CAD fixture is currently committed. Never describe source/static review as a runtime test.
+
+
+## ver-03.2 logical-table recovery regression
+
+1. Load the updated ver-03 source over an existing Modeling session that may contain old ver-03 page state.
+2. Run the mapped Process/Material dialog and press OK.
+3. Expected: no empty logical-table name error; refresh succeeds or reports the concrete non-empty table identifier.
+4. Repeat the same Density pair to exercise in-place refresh.
+5. Start a fresh Modeling session and repeat the search to verify first-page creation remains valid.
+6. If it fails, capture the full new error text; it should now identify the specific table name or control restoration stage.
