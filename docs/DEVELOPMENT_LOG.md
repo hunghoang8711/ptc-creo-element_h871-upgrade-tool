@@ -253,7 +253,7 @@ Resolved:
 - Preserve this proven native bridge as the fallback. Do not remove it or replace the UICT Results architecture.
 - Created isolated branch `experiment/ver03-auto-apply-visible-bridge` from the user-tested visible-bridge baseline.
 - New experiment: after Results Apply opens the bridge and selects the corresponding BrowserNodes, invoke `:select-and-execute` programmatically while the bridge is visible.
-- Critical safety change versus the earlier failed attempt: do not immediately hide or destroy the bridge after programmatic hand-off. If automatic selection does not occur, the user can still press the bridge's native Apply button.
+- Critical safety change versus the earlier failed attempt: do not immediately hide or destroy the bridge after programmatic hand-off. If automatic selection does not occur and the bridge remains open, the user can press its native Apply button; if the native command closed it, pressing Results Apply again reopens the same fallback bridge.
 - Trace markers: `APPLY/AUTO-HANDOFF/BEFORE`, `APPLY/AUTO-HANDOFF/RETURN`, `APPLY/AUTO-HANDOFF/AFTER`, and `APPLY/AUTO-HANDOFF/SKIPPED`.
 - A `:SUCCESS` return is not proof of 3D viewport selection. This branch is a runtime experiment only; it is not production-validated and must not be merged to `main` without user confirmation.
 - Runtime test: select one Part in Results and press Results Apply. First verify whether the Part is already selected in the 3D viewport. If not, press Apply in the still-open Native Apply Bridge and verify the fallback still selects it. Repeat with multiple Parts and confirm no unrelated Part is selected.
