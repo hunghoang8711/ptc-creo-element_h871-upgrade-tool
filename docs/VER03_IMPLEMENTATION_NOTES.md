@@ -103,3 +103,12 @@ A retest showed the empty logical-table error persisted. Root cause in the first
 - Fix: make tab callback and status updater tolerate the pre-registration callback; validate page/table/status handles as non-empty strings before calling UICT functions.
 - Filter alignment: ver-03 collector now explicitly rejects NIL Density Instance/Base before numeric comparison, as ver-02 does. Numeric filter values remain Instance=process code and Base=material code; `/1000.0` normalization is unchanged.
 - This is a code-path diagnosis, not a confirmed runtime fix. Test on Modeling 18.1 before marking resolved.
+
+
+## 2026-11-16 – ver-03 partial UICT initialization recovery
+
+- User retested the previous callback/status guard and confirmed the same NIL-is-not-of-type-STRING error remains before the Results window appears.
+- A second review found that shell, grid-area and tab-control creation were all inside one unless sd-dialog-shell-p block. A previous failed attempt could leave the shell alive but leave the grid or tab control missing. The next run would see the shell, skip all child initialization, then attempt to insert a page into an incomplete UI.
+- Changed h871-pf-v03-create-shell to check/create the dialog shell, grid area and tab control independently. Uses sd-control-p for the child UICT handles; this is documented as checking controls, areas, grid areas and dialog shells.
+- Changed :tabChangedAction from a quoted symbol to a function object (#'h871-pf-v03-tab-changed), matching PTC's official UICT tab-control examples.
+- This is a source-level correction based on the initialization lifecycle; it has not yet been confirmed in Modeling 18.1. If the same error persists, the next revision should add per-call stage diagnostics around the remaining UICT creation calls rather than alter density matching.
