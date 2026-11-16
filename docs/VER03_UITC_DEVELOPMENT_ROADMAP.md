@@ -848,3 +848,45 @@ If the user does not accept a temporary diagnostic window, do not show it. Conti
 - Current hidden bridge is now suspected to fail because it selects BrowserNodes while the browser reports them as not displayed.
 - The no-second-window Apply requirement remains **not solved**.
 - PTC API references are later 20.x documentation unless otherwise noted; no unverified API is being presented as 18.1-proven.
+
+
+## 27. COM/.NET object-model selection route checked — 2026-11-16
+
+### Why this route was checked
+
+The Lisp Integration Kit exposes COM/.NET interoperability, and the object model has `ISelectionItem` / `SelectionItem` objects. This looked like a possible way to bypass the Graphical Browser and submit Part references directly.
+
+### Official API findings
+
+PTC's object-model overview documents:
+- `IApplication` as the application root, with access to the active 3D document, file loading, add-ins and Lisp command execution.
+- `IDocument3D` as the route to the root component and model structure.
+- `SelectionItem` / `ISelectionItem` as a handle for referring to a particular component instance.
+- `IDocument3D.CreateISelectionItem` can create a selection-item reference.
+
+PTC's Lisp/.NET interoperability reference documents conversion of a Lisp `SEL_ITEM` to `ISelectionItem`, and passing arrays of selection items to add-ins.
+
+References:
+- Object model: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/dotnetapi/ApiDocumentation/OsdmApiObjectModel.html
+- Lisp/.NET integration: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/dotnetapi/ApiDocumentation/OsdmLispIntegration.html
+- Lisp interoperability: https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/dotnetapi/ApiDocumentation/OsdmApiLispInterop.html
+
+### Result
+
+The reviewed public object-model documentation describes how to identify, create, traverse, and pass selection-item references. It does **not** document an application/document Selection collection or a method that assigns an arbitrary array of Part selection items to the active Modeling viewport selection.
+
+Therefore:
+- `.net:selection-item` is a reference conversion helper, not a viewport selection setter.
+- `CreateISelectionItem` creates a reference object; it is not documented as selecting/highlighting the Part in the viewport.
+- Passing an array to a custom add-in only transfers the references to that add-in; it does not mutate Modeling's selection state by itself.
+- Do not build a custom .NET add-in on the assumption that it can set the viewport selection. That would add deployment complexity without a documented selection API.
+
+### Investigation status
+
+The documented routes reviewed so far are:
+1. Graphical Browser `:select-and-execute`: proven command-input hand-off, but the current hidden bridge has invisible nodes and the method is not documented as a global selection setter.
+2. Dialog Generator selection variables / `:initial-value`: can carry SEL_ITEM values into a dialog variable, but not proven to set global viewport selection.
+3. `GET_SELECTION`: invokes interactive selection and returns selected items; it is not a setter for a supplied list.
+4. COM/.NET `ISelectionItem`: creates/transfers references; no documented active viewport selection setter found.
+
+No production source change was made. The one-window Apply requirement remains **not solved**. Further work must not invent an API name or equate object references, dialog feedback, browser selection, command input, and global viewport selection.
