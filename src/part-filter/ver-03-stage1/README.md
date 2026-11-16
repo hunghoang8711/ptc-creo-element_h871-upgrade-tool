@@ -2,7 +2,7 @@
 
 **Branch:** `rebuild/ver-03-from-ver-02`  
 **Target:** PTC Creo Elements/Direct Modeling 18.1  
-**Status:** Stage 0-equivalent diagnostic baseline passed in Modeling 18.1; no Stage 1 feature has been added yet.
+**Status:** First isolated tab-presentation experiment prepared; Modeling 18.1 runtime test pending.
 
 ## Current source
 
@@ -16,7 +16,15 @@ The previous multi-browser implementation caused Fatal Exception `0xC00000FD` im
 
 The trace file `%USERPROFILE%/H871_PART_FILTER_STAGE1_TRACE.txt` was created once but remained 0 KB and was not updated on a later search. The trace writer swallowed its own errors with `ignore-errors`; therefore the empty file is **not reliable evidence** about which search stage was reached. The trace mechanism is retired for this diagnostic cycle.
 
-## Current diagnostic design
+## Confirmed diagnostic baseline
+
+Before the current experiment, the user confirmed that the Stage 0-equivalent Stage 1 source ran successfully in Modeling 18.1. It provided exactly the same functionality as Stage 0.
+
+## Current experiment — one API difference
+
+The current source adds only `:createAsTab t` to the existing `sd-create-graphical-browser` call. It still creates exactly one Browser Tree and one Graphical Browser. No multiple-browser sessions, callback closures, `:tabname`, search changes, report changes, or selection/Apply changes are included. The purpose is only to test whether Modeling 18.1 accepts the tab-presentation option in isolation.
+
+## Previous diagnostic design
 
 Stage 1 source has been replaced by a mechanical clone of the user-confirmed Stage 0 source:
 
@@ -31,11 +39,11 @@ Stage 1 source has been replaced by a mechanical clone of the user-confirmed Sta
 
 This diagnostic deliberately removes all multi-tab functionality. The user has now confirmed that it runs successfully in Modeling 18.1 and behaves exactly like Stage 0. This establishes that the renamed Stage 1 command/helper prefix is not, by itself, causing the earlier failure. The exact cause among the removed multi-browser/tab changes remains unknown.
 
-## Runtime confirmation and next step
+## Test this isolated experiment
 
-User confirmed on 2026-11-16 that this Stage 1 source runs successfully in Creo Modeling 18.1 and has the same functionality as Stage 0. No new feature is present in this diagnostic baseline.
+Use a disposable model copy and a fresh Modeling 18.1 session. Load the current Stage 1 file and run `H871_PART_FILTER_VER_03_STAGE1` for one known pair (CNC-SUS304, numeric 1/304). Confirm whether the Results Browser opens and whether row selection, Select All, double-click and Apply still work. Also note whether the browser is presented as a tab or as a normal window.
 
-The next revision will introduce only one tab-related API change, with all search, report, native selection and Apply logic kept identical. The user must test that isolated revision before any additional tab or multi-browser behavior is added. If the fatal exception returns, revert that single experiment to this confirmed baseline.
+If the fatal exception returns or the Browser fails to open, revert only `:createAsTab t` to return to the confirmed baseline. Do not add a second browser or any other tab-related argument until this experiment passes.
 
 ## Preservation and safety
 
