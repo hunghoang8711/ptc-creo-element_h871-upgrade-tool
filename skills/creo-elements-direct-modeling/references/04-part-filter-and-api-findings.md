@@ -99,3 +99,6 @@ The latest ver-05 source generates a Graphical Browser `:modeMenu` row with one 
 The ver-05 page activation path must clear the previous Graphical Browser table root before setting the next one. PTC's 20.6 reference shows the buffered sequence :buffer-display t, :clear-table-roots, :change-table-root, :buffer-display nil. Without clearing roots, rows from multiple pages may be shown together and page-scoped Apply is unsafe.
 
 ver-05 now also clears the Browser selection before changing roots and logs :number-of-table-roots. Require the trace to report exactly one root after each page switch. This is a source-level fix only; Modeling 18.1 runtime behavior remains pending.
+
+
+Fail-safe refinement: ver-05 checks both :clear-table-roots and :change-table-root return values and refuses to mark a page active if either fails. The :number-of-table-roots query is diagnostic-only and guarded with ignore-errors. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4. Modeling 18.1 runtime validation is still required.
