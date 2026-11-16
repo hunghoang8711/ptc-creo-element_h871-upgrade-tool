@@ -182,3 +182,8 @@ ver-05 follow-up: page activation now fails closed if :clear-table-roots or :cha
 
 
 ver-05 caption correction: page labels now use PROCESS-MATERIAL order (CNC-SUS304, CG-SS400), matching the established ver-03 convention. The numeric Density mapping and search values are unchanged. Source commit: 8a189bb6ec8e44234b5b6607deb8600af3541c0a.
+
+
+### ver-05 page-selector UI correction (2026-11-16)
+
+The missing multi-page UI was traced to using :modeMenu as a horizontal tab strip. PTC documentation states modeMenu maps to right-click popup entries; :buttonMenu is the visible horizontal button row. The user therefore saw a ver-02-like table without page buttons. ver-05 now builds each Density-pair page selector dynamically through :buttonMenu, followed by Select All and Clear Selection. The incorrect modeMenu page configuration and popup menu installer call were removed. Source commit: ca85cf158cdb345381f989f46f3e6cadbfe9bdc4. Runtime visibility and callback behavior in Modeling 18.1 remain unverified.
