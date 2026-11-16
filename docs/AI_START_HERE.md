@@ -47,10 +47,12 @@ Never promote a feature to runtime-tested without an explicit test result from t
 ## Current Part Filter handover
 
 - ver-01 is the user-confirmed numeric Density-pair baseline.
-- ver-02 is the mapped Machining Process + Material convention dialog; user reported very good results.
-- ver-03 is specified but has no new implementation yet.
-- The correct ver-03 UI is one separate Results Browser window with its own internal horizontal tabs/pages. It is not multiple Graphical Browser windows and not Creo Browser Bar tabs.
-- Read TD-008 in `docs/TECHNICAL_DECISIONS.md` before working on multi-search behavior.
+- ver-02 is the user-confirmed mapped Machining Process + Material filter; its visible Results Graphical Browser owns row selection and native Apply. Do not alter it.
+- ver-03 UICT Results pages, result tables and page-local selection are user-confirmed in project testing; UICT-to-Modeling Apply is unresolved. The hidden Graphical Browser bridge, GET_SELECTION experiments and direct UICT callback hand-off failed.
+- A Search candidate produced Modeling fatal exception 0xC00000FD; the iterative traversal candidate did not fix it and was reverted. Search root cause is unresolved. Use a disposable model and inspect the trace before changing the collector.
+- ver-04 diagnostic: `src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp`. It prototypes one native Graphical Browser with multiple page roots, Previous/Next and a Results Pages popup menu. It preserves native Apply but is not yet a horizontal-tab UI and has not been runtime-tested.
+- Keep ver-01/ver-02 untouched. Do not retry Browser reparenting or hidden Browser Apply without a new, proven cause.
+- Read TD-008, TD-010, TD-011 and KI-012 before changing multi-search or Apply architecture.
 
 ## New tool development
 
