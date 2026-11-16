@@ -234,3 +234,16 @@ Resolved:
 - Source commit: `dd266a318eaa6d9f4699ad3435859e4bb5b037f0`.
 - Static checks: exactly two selection callback bindings removed; no selectionAction or doubleClickAction bindings remain; Apply binding and selected-row reader remain. No Creo LISP runtime test has been performed.
 - Next acceptance test: single-click a row and Ctrl+click another row. The table should visibly mark the selected rows without a busy pause or launching the Apply bridge. Then press Apply once and verify actual 3D viewport selection separately.
+
+
+## 2026-11-16 – Restore the proven native Graphical Browser Apply action
+
+- User supplied a fresh trace after testing in a completely new Modeling window. Results collection and logical-table refresh completed; UICT returned 1, 2 and 8 selected `ELAN::SEL_ITEM` values on separate Apply runs.
+- For each run, the bridge was shown, BrowserNodes were resolved, browser selection counts matched the requested number, and programmatic `:select-and-execute` returned `:SUCCESS`. The bridge and tree were then destroyed. The trace still does not prove that the intended Parts entered the 3D viewport.
+- Critical comparison with the user-confirmed ver-02 baseline: ver-02 configures `:okButtonLabel "Apply"` and lets the Graphical Browser's native OK action perform `:select-and-execute`. The user had separately confirmed that manually pressing Apply in the visible bridge selected the intended Part in the viewport.
+- The current ver-03 path instead invoked `:select-and-execute` programmatically from a custom User Action and immediately destroyed the bridge. Although the command returned `:SUCCESS`, this is not equivalent evidence to the successful native-button interaction.
+- Narrow correction: keep the bridge visible with its selected rows and stop invoking `:select-and-execute` programmatically. The user must press the bridge's built-in **Apply** button, allowing Creo's native Graphical Browser OK action to perform the hand-off exactly as in ver-02. The bridge is no longer destroyed before that native action.
+- Added trace marker `APPLY/READY-FOR-NATIVE-OK` and an on-screen instruction identifying the bridge's Apply button.
+- Source commit: `875c89febb0a3409c2a7744e07aa690e1278d5f8`.
+- Static checks: native browser creation still has `:okButtonLabel "Apply"`; programmatic `:select-and-execute` call removed; immediate bridge/tree destroy removed; selected BrowserNode setup retained. No Modeling 18.1 runtime test yet.
+- Runtime acceptance: click the Results window's Apply once; confirm the Native Apply Bridge appears with the expected highlighted rows; then click **Apply inside that bridge**. Verify the matching Parts become selected in the 3D viewport. Only after that is confirmed should bridge cleanup be addressed.
