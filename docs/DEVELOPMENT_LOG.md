@@ -205,3 +205,15 @@ Resolved:
 - Static source validation passed: balanced parentheses, no unterminated strings, unique stage command and symbol prefix, separate tree update arguments, no UICT calls.
 - Compatibility caveat: `:createAsTab` and Browser Tree `:update-args` were verified in later-version PTC Integration Kit documentation, not yet in a Modeling 18.1 runtime test. Stage 1 remains unverified until user tests it.
 - Test only on a disposable model copy. Do not proceed to Stage 2 until Stage 1 passes.
+
+
+## 2026-11-16 – Stage 1 Search exception: Browser Tree callback compatibility correction
+
+- User tested Stage 1 and reported Fatal Exception `0xC00000FD` immediately after pressing Search OK. Closing the message left Modeling usable, matching the earlier incident; Results Browser did not appear.
+- Compared Stage 1's search path with the user-confirmed Stage 0 source. Density matching and recursive Assembly collection are structurally equivalent; Stage 1's Browser Tree creation introduced a new later-version API usage: `:update-args` with a two-argument updater, unlike Stage 0's zero-argument callback.
+- Targeted correction: removed `:update-args`. Stage 1 now registers a unique zero-argument callback symbol for each Density-pair tree. The callback closes over that tree name and pair key, so separate result trees retain independent data without relying on the later-version callback-argument feature.
+- Added append-only trace milestones in `H871_PART_FILTER_STAGE1_TRACE.txt` under the Modeling user's home directory: Search entry, before/after collection, after report, before/after Browser Tree creation, after Browser creation, and after showing the Browser.
+- Static validation after correction: 494 lines; parentheses balanced (depth 0, minimum 0); no unterminated strings; no `:update-args` call remains; zero-argument updater and trace writer present.
+- Remaining unverified API: `:createAsTab` still relies on later-version PTC documentation and requires Modeling 18.1 runtime validation.
+- Runtime status: **fix not yet confirmed**. User must test only on a disposable model copy and report either successful Results display or the last trace line if the exception persists.
+- Stage 0, ver-01 and ver-02 source files were not modified.
