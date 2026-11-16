@@ -400,7 +400,13 @@
     (when (eq handoff :error)
       (sd-display-message
         "H871 Apply: Modeling rejected the native hand-off. See the trace file.")
-      (return-from h871-pf-v03-native-apply nil)))
+      (return-from h871-pf-v03-native-apply nil))
+    ;; The bridge must remain visible until Modeling completes the native
+    ;; selection hand-off. Once the hand-off succeeds, hide the temporary
+    ;; bridge so it does not remain as a second Results window.
+    (let ((hidden
+            (sd-hide-graphical-browser *h871-pf-v03-apply-browser*)))
+      (h871-pf-v03-trace "APPLY/HIDE-BRIDGE-AFTER-HANDOFF" hidden)))
   t)
 
 ;; A zero-input sequential Dialog Generator command runs its :ok-action
