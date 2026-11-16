@@ -74,3 +74,8 @@ Important: a custom Apply callback previously replaced native Apply and caused r
 - Dynamic popup menu entries can provide a page selector, with Previous/Next toolbar buttons for navigation. This is a diagnostic page-navigation UI, not a horizontal tab strip.
 - Preserve the Browser's native Apply default. Do not override :okButtonAction without a proven reason and a runtime regression test.
 - Do not retry the failed Browser reparenting/host-shell integration without a newly isolated root cause.
+
+
+## 2026-11-16 – ver-04 persistent UICT reopen launcher
+
+The native Results Browser can now be reopened from the restored ver-03 UICT Results shell without typing the diagnostic command again. ver-04 installs a uniquely named `Open Native Results` pushbutton in the existing ver-03 grid, guarded by `sd-control-p`, with `:pushAction '(h871-pf-v04-run-diagnostic)`. The callback snapshots current ver-03 page data and selection before rebuilding the one native Browser. Previous/Next also emit navigation request/target trace markers. This is a static-checked implementation; verify UICT button coordinates, callback execution, repeated close/reopen, page switching and actual viewport Apply in Modeling 18.1 before treating it as a proven workflow. Source: `src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp`, commit `21ddfb945a40f2361cb09439522387f90f6fac54`.
