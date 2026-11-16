@@ -110,3 +110,10 @@ Resolved:
 - Reviewed full ver-03 initialization against known-good ver-02.
 - Guarded tab-change/status callback against firing before the page registry and UI handles exist; prevent NIL from reaching Display Table selection APIs.
 - Matched ver-02's null-safe Density Instance/Base check in the recursive filter. Runtime retest pending.
+
+
+### 2026-11-16 – ver-03 partial UICT initialization recovery
+- User confirmed the NIL-is-not-of-type-STRING error remained after the early tab-callback guard.
+- Found a separate partial-initialization bug: shell, grid area and tab control were created under a single shell-existence check. If a previous failed run left only the shell alive, later runs skipped creation of missing child controls and tried to insert pages into an incomplete UI.
+- Updated shell initialization to recover each layer independently with sd-control-p; changed tab callback binding to a function object as shown in PTC's official UICT examples.
+- Density search logic and ver-01/ver-02 remain unchanged. Modeling 18.1 retest pending.
