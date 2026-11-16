@@ -154,3 +154,14 @@ ver-05 caption follow-up: the page label order was corrected from MATERIAL-PROCE
 ## KI-017 correction – modeMenu is a horizontal row
 
 The previous KI-017 root-cause statement was incorrect. PTC's Graphical Browser reference explicitly documents modeMenu as a row of toggle buttons directly above buttonMenu. Both are also mapped to right-click popup entries for compatibility. Therefore modeMenu was valid in principle; moving page buttons to buttonMenu was not a proven fix and has been reverted. Source commit 7763d35 restores modeMenu and adds diagnostic trace markers. The reason the user did not see page buttons remains unresolved and must be diagnosed from the generated menu spec and runtime behavior.
+
+
+## KI-018 – ver-03 Apply hand-off still requires runtime verification (2026-11-16)
+
+The user has reaffirmed ver-03 as the accepted Results UI: one window with internal Density-pair tabs and direct row selection. The current ver-03 source was found still passing raw `sd-create-browsernode` return tokens (for example `#:NODE241`) into `:set-object-selection`, despite an earlier documentation note claiming the conversion had already been applied.
+
+Correction committed in source: root and Part node IDs are now resolved using `sd-get-browsernode-struct`; only resolved structures are stored/passed to Browser selection APIs. The source logs root resolution, each Part-node resolution and the resolved count, and fails closed if any selected Part cannot be resolved.
+
+**Not verified:** whether the hidden temporary Browser bridge can transfer those selected Parts into Modeling's actual selection context. Previous investigations found hidden/offscreen Browser hand-off unreliable. A successful BrowserNode lookup or `:select-and-execute` status is not acceptance evidence. User must verify the selected Parts are visibly selected in the 3D viewport.
+
+Next test: load the updated ver-03 source in a fresh Modeling 18.1 session, search a known pair, select one row, Apply, then repeat with multiple rows. Capture `H871_PART_FILTER_VER_03_TRACE.txt` and report actual viewport selection. Do not change the ver-03 UI or filter collector while diagnosing this boundary.
