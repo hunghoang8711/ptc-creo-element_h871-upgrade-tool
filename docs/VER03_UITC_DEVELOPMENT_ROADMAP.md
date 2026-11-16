@@ -763,3 +763,21 @@ If steps 1–3 work but step 4 does not, stop this route: it is only a hidden co
 - User-confirmed runtime facts from sections 22–23 remain unchanged.
 - One-window Apply/double-click to actual Modeling viewport selection remains **not solved**.
 - API documentation is later-release material except for the What's New entry explicitly describing a feature introduced in Modeling 18.1; runtime validation is still required.
+
+
+### Follow-up source and baseline inspection — scope guard
+
+The active ver-03 source was re-fetched and inspected at blob `7a195dfdc6970a1fed53e37000925f254bd7f996`. Its current Apply callback/trampoline and native bridge are exactly the section 22/23 implementation; no unrecorded source drift was found in the inspected canonical file.
+
+The ver-02 baseline was also re-fetched from `main` at blob `fdd16940a751ba3e24ed108b41a19e03a38bada8`. It confirms that the known-good behavior depends on the **visible native Graphical Browser's own OK button**. Its code does not expose a generic global-selection setter that can be reused by UICT.
+
+The new `:without-show` + `:initial-value` idea must therefore remain an isolated API experiment only. The manual says:
+- `:without-show` suppresses the Parallel Dialog UI; it does not say that hiding the dialog automatically presses OK.
+- A selection variable can accept a list of SEL_ITEMs when `:multiple-items t`.
+- Part variables normally display their object name; persistent highlight is a separate feedback option. The docs do not equate this feedback with the global Modeling selection set.
+
+Consequently, there is not yet a justified production patch. Before any isolated experiment, first inspect the 18.1 command syntax and whether a hidden parallel dialog can be invoked non-interactively with its selection list supplied as command input. Even if that succeeds, verify actual Modeling selection state independently from dialog feedback. Do not modify the production Apply path until both conditions are demonstrated.
+
+References:
+- https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
+- https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/whatsnew.html
