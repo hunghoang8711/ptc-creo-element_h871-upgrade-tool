@@ -272,3 +272,11 @@ Resolved:
 - Final source audit after these changes: 564 lines; balanced parentheses; no unterminated strings; no duplicate local DEFUN names; no missing local `h871-pf-v05-*` definitions; no UICT Display Table/logical-table APIs or Apply Bridge; both Density fields are compared; native Graphical Browser Apply and per-Browser callback closures are present.
 - Latest source content SHA: `97b754f71f2ade1bbbbf6dbf7f06220061c75f47`.
 - Runtime remains pending. Static source checks do not validate Creo 18.1 API behavior or prove the `0xc00000fd` issue is fixed.
+
+### VER-05 Manager control validation and callback lifecycle follow-up
+
+- Manager text controls and pushbuttons are now checked by their UICT control handles after creation, rather than assuming the creation/set-text API return value is truthy.
+- Added cleanup of obsolete per-Browser callback function bindings after the associated old Browser and Tree are destroyed, including Browser creation failure paths.
+- Final source content SHA after these follow-ups: `f0c0f3dc89bbc6e620b19c685b44a6a91eccec41` (590 lines).
+- Static checks re-run: balanced parentheses, closed strings, no duplicate local DEFUN names, no missing local helper definitions, and no Display Table/logical-table/Apply-Bridge code.
+- Runtime status unchanged: NOT TESTED in Modeling 18.1.
