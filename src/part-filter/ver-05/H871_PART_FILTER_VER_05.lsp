@@ -2,21 +2,19 @@
 ;; H871 PART FILTER - SINGLE GRAPHICAL BROWSER / MULTI-PAGE IMPLEMENTATION CANDIDATE
 ;; Target: PTC Creo Elements/Direct Modeling 18.1
 ;;
-;; This diagnostic avoids the previously failed Browser-parent/reparent path.
-;; It uses ONE visible Graphical Browser for all Density-pair pages:
-;; - One Browser Tree with one page root per Density pair.
-;; - One Browser table and one native Apply button.
-;; - Previous/Next toolbar buttons plus a dynamic "Results Pages" popup menu.
-;; - Page-local selection is saved/restored while changing table roots.
+;; Product architecture:
+;; - One standalone Results Graphical Browser owns all result pages.
+;; - The same visible Browser owns row selection and native Apply.
+;; - Search, page registry, page navigation and result rows are self-contained;
+;;   no ver-03 UICT Results window or hidden Browser bridge is involved.
+;; - One Browser Tree has one page root per numeric Density pair.
+;; - Previous/Next and a Results Pages popup switch the active page root.
+;; - Page-local selection paths are restored in the same visible Browser.
 ;;
-;; UI note:
-;; This is a page-navigation prototype, not the final horizontal tab strip.
-;; It isolates whether same-browser native Apply can coexist with multiple
-;; result pages without creating one Graphical Browser per query.
-;;
-;; Preconditions:
-;; 2. Run at least two searches so two Results pages exist.
-;; 3. Run H871_PART_FILTER_VER_05.
+;; UI note: horizontal tab-strip rendering is not yet implemented; this
+;; version provides multiple pages in one Results window without an extra
+;; Results-window transition. The horizontal tab UI remains a separate task.
+;; Search predicate, numeric normalization and mappings follow ver-02.
 ;; ============================================================================
 
 (in-package :oli)
