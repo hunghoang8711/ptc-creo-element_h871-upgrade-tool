@@ -247,3 +247,20 @@ Resolved:
 - Source commit: `875c89febb0a3409c2a7744e07aa690e1278d5f8`.
 - Static checks: native browser creation still has `:okButtonLabel "Apply"`; programmatic `:select-and-execute` call removed; immediate bridge/tree destroy removed; selected BrowserNode setup retained. No Modeling 18.1 runtime test yet.
 - Runtime acceptance: click the Results window's Apply once; confirm the Native Apply Bridge appears with the expected highlighted rows; then click **Apply inside that bridge**. Verify the matching Parts become selected in the 3D viewport. Only after that is confirmed should bridge cleanup be addressed.
+
+
+## 2026-11-16 – VER-05 rebuild from VER-03 filter with native multi-Browser manager
+
+- User explicitly requested a clean restart from the VER-03 source revision on `debug/ver03-visible-apply-bridge`, where the visible Graphical Browser's native Apply button was user-confirmed to select Parts in the 3D viewport.
+- Created isolated branch `rebuild/ver05-ver03-filter-native-multi-browser`. No changes to `main`, VER-01, VER-02, VER-03 or VER-04.
+- Preserved the complete VER-03 Search dialog layout and choice mappings (Assembly, Machining Process, Material, Process Code and Material Code), numeric Density comparison, report generation and Assembly traversal.
+- Replaced the Results UICT Display Table / logical-table architecture entirely. VER-05 contains no `sd-create-display-table-control`, `sd-create-logical-table`, `sd-get-display-table-selection`, or logical-table update calls.
+- New Manager is one dialog shell containing per-pair text controls and Open Browser pushbuttons. It is not a Display Table.
+- Each Density Instance + Density Base pair owns a separate Graphical Browser and Browser Tree. Names include pair codes and a generation number. Each Browser Tree update callback is a separately interned function symbol whose function is a closure over that Browser's tree name, pair label and copied Part result list; there is no shared active-pair/global-parts variable.
+- Browser columns are Part Name, Density Instance, Density Base and Assembly Path. Select All / Clear Selection use the native Graphical Browser commands. The Browser's own native `:okButtonLabel "Apply"` is the direct Apply mechanism; the temporary Apply Bridge has been removed from this architecture.
+- Same-pair refresh creates and displays the replacement Browser before updating the Manager entry and destroying only the previous Browser/Tree for that same pair. A no-match search does not replace existing pair data.
+- Added `src/part-filter/ver-05/README.md` with load instructions, architecture, mapping, safety guidance and runtime acceptance checklist.
+- Commits: `d47719ed1adafad1dc452400405caee705173e23` (initial source), `64f1c60136f7e62c279489194f565e526a816bd8` (restore missing VER-03 filter engine and complete architecture), `d5fc20b140d62fc287311c103bbe643bea46ebb0` (manager row layout), `d7ec93de2ca814e54ee026fee1b551d6b50b0736` (README).
+- Static audit: balanced parentheses, no unterminated strings, no duplicate local DEFUN names, all referenced `h871-pf-v05-*` functions defined, no UICT Display Table/logical-table APIs, native Graphical Browser Apply configured, and per-Browser callback closures present.
+- Runtime status: NOT TESTED in Modeling 18.1. The development environment cannot execute Creo, so it cannot truthfully supply the requested live runtime result. Multiple simultaneous Browsers, callback timing, UICT manager controls, native Apply and the reported fatal `0xc00000fd` behavior remain runtime acceptance items.
+- Important known risk: the VER-03 recursive Assembly collector was deliberately retained to preserve the exact filter engine. An earlier iterative traversal experiment did not resolve the reported `0xc00000fd`; root cause remains unknown. Do not describe the crash as fixed. Test only on a disposable Assembly copy.
