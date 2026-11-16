@@ -138,3 +138,14 @@ KI-016 follow-up: ver-05 now checks that :clear-table-roots and :change-table-ro
 
 
 ver-05 caption follow-up: the page label order was corrected from MATERIAL-PROCESS to PROCESS-MATERIAL (CNC-SUS304). This is a presentation correction only; Density search logic is unchanged. Source commit: 8a189bb6ec8e44234b5b6607deb8600af3541c0a.
+
+
+## KI-017 – ver-05 page selectors were attached to modeMenu instead of visible buttonMenu (2026-11-16)
+
+**Symptom:** The Results window looked like ver-02 and showed no horizontal Density page selectors.
+
+**Root cause:** PTC Graphical Browser reference states that modeMenu is mapped to right-click popup entries; buttonMenu creates the visible horizontal row. ver-05 incorrectly used modeMenu for the page selectors.
+
+**Correction:** Generate page selector buttons dynamically in :buttonMenu and append Select All/Clear Selection. Remove the incorrect modeMenu page selector and duplicate popup menu installation. Source commit: ca85cf158cdb345381f989f46f3e6cadbfe9bdc4.
+
+**Verification:** Static source checks passed. Must test in Modeling 18.1: after two successful searches, two horizontal page buttons must be visible in the same Results Browser, and clicking each must switch to only that page's Parts. Do not treat source inspection as runtime proof.
