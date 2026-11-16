@@ -70,7 +70,7 @@ H871_PART_FILTER_VER_05
 
 Static source audit passed: balanced parentheses, closed strings, no duplicate local DEFUN names, all referenced `h871-pf-v05-*` functions defined, no UICT Display Table/logical-table APIs, native Browser Apply present, and per-Browser callback closures present.
 
-The user has runtime-confirmed in Modeling 18.1 that separate result Graphical Browsers are independent; individual selection, double-click selection, and Select All followed by native Apply correctly select Parts in the 3D viewport for the tested workflow. The Manager's original small/clipped layout was reported by the user. Its pixel/grid sizing correction is now committed but awaits runtime confirmation. Remaining multi-window lifecycle cases and the earlier fatal `0xc00000fd` root cause are still open.
+The user has runtime-confirmed in Modeling 18.1 that separate result Graphical Browsers are independent; individual selection, double-click selection, and Select All followed by native Apply correctly select Parts in the 3D viewport for the tested workflow. The Manager's original small/clipped layout was corrected by changing only its grid-area dimensions from 112 × 82 to 1120 × 820 pixels while retaining the 10 × 10 pixel cell size and all child-control coordinates. The user subsequently confirmed in Modeling 18.1 that the H871 Graphic window became larger. Exact full-layout readability and all Manager row/button positions still need a complete visual check. Remaining multi-window lifecycle cases and the earlier fatal `0xc00000fd` root cause are still open.
 
 ## Known risk
 
@@ -109,7 +109,7 @@ Updated test status:
 - [x] Individual Part selection works.
 - [x] Double-click selection works.
 - [x] Select All + native Apply selects Parts in the 3D viewport.
-- [ ] H871 Graphic/Manager window displays all information legibly.
+- [x] H871 Graphic/Manager window became larger after the grid-area sizing correction (user-confirmed); verify all rows/buttons and full readability as a separate visual acceptance check.
 - [ ] Full regression sequence (same-pair replacement, no-match preservation, Manager reopen buttons and fresh-session repeat) confirmed.
 - [ ] Root cause/status of the earlier fatal exception conclusively established.
 
