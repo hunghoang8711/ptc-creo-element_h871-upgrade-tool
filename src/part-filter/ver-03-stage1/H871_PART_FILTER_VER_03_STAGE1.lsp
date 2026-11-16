@@ -125,6 +125,30 @@
   (declare (ignore browser-name))
   (getf (h871-pf-mt-row-data node) :path))
 
+;; Modeling 18.1 compatibility: use a zero-argument updater callback
+;; like the verified Stage 0 browser tree.
+(defun h871-pf-mt-register-tree-updater (tree-name key)
+  (let* ((updater-name
+           (intern (format nil "H871-PF-MT-UPDATE-~A"
+                     (substitute #\\- #\\. key))
+             :oli))
+         (captured-tree tree-name)
+         (captured-key key))
+    (setf (symbol-function updater-name)
+      (lambda ()
+        (h871-pf-mt-build-results-tree captured-tree captured-key)))
+    updater-name))
+
+(defun h871-pf-mt-trace (stage)
+  (ignore-errors
+    (with-open-file
+      (stream
+        (merge-pathnames "H871_PART_FILTER_STAGE1_TRACE.txt"
+          (user-homedir-pathname))
+        :direction :output :if-exists :append :if-does-not-exist :create)
+      (format stream "~A~%" stage)
+      (finish-output stream))))
+
 (defun h871-pf-mt-find-session (key)
   (find key *h871-pf-mt-sessions*
     :key (function (lambda (entry) (getf entry :key)))
@@ -194,14 +218,15 @@
     (ignore-errors (sd-destroy-graphical-browser browser-name))
     (ignore-errors (sd-destroy-browser-tree tree-name))
 
+    (h871-pf-mt-trace "BROWSER:BEFORE-CREATE-TREE")
     (unless
       (sd-create-browser-tree
         tree-name
         :update-events oli:*SD-CHANGE-OBJECT-TREE-EVENT*
-        :update-func 'h871-pf-mt-build-results-tree
-        :update-args (list tree-name key))
+        :update-func (h871-pf-mt-register-tree-updater tree-name key))
       (sd-display-error "H871: Could not create the results data tree.")
       (return-from h871-pf-mt-open-results-browser nil))
+    (h871-pf-mt-trace "BROWSER:AFTER-CREATE-TREE")
 
     (unless
       (sd-create-graphical-browser
@@ -247,6 +272,7 @@
         :tabname tabname)
       (sd-display-error "H871: Could not create the results browser.")
       (return-from h871-pf-mt-open-results-browser nil))
+    (h871-pf-mt-trace "BROWSER:AFTER-CREATE-BROWSER")
 
     (unless
       (sd-browser-define-table
@@ -277,6 +303,7 @@
     (sd-browser-set-active-table browser-name :table-name "h871-pf-mt-bom")
     (sd-browser-exec-cmd browser-name :set-table-mode)
     (sd-show-graphical-browser browser-name)
+    (h871-pf-mt-trace "BROWSER:AFTER-SHOW")
     (let ((root (sd-get-browsernode-struct tree-name :root)))
       (when root
         (sd-browser-exec-cmd browser-name :change-table-root root t)))
@@ -331,12 +358,15 @@
     (otherwise (format nil "MATERIAL-~A" value))))
 
 (defun h871-pf-mt-run (assembly requested-instance requested-base)
+  (h871-pf-mt-trace "RUN:BEGIN")
   (setf *h871-pf-mt-diagnostic-samples* nil)
   (setf *h871-pf-mt-results-assembly* assembly)
   (setf *h871-pf-mt-requested-instance* requested-instance)
   (setf *h871-pf-mt-requested-base* requested-base)
+  (h871-pf-mt-trace "RUN:BEFORE-COLLECT")
   (setf *h871-pf-mt-last-results*
     (h871-pf-mt-collect assembly nil requested-instance requested-base))
+  (h871-pf-mt-trace "RUN:AFTER-COLLECT")
   (let* ((report
            (h871-pf-mt-write-report
              assembly *h871-pf-mt-last-results*
@@ -349,6 +379,7 @@
              (h871-pf-mt-process-label requested-instance)
              (h871-pf-mt-material-label requested-base)))
          (old-session (h871-pf-mt-find-session key)))
+    (h871-pf-mt-trace "RUN:AFTER-REPORT")
     (if (null *h871-pf-mt-last-results*)
         (sd-display-message
           (format nil
@@ -372,8 +403,10 @@
                 :base requested-base
                 :results *h871-pf-mt-last-results*)
           *h871-pf-mt-sessions*)
+        (h871-pf-mt-trace "RUN:BEFORE-OPEN-BROWSER")
         (unless (h871-pf-mt-open-results-browser key)
-          (return-from h871-pf-mt-run nil))))
+          (return-from h871-pf-mt-run nil))
+        (h871-pf-mt-trace "RUN:AFTER-OPEN-BROWSER")))
     (values (length *h871-pf-mt-last-results*) report)))
 
 ;; ------------------------------------------------------------
