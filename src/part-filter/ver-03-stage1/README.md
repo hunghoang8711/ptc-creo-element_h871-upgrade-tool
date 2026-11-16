@@ -63,3 +63,12 @@ If the fatal exception returns or the Browser fails to open, revert only `:creat
 - **Static status:** Source patch committed; parenthesis/API availability not yet runtime-verified in the user's Modeling 18.1 installation.
 - **User test required:** Run one known matching pair. Confirm whether Results is now docked in the Browser Bar and whether row selection, Select All, double-click and Apply still work. If it remains floating, report whether any error appears; because the docking call is protected, the window should still be available if the API is unsupported.
 - **References:** PTC Creo Elements/Direct Modeling Integration Kit, Graphical Browsers reference (20.6/20.7 documentation; exact 18.1 runtime compatibility still requires user test).
+
+
+## Superseding correction – internal tabs, not Browser Bar docking
+
+The correct requirement is one standalone Results window with its own internal, clearly named tabs/pages. It must not be docked into Structure Browser or Browser Bar. The earlier ver-03 UICT source (src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp on main) is the architectural reference because it implements one UICT Dialog Shell + one internal Tab Control + per-page tables.
+
+The remaining user-reported ver-03 defect is Apply: #:NODE241 is not of type BROWSERNODE. Stage 0 is only the single-window native Graphical Browser baseline; it does not implement internal pages. Do not confuse Stage 0 with the earlier UICT ver-03 prototype.
+
+The :createAsTab t and sd-dock-graphical-browser experiment was the wrong direction and has been removed from the active Stage 1 source. Future work must return to the UICT Apply bridge and prove the BrowserNode object type expected by :set-object-selection without changing the UICT window/tab architecture.
