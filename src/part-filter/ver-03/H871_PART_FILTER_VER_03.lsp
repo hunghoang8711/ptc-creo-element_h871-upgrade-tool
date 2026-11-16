@@ -138,14 +138,16 @@
   (concatenate 'string page-name "-STATUS-TX"))
 
 (defun h871-pf-v03-table-contents (parts)
-  (let ((rows nil))
+  (let ((rows nil)
+        (row-id 0))
     (dolist (part parts)
       (push
         (list
+          (incf row-id)
           (h871-pf-v03-name part)
           (h871-pf-v03-density-display-value
             (sd-inq-part-density part :instance))
-          (h871-pf-v03-density-display-value
+          (sd-inq-part-density-display-value
             (sd-inq-part-density part :contents))
           (h871-pf-v03-path part)
           part)
@@ -330,12 +332,12 @@
   (sd-create-logical-table
     logical-table
     :secured nil
-    :columns '(:part-name :density-instance :density-base
+    :columns '(:row-id :part-name :density-instance :density-base
                :assembly-path :part-object)
-    :columnNames '("Part Name" "Density Instance" "Density Base"
+    :columnNames '("Row ID" "Part Name" "Density Instance" "Density Base"
                    "Assembly Path" "Part Object")
-    :keyColumns '(:part-object)
-    :types '(:string :number :number :string nil)
+    :keyColumns '(:row-id)
+    :types '(:number :string :number :number :string nil)
     :contents nil))
 
 (defun h871-pf-v03-create-page (instance base)
