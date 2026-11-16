@@ -405,22 +405,25 @@
         (push new-entry *h871-pf-v05-pages*)
         page-name))))
 
-(defun h871-pf-v05-page-mode-button-name (entry)
+(defun h871-pf-v05-page-button-name (entry)
   (format nil "PAGE-~A" (getf entry :page)))
 
-(defun h871-pf-v05-page-mode-menu ()
-  ;; Graphical Browser modeMenu is a horizontal row of page mode buttons. Build one page button for each stored Density-pair page.
-  (mapcar
-    (lambda (entry)
-      (list
-        (h871-pf-v05-page-mode-button-name entry)
-        :label (getf entry :label)
-        :push (list 'h871-pf-v05-activate-page (getf entry :page))))
-    (reverse *h871-pf-v05-pages*)))
-
-(defun h871-pf-v05-current-mode-button ()
-  (let ((entry (h871-pf-v05-page-by-name *h871-pf-v05-current-page*)))
-    (and entry (h871-pf-v05-page-mode-button-name entry))))
+(defun h871-pf-v05-page-button-menu ()
+  ;; PTC maps buttonMenu to the visible horizontal row above the Browser
+  ;; table. modeMenu is a context-popup menu, not the horizontal tab row.
+  ;; Use push buttons for pages; active page identity is also shown in status.
+  (append
+    (mapcar
+      (lambda (entry)
+        (list
+          (h871-pf-v05-page-button-name entry)
+          :label (getf entry :label)
+          :push (list 'h871-pf-v05-activate-page (getf entry :page))))
+      (reverse *h871-pf-v05-pages*))
+    (list
+      '("select-all" :label "Select All" :push (h871-pf-v05-select-all))
+      '("clear-selection" :label "Clear Selection"
+        :push (h871-pf-v05-clear-selection)))))
 
 (defun h871-pf-v05-rebuild-results-browser ()
   ;; Rebuild one named Browser and one named Tree; never create a second
@@ -439,17 +442,12 @@
       :tree *h871-pf-v05-tree*
       :topLabel "H871 - PART FILTER RESULTS"
       :treeStatusBar "Select Parts directly; Apply transfers the native Browser selection to Modeling."
-      :tableStatusBar "Select a page using the horizontal Results Pages buttons or right-click > Results Pages."
-      :modeMenuLabel "Results Pages"
-      :modeMenu (h871-pf-v05-page-mode-menu)
-      :modeMenuInitialButton (h871-pf-v05-current-mode-button)
+      :tableStatusBar "Use the horizontal page buttons to switch Density-pair results. Active page is shown in the status line."
       :minHeight 280 :maxWidth 980 :maxHeight 760
       :okButtonLabel "Apply"
       :abortButtonLabel "Close Results"
       :abortButtonAction '(h871-pf-v05-close-results)
-      :buttonMenu
-        '(( "select-all" :label "Select All" :push (h871-pf-v05-select-all))
-          ( "clear-selection" :label "Clear Selection" :push (h871-pf-v05-clear-selection))))
+      :buttonMenu (h871-pf-v05-page-button-menu))
     (ignore-errors (sd-destroy-browser-tree *h871-pf-v05-tree*))
     (sd-display-error "H871: Could not create the single Results Browser.")
     (return-from h871-pf-v05-rebuild-results-browser nil))
@@ -478,7 +476,6 @@
     (h871-pf-v05-reset-browser-objects)
     (sd-display-error "H871: Could not show the Results Browser.")
     (return-from h871-pf-v05-rebuild-results-browser nil))
-  (h871-pf-v05-add-page-menu)
   (h871-pf-v05-activate-page *h871-pf-v05-current-page* t)
   t)
 
