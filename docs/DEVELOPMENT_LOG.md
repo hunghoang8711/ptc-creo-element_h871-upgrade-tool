@@ -247,3 +247,19 @@ Resolved:
 - Source commit: `875c89febb0a3409c2a7744e07aa690e1278d5f8`.
 - Static checks: native browser creation still has `:okButtonLabel "Apply"`; programmatic `:select-and-execute` call removed; immediate bridge/tree destroy removed; selected BrowserNode setup retained. No Modeling 18.1 runtime test yet.
 - Runtime acceptance: click the Results window's Apply once; confirm the Native Apply Bridge appears with the expected highlighted rows; then click **Apply inside that bridge**. Verify the matching Parts become selected in the 3D viewport. Only after that is confirmed should bridge cleanup be addressed.
+
+
+## 2026-11-16 – VER-05 rebuild: VER-03 UI with stack-safe Assembly traversal
+
+- User reported a fatal Windows exception `0xc00000fd` (stack overflow) while testing the VER-04 multi-browser experiment. Creo warned that model data might have been damaged. The user was instructed to save a recovery copy to a new filename, never overwrite the original, and exit the affected Modeling session.
+- Root-cause status: NOT PROVEN. Source comparison found that VER-03 and VER-04 both recursively traverse `sd-inq-obj-children`. Deep Assembly nesting or repeated object references are a plausible stack-overflow trigger, but the exception has not yet been correlated with a trace or reproduced in Modeling 18.1.
+- Created isolated branch `rebuild/ver05-ver03-stack-safe-ui` from `debug/ver03-visible-apply-bridge`; no changes to VER-01, VER-02, VER-03, VER-04, or `main`.
+- Added `src/part-filter/ver-05/H871_PART_FILTER_VER_05_STACK_SAFE.lsp` (full standalone source, 872 lines). UI architecture is rebuilt from VER-03: one Results window, internal tabs keyed by numeric Density Instance + Density Base, multi-column Display Table, Select All, Clear Selection, and explicit Apply.
+- Replaced recursive Assembly traversal with an iterative pending-list traversal using an EQ hash table for visited object handles. Added a 250,000-object safety ceiling, progress/abort trace markers, and a fail-closed path: an incomplete scan does not update or replace any Results page.
+- Preserved exact two-field Density matching and /1000 normalization. `1-304` remains CNC-SUS304; labels are presentation only.
+- Removed custom Display Table `:selectionAction` and `:doubleClickAction` bindings. Native row selection remains; Apply is triggered only by the explicit Apply button. This avoids the previously observed unexpected callback/busy-cursor path.
+- Preserved the visible Native Apply Bridge and its native **Apply** button because the user confirmed that pressing that native button selects the intended Part(s) in the 3D viewport. This remains a two-step Apply interaction; no unsupported automatic selection success is claimed.
+- Static checks performed: balanced parentheses and closed strings; no recursive call remains in the collector; no custom selection/double-click callback bindings remain; V05 Apply command name matches its queued command string.
+- Commits: `a20256cf0143f3a5111a1ce0b0fca7148e779c12` (new full source), `e08a8aaa52fbc42fdba00e7625edef1e7d3c7a61` (Apply command-name correction).
+- Runtime status: NOT TESTED in Creo Elements/Direct Modeling 18.1. Do not treat the fatal exception as conclusively fixed until the user tests the V05 branch on a disposable Assembly copy and confirms the Results window opens without a crash.
+- Runtime acceptance: (1) load V05 in a fresh Modeling session; (2) filter CNC-SUS304; (3) filter KH-A6061; (4) repeat CNC-SUS304 and confirm only its tab refreshes; (5) select one Part and multiple Parts; (6) press Results Apply, then native Apply in the bridge; (7) verify actual viewport selection; (8) try a no-match pair and confirm existing tabs are unchanged. Preserve the trace file if any failure occurs.
