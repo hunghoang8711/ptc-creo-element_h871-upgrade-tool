@@ -235,3 +235,37 @@ Next runtime test:
    - CHANGE-CONTENTS/RETURN | NIL: API returned failure normally; inspect table definition/row schema.
    - CHANGE-CONTENTS/RETURN | T: proceed to inspect selection reset and post-refresh UI.
 Runtime status: source change is committed; not yet tested in Modeling 18.1.
+
+
+## 13. Results UI confirmed stable; BrowserNode Apply fix candidate — 2026-11-16
+
+The user has now confirmed the following in Creo Elements/Direct Modeling 18.1:
+- The standalone Results window displays the Part Results table correctly.
+- Searching a new machining-process/material pair creates a new internal page.
+- All pages retain their corresponding result data.
+- Select All highlights all rows on the active page.
+- The remaining interaction failures are double-click-to-select and Apply-to-select-in-3D.
+- Apply reports: `LISP error: #:NODE289 is not of type "BROWSERNODE".`
+
+Evidence-based diagnosis:
+- In the current source, `sd-create-browsernode` return values were stored in `*h871-pf-v03-apply-nodes*` and passed directly to `:set-object-selection`.
+- PTC Integration Kit Graphical Browser documentation explicitly states that `sd-create-browsernode` returns a symbolic node name, while `sd-get-browsernode-struct(tree-name, node-name)` returns the BrowserNode structure. The PTC 20.7 documentation gives a direct example of this conversion. This explains the exact Symbol-vs-BrowserNode error; Modeling 18.1 runtime compatibility still requires user testing.
+- The Results UI, collector, numeric Density matching, table schema and internal-page architecture are now user-confirmed working and must remain unchanged.
+
+Candidate source change on `feature/ver03-uict-apply`:
+- Commit: `f92834af7c28fa172768f552431bb06315b72ee6`
+- Blob: `c55f008127db50658191b447b43d6e8325429caa`
+- In `h871-pf-v03-native-apply`, each symbolic child node ID is now resolved with `sd-get-browsernode-struct` before being passed to `:set-object-selection`. A missing structure produces a clear H871 error instead of passing an invalid value.
+- Added `h871-pf-v03-double-click`, which receives the Display Table name, finds its owning page and invokes that page's Apply handler.
+- Wired `:doubleClickAction 'h871-pf-v03-double-click` into both Display Table creation paths (new page and restored table).
+- No changes to search, Density mappings/normalization, results rows, hidden Part-object column, tab behavior, Select All, or the standalone Results UI.
+- Static source update committed; **not yet tested** in Modeling 18.1.
+
+Next runtime test, in order:
+1. Load the exact candidate source linked from this branch.
+2. Search a known-positive pair and confirm the Results window, multiple pages and Select All still work.
+3. Select exactly one result row and press Apply. Confirm exactly that Part is selected in the 3D model.
+4. Repeat by double-clicking one row. Confirm it selects that Part in 3D.
+5. Select multiple rows and press Apply; confirm only those Parts are selected.
+6. Switch to another page and verify Apply/double-click never selects Parts from the previous page.
+7. If an error remains, provide the exact LISP error and a trace/log if available. Do not change the UICT architecture or search pipeline while investigating.
