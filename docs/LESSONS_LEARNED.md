@@ -144,3 +144,10 @@ The user explicitly reaffirmed that ver-03 already provides the desired one-wind
 A source/doc consistency audit also found that an earlier note said the ver-03 Apply node-ID conversion had been fixed, but the checked-in source still passed raw `sd-create-browsernode` IDs to `:set-object-selection`. The correction now resolves each returned ID with `sd-get-browsernode-struct` and records resolution traces. Always verify the actual committed source, not only a prior development-log statement.
 
 The hidden Browser Apply bridge remains unproven. Never equate a resolved BrowserNode, a true return value, or a `:SUCCESS` status with actual Modeling viewport selection. The user's viewport observation is the acceptance test.
+
+
+## Critical correction – use proven native Browser baseline, not UICT ver-03 (2026-11-16)
+
+A previous assistant handover incorrectly treated UICT ver-03 as the accepted development base. This repeated an obsolete implementation and risked returning to the fatal `0xC00000FD` path. The user's proven baseline is Stage 0: a native Graphical Browser with working direct row selection, Select All and Apply. ver-04 separately demonstrated page-root switching and selected-row restoration in one Browser. The correct engineering task is to combine those two proven pieces inside exactly one visible Results Browser.
+
+Do not use UICT Display Table selection bridged through a hidden Browser. Do not create an intermediate-window workflow, one Browser per query, Browser Bar tabs, or reparent a Browser into a host shell. Do not treat a `:SUCCESS` trace as proof of viewport selection. Preserve Stage 0 unchanged; integrate and test page navigation independently.
