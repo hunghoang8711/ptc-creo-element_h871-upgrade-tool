@@ -86,3 +86,19 @@ PTC references:
 
 ## Updating this register
 When a new API is found, add its exact signature, version/source, test setup, return type/units, result and evidence label. Never promote an unverified proposal to confirmed merely because it appears in a manual for another release.
+
+## F. BrowserNode creation and structure lookup – Apply bridge
+
+| API | Evidence | Contract / use |
+|---|---|---|
+| `sd-create-browsernode` | PTC official Integration Kit 20.7 documentation; exact Modeling 18.1 contract not independently checked | Returns a **Symbol** (symbolic BrowserNode name), not a BrowserNode structure. |
+| `sd-get-browsernode-struct` | PTC official Integration Kit 20.7 documentation; also present in preserved ver-02 source | `(sd-get-browsernode-struct tree-name node-name)` returns the BrowserNode structure or NIL. |
+| `:set-object-selection` | Later-release Graphical Browser reference; used by current ver-03 bridge | Its object argument must be a BrowserNode structure. Modeling 18.1 Apply bridge runtime retest pending. |
+
+Documented resolution pattern:
+```lisp
+(setq node-id (sd-create-browsernode ...))
+(setq node (sd-get-browsernode-struct tree-name node-id))
+```
+
+The ver-03 Apply bridge now follows this pattern. The PTC reference establishes the return/lookup contract for the documented release; ver-02's existing root lookup provides additional project evidence. Do not label the full ver-03 Apply workflow as 18.1 runtime-confirmed until the user tests it.
