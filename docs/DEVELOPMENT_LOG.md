@@ -140,3 +140,12 @@ Resolved:
 - ver-02 obtains actual selected BrowserNodes via `sd-query-browser ... :get-selected-objects`; it does not use the direct creation return token as a BrowserNode.
 - Next step: verify the exact Modeling 18.1 API for resolving a created node identifier to a BrowserNode structure, then pass only that structure to `:set-object-selection`. Do not invent a lookup API.
 - Preserve the now-working Results UI, numeric Density Instance/Base matching, and ver-02 source. Apply remains unresolved until the exact 18.1 API is verified and user retests.
+
+## 2026-11-16 – ver-03 Apply BrowserNode identifier resolution
+
+- Exact user error: `#:NODE241 is not of type "BROWSERNODE"`.
+- PTC official Graphical Browser documentation confirms `sd-create-browsernode` returns a symbolic node ID; `sd-get-browsernode-struct` resolves that ID to the BrowserNode structure required by BrowserNode-consuming commands.
+- The ver-02 source already uses `sd-get-browsernode-struct` to resolve the root node.
+- Updated only the ver-03 Apply tree builder: capture each creation ID, resolve it, and store the resulting BrowserNode structure before `:set-object-selection`.
+- No changes to Density filter, Results UI, logical tables, tabs, or ver-01/ver-02.
+- Modeling 18.1 runtime retest remains required; Apply is not marked resolved until user confirmation.
