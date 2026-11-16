@@ -242,3 +242,8 @@ Fail-safe refinement: ver-05 now requires both :clear-table-roots and :change-ta
 
 
 ver-05 page captions use PROCESS-MATERIAL order (CNC-SUS304, CG-SS400), matching the established ver-03 convention. Keep labels separate from numeric Density filter values.
+
+
+### ver-05 page-selector UI root cause
+
+The first ver-05 page strip was invisible because the implementation put Density page entries in Graphical Browser :modeMenu. PTC's reference identifies :buttonMenu as the visible horizontal button row; :modeMenu is mapped to right-click popup menu entries for compatibility. The corrected ver-05 source dynamically generates Density page buttons in :buttonMenu, followed by Select All and Clear Selection. Runtime confirmation in Modeling 18.1 is mandatory.
