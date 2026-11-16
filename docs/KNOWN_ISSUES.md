@@ -177,3 +177,14 @@ Use these separate evidence boundaries:
 - ver-05: integration candidate; horizontal page selector behavior in Modeling 18.1 remains unverified.
 
 Target is one standalone visible Results Browser combining Stage 0 native selection/Apply with ver-04 page-root logic. No intermediate-window workflow, UICT/hidden bridge, Browser Bar docking, extra Browser per search, or reparenting.
+
+
+
+
+## KI-019 – ver-06 multi-page integration requires Modeling 18.1 runtime acceptance (2026-11-16)
+
+The ver-06 candidate combines two separately user-confirmed behaviors: Stage 0 native Graphical Browser row selection/Apply and ver-04 page-root switching/selection restoration. Static source checks pass, but this combined implementation has not yet been tested in Modeling 18.1.
+
+Required disposable-model tests: two Density-pair pages; page isolation; previous/next and Results Pages context menu; page-local selected-row restoration; Select All/Clear Selection; same-pair refresh; no-match preservation; and actual viewport Part selection after native Apply.
+
+Do not infer Apply success from a LISP return value, BrowserNode conversion, or trace marker. Only visible selection in the 3D viewport is acceptance evidence. Do not test on the original/customer Assembly. Keep Stage 0 source immutable while diagnosing this integration.
