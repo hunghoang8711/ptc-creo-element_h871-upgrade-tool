@@ -128,3 +128,17 @@ The preceding diagnosis that modeMenu is only a context popup was incorrect. PTC
 Continue from **ver-03**, not ver-05. The user reaffirmed that ver-03's single Results window with internal Density-pair tabs is already the accepted UI. Keep its Display Tables, direct multi-row selection, Select All/Clear Selection and page isolation. Do not redesign the UI around a single Graphical Browser, add an intermediate window, or revive the UICT-to-native-window navigation flow.
 
 Latest source commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` corrects a real Apply defect: `sd-create-browsernode` IDs are resolved to BrowserNode structures using `sd-get-browsernode-struct` before `:set-object-selection`. Static parentheses check passed; runtime Apply remains unverified. Test on a disposable Assembly and require actual Part selection in the 3D viewport. A successful trace or command return is insufficient.
+
+
+## Critical correction – active Part Filter architecture (2026-11-16)
+
+A prior note in this file incorrectly instructed the next developer to continue from UICT ver-03. That direction is superseded. The UICT ver-03 implementation is the unstable path associated with Modeling fatal exception `0xC00000FD`; do not load it as the active candidate or use its hidden Browser Apply bridge.
+
+Recovered user-confirmed milestones:
+- **Stage 0** at `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`: native Graphical Browser baseline. User confirmed Results, Select All, individual row selection and native Apply select Parts. This is the proven selection baseline.
+- **ver-04 diagnostic**: one Graphical Browser with multiple page roots. User confirmed page switching and restoring selected rows for `CG-SS400`. Its Apply trace showed `:SUCCESS`/selection context, but prior test record did not conclusively confirm actual viewport selection.
+- **ver-05**: intended single-Graphical-Browser multi-page integration candidate. Its page-selector UI has not been confirmed visible/working in Modeling 18.1.
+
+**Required final architecture:** exactly one visible standalone Results window; direct native row selection and native Apply as in Stage 0; multiple Density-pair pages within that same Browser using the page-root approach proven in ver-04. No intermediate-window workflow, no UICT Display Table/hidden Browser bridge, no Browser Bar docking, no one-Browser-per-search, and no reparenting into a host shell. Continue by integrating the ver-04 page-root/page-selection algorithm into the Stage 0 native Browser, then verify the page navigation controls in 18.1. Preserve the Stage 0 baseline unchanged.
+
+The source edit commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` only changes the obsolete UICT Apply bridge and is **not the active implementation**. Do not load it for user testing.
