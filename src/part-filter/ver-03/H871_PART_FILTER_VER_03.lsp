@@ -332,10 +332,20 @@
       (sd-browser-exec-cmd
         *h871-pf-v03-apply-browser* :change-table-root root t)))
 
-  ;; Programmatically select each real Part-backed BrowserNode.
-  (dolist (node *h871-pf-v03-apply-nodes*)
-    (sd-browser-exec-cmd
-      *h871-pf-v03-apply-browser* :set-object-selection node t))
+  ;; sd-create-browsernode returns a SYMBOLIC node ID (e.g. #:NODE289),
+  ;; while :set-object-selection requires a BrowserNode structure.
+  ;; Resolve every child ID against the temporary tree before passing it on.
+  (dolist (node-id *h871-pf-v03-apply-nodes*)
+    (let ((node-struct
+            (sd-get-browsernode-struct *h871-pf-v03-apply-tree* node-id)))
+      (unless node-struct
+        (sd-display-error
+          (format nil
+            "H871 Apply: Could not resolve BrowserNode ID ~S in tree ~A."
+            node-id *h871-pf-v03-apply-tree*))
+        (return-from h871-pf-v03-native-apply nil))
+      (sd-browser-exec-cmd
+        *h871-pf-v03-apply-browser* :set-object-selection node-struct t)))
 
   ;; Native ver-02 hand-off: selected objects enter Modeling's select list.
   (unless
@@ -345,6 +355,14 @@
       "H871 Apply: No objects were handed to Modeling. Check the active command.")
     (return-from h871-pf-v03-native-apply nil))
   t)
+
+;; Display Table double-click callback. UICT passes the table name;
+;; route the action to the owning page so only that page's selected Part(s)
+;; are handed to Modeling.
+(defun h871-pf-v03-double-click (table-name)
+  (let ((entry (h871-pf-v03-page-by-table table-name)))
+    (when entry
+      (h871-pf-v03-apply (getf entry :page)))))
 
 (defun h871-pf-v03-apply (page-name)
   (let* ((entry (h871-pf-v03-page-by-name page-name))
@@ -459,7 +477,8 @@
         :columns '(:part-name :density-instance :density-base :assembly-path)
         :entryAlignment '(:left :right :right :left)
         :selectionMode :multiple-rows
-        :selectionAction 'h871-pf-v03-table-selection-changed)
+        :selectionAction 'h871-pf-v03-table-selection-changed
+        :doubleClickAction 'h871-pf-v03-double-click)
       (sd-display-error "H871 ver-03: Could not create the multi-column results table.")
       (return-from h871-pf-v03-create-page nil))
 
@@ -562,7 +581,8 @@
           :columns '(:part-name :density-instance :density-base :assembly-path)
           :entryAlignment '(:left :right :right :left)
           :selectionMode :multiple-rows
-          :selectionAction 'h871-pf-v03-table-selection-changed)
+          :selectionAction 'h871-pf-v03-table-selection-changed
+        :doubleClickAction 'h871-pf-v03-double-click)
         (sd-display-error
           "H871 ver-03: Could not restore the result table control.")
         (return-from h871-pf-v03-refresh-page nil)))
