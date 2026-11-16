@@ -68,6 +68,8 @@
          (<= (abs (- a b)) 0.0000001))))
 
 (defun h871-pf-v03-collect (obj matches requested-instance requested-base)
+  ;; Keep the ver-02 search semantics: compare numeric Density Instance and
+  ;; Density Base values after /1000 normalization; labels are never inputs.
   (when (sd-inq-part-p obj)
     (let ((actual-instance (sd-inq-part-density obj :instance))
           (actual-base (sd-inq-part-density obj :contents)))
@@ -79,6 +81,8 @@
                 actual-base (type-of actual-base))
           *h871-pf-v03-diagnostic-samples*))
       (when (and
+              (not (null actual-instance))
+              (not (null actual-base))
               (h871-pf-v03-numeric-equal-p
                 (h871-pf-v03-density-display-value actual-instance)
                 requested-instance)
@@ -158,26 +162,42 @@
     (nreverse rows)))
 
 (defun h871-pf-v03-update-status (page-name)
-  (let* ((entry (h871-pf-v03-page-by-name page-name))
-         (table-name (getf entry :table))
-         (selection (sd-get-display-table-selection table-name))
-         (selected-rows (if selection (car selection) nil))
-         (selected-count (if selected-rows (length selected-rows) 0))
-         (total (length (getf entry :results))))
-    (sd-set-text-control-value (getf entry :status)
-      :text
-        (format nil "~A Part(s) | ~A selected | Density Instance ~A / Base ~A"
-          total selected-count
-          (getf entry :instance) (getf entry :base)))))
+  ;; A tab-change callback can fire while sd-insert-tab-control-page is
+  ;; creating the page, before its page record/table/status controls exist.
+  ;; Never pass NIL to a UICT API that requires a STRING handle.
+  (let ((entry (and (stringp page-name)
+                    (h871-pf-v03-page-by-name page-name))))
+    (when entry
+      (let ((table-name (getf entry :table))
+            (status-name (getf entry :status)))
+        (when (and (stringp table-name)
+                   (> (length table-name) 0)
+                   (stringp status-name)
+                   (> (length status-name) 0))
+          (let* ((selection (sd-get-display-table-selection table-name))
+                 (selected-rows (if selection (car selection) nil))
+                 (selected-count
+                   (if selected-rows (length selected-rows) 0))
+                 (total (length (getf entry :results))))
+            (sd-set-text-control-value status-name
+              :text
+                (format nil
+                  "~A Part(s) | ~A selected | Density Instance ~A / Base ~A"
+                  total selected-count
+                  (getf entry :instance) (getf entry :base))))))))
 
 (defun h871-pf-v03-table-selection-changed (table-name)
-  (let ((entry (h871-pf-v03-page-by-table table-name)))
-    (when entry
-      (h871-pf-v03-update-status (getf entry :page)))))
+  (when (stringp table-name)
+    (let ((entry (h871-pf-v03-page-by-table table-name)))
+      (when entry
+        (h871-pf-v03-update-status (getf entry :page)))))
 
 (defun h871-pf-v03-tab-changed (page-name)
-  (setf *h871-pf-v03-current-page* page-name)
-  (h871-pf-v03-update-status page-name))
+  (when (stringp page-name)
+    (setf *h871-pf-v03-current-page* page-name)
+    ;; During initial page insertion the page registry may not exist yet.
+    ;; update-status safely becomes a no-op until create-page registers it.
+    (h871-pf-v03-update-status page-name)))
 
 (defun h871-pf-v03-select-all (page-name)
   (let* ((entry (h871-pf-v03-page-by-name page-name))
