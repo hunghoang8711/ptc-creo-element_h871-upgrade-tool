@@ -117,3 +117,14 @@ The ver-03 Apply bridge now follows this pattern. The PTC reference establishes 
 | Dynamic per-Browser callback closure installed with `symbol-function` | Common Lisp function binding; new VER-05 design | Static code review only. Verify that Modeling 18.1 invokes each callback independently and retains the captured result snapshot. |
 
 Do not infer full VER-05 runtime compatibility from the individual VER-02 API precedent. The multi-window lifecycle, callback closure behavior and Manager control layout are new integration behavior and require a real Modeling 18.1 test.
+
+## VER-05 – first user-confirmed runtime evidence (2026-11-16)
+
+| API / workflow | Evidence | Confirmed behavior / remaining scope |
+|---|---|---|
+| Multiple independent Graphical Browser instances | User-confirmed runtime, 2026-11-16 | Separate Graphical Browser windows are created for separate filter result types/pairs and remain independent in the tested workflow. Full lifecycle regression (replacement/no-match/reopen/fresh-session) remains pending. |
+| Native Browser row selection / double-click selection | User-confirmed runtime, 2026-11-16 | User can select Parts from each result Browser; double-click selection works as reported. |
+| Select All + native Apply | User-confirmed runtime, 2026-11-16 | Select All followed by Apply correctly selects the intended Parts in the 3D viewport, matching the known-good VER-02 behavior in the tested case. |
+| H871 Graphic/Manager window | User-confirmed runtime, 2026-11-16 | Window appears separately in a screen corner, but is too small to read all information. Layout/readability remains an open UI issue; exact sizing API/signature must be verified before modification. |
+
+Trace evidence for the tested filter: COLLECT/PROGRESS reached 500 and COLLECT/COMPLETE | (0 530) was recorded. Do not infer undocumented meanings for the tuple. No fatal exception was reported during this test; this does not conclusively resolve all earlier 0xc00000fd reports.
