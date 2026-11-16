@@ -239,10 +239,10 @@
 ;; Apply bridge
 ;;
 ;; The selected Display Table rows return the hidden :part-object column.
-;; Those real Part objects are represented as BrowserNodes using their actual
-;; Modeling object path. The same native :set-object-selection and
-;; :select-and-execute commands used by ver-02 then hand the selected objects
-;; to the active Modeling command/selection context.
+;; sd-create-browsernode returns a symbolic node ID, not a BrowserNode struct.
+;; Resolve each ID with sd-get-browsernode-struct before passing it to
+;; :set-object-selection. The same native selection-and-execute hand-off used
+;; by ver-02 then transfers the selected objects to Modeling.
 ;; ---------------------------------------------------------------------------
 
 (defun h871-pf-v03-build-apply-tree ()
@@ -255,14 +255,21 @@
             :objClientData (list :kind :root))))
     (setf *h871-pf-v03-apply-nodes* nil)
     (dolist (part *h871-pf-v03-apply-parts*)
-      (push
-        (sd-create-browsernode
-          :tree *h871-pf-v03-apply-tree*
-          :parent root
-          :objPath (h871-pf-v03-path part)
-          :objPname (h871-pf-v03-name part)
-          :objClientData (list :kind :part :part part))
-        *h871-pf-v03-apply-nodes*))
+      ;; sd-create-browsernode returns a symbolic node ID (e.g. #:NODE241),
+      ;; not a BROWSERNODE structure. Resolve that ID before selection.
+      (let* ((node-id
+               (sd-create-browsernode
+                 :tree *h871-pf-v03-apply-tree*
+                 :parent root
+                 :objPath (h871-pf-v03-path part)
+                 :objPname (h871-pf-v03-name part)
+                 :objClientData (list :kind :part :part part)))
+             (node
+               (and node-id
+                    (sd-get-browsernode-struct
+                      *h871-pf-v03-apply-tree* node-id))))
+        (when node
+          (push node *h871-pf-v03-apply-nodes*))))
     root))
 
 (defun h871-pf-v03-native-apply (parts)
