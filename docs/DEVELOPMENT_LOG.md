@@ -149,3 +149,11 @@ Resolved:
 - Updated only the ver-03 Apply tree builder: capture each creation ID, resolve it, and store the resulting BrowserNode structure before `:set-object-selection`.
 - No changes to Density filter, Results UI, logical tables, tabs, or ver-01/ver-02.
 - Modeling 18.1 runtime retest remains required; Apply is not marked resolved until user confirmation.
+
+## 2026-11-16 – Emergency rollback after fatal exception
+
+- User reported Modeling fatal exception `Oxc00000fd` immediately after pressing OK to Search; message warned that model data may have been damaged.
+- Reviewed the two latest source diffs. They only changed `h871-pf-v03-build-apply-tree` and the early validation guard in `h871-pf-v03-native-apply`; they did not edit the Search dialog or `h871-pf-v03-run`. Cause of the Search-time fatal exception remains unknown.
+- Emergency action: restored the active ver-03 source on `main` to the last source revision associated with user-confirmed Results UI appearance: `8c0a1cd56f25f125958080b3ab6316e55827b141`.
+- This removes the unverified Apply fix. Do not represent Apply as fixed. The restored revision is a source rollback only; user must reload it in a disposable test session and verify Search before further use.
+- Safety: do not test on or overwrite the original model. Preserve the exact crash report/log and diagnostic trace for investigation.
