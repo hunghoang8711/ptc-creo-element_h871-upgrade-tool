@@ -197,3 +197,41 @@ Consequences:
 - Runtime status: trace writer test = **user-tested success**; integrated ver-03 trace and traversal checkpoints = **not yet tested** in Modeling 18.1.
 
 Next test: load this updated ver-03 source, run one known-positive search (CNC / SUS304), and if it fails or terminates, send the generated `H871_PART_FILTER_VER_03_TRACE.txt`. The last checkpoint will show whether failure occurs before collection, during traversal (including last 100-object progress count), report writing, or UICT creation. Do not change the Apply bridge until Search behavior is isolated.
+
+
+## 12. Search trace isolates logical-table content update — 2026-11-16
+
+The user tested the integrated trace in Creo Elements/Direct Modeling 18.1 and supplied this final sequence:
+
+- Assembly traversal completed: 500 visited objects.
+- Two matching Parts were found (RUN/COLLECT-DONE | 2).
+- The result report was written successfully.
+- The standalone Results shell was created successfully.
+- A new internal page was inserted; logical table, status control, display table and all three buttons were created.
+- The page was made current.
+- The refresh passed logical-table and display-table existence checks.
+- The final trace marker was REFRESH/CHANGE-CONTENTS/BEGIN | ("H871-PF-V03-PAGE-2-LOGICAL-TABLE" 2).
+
+Evidence-based conclusion:
+- The current failure is localized to the sd-change-logical-table-contents call or the automatic Display Table update it triggers. The trace does not yet distinguish those possibilities.
+- Assembly recursion, matching, report writing, shell creation and page/control creation are not the failing stages in this run.
+- PTC Integration Kit documentation for later releases describes sd-change-logical-table-contents as taking a list of rows, one list per row, with one value per logical-table column. It also documents nil column type as untyped and able to hold arbitrary Lisp objects. This supports the intended six-column row design, including the hidden Part-object value, but does not prove Modeling 18.1 compatibility.
+- Do not remove the hidden Part-object column or change the Apply bridge based on this trace alone.
+- Do not change the numeric filter, recursive collector, page architecture or Apply bridge during this diagnostic step.
+
+Diagnostic-only source update:
+- Added REFRESH/CONTENTS-SHAPE before the update call. It records row count, each row's element count, and the Lisp type of each cell without dumping object values.
+- Added REFRESH/CHANGE-CONTENTS/RETURN immediately after the API call to record its return value if control returns normally.
+- No table schema, row data, search logic, selection behavior or UI architecture was changed.
+- Source commit: b40f77b6d5e1b5573591ef7c33df3e4b40dc3cd0.
+
+Next runtime test:
+1. Load the updated canonical ver-03 source from feature/ver03-uict-apply.
+2. Run the same known-positive CNC / SUS304 search on a disposable/test assembly.
+3. Send the new trace and the exact Modeling error text, if an error appears.
+4. Interpret the next trace:
+   - No CONTENTS-SHAPE: failure occurred before the new shape logger.
+   - CONTENTS-SHAPE but no CHANGE-CONTENTS/RETURN: failure is inside the API call or its synchronous display-table refresh.
+   - CHANGE-CONTENTS/RETURN | NIL: API returned failure normally; inspect table definition/row schema.
+   - CHANGE-CONTENTS/RETURN | T: proceed to inspect selection reset and post-refresh UI.
+Runtime status: source change is committed; not yet tested in Modeling 18.1.
