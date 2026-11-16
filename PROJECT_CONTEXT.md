@@ -141,3 +141,25 @@ The accessible Library search did not identify a standalone official Modeling 18
 The user confirmed Close Results returns from the native ver-04 Graphical Browser to the old ver-03 UICT Results shell. To avoid requiring a manual `H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG` command each time, ver-04 now installs a persistent `Open Native Results` pushbutton in the existing ver-03 shell grid. The button calls the ver-04 rebuild entry point, which snapshots the latest ver-03 pages/selections, cleans up any previous named Browser/Tree, and recreates the native Browser. Previous/Next now emit `PAGE/NAVIGATION-REQUEST` and `PAGE/NAVIGATION-TARGET` trace markers. Source commit: `21ddfb945a40f2361cb09439522387f90f6fac54`.
 
 This is static-checked only. Modeling 18.1 must confirm button placement/callback, repeated close/reopen, user-operated Previous/Next and context-menu navigation, and actual viewport Apply. The trace's `SELECT-AND-EXECUTE-SUCCESS-CONTEXT` is not itself proof of viewport selection.
+
+## 11. Final product direction and ver-05 self-contained candidate (2026-11-16)
+
+The user reconfirmed that the final architecture must remain exactly one Results window: native direct row selection and Apply from ver-02, combined with multiple result pages from ver-03. ver-04's UICT-to-Browser switching, persistent launcher, and Close-to-UICT return path were diagnostic steps only and are not accepted as the final workflow.
+
+New candidate source:
+`src/part-filter/ver-05/H871_PART_FILTER_VER_05.lsp`
+
+Design:
+- One standalone Graphical Browser owns all result rows and every Density-pair page.
+- The candidate includes its own Assembly search action and ver-02 Process/Material numeric mapping; it does not require ver-03 page data or UICT globals.
+- One Browser Tree has a root per Density pair; one shared Browser table shows the active page's direct Part children.
+- The same visible Browser owns selection and the untouched native Apply action. No hidden Browser bridge or custom Apply callback.
+- Same-pair search refreshes its page and clears only that page's selection; new pair creates a page; no-match preserves existing pages.
+- Page-local selected paths are saved/restored when changing pages.
+- Navigation is Previous/Next and a Results Pages popup inside the same Browser. Horizontal tab-strip rendering remains open work; do not claim it is implemented.
+- On successful search, the named Browser/Tree are rebuilt so the one Browser contains the latest page registry. No additional Results window or manual reopen step is intended.
+
+Density mapping and search rules remain unchanged: CNC=1, KH=2, CG=3, COVER=4; A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50; API values are divided by 1000; matching requires both Instance and Base.
+
+**Evidence status:** ver-05 is static-checked only, not loaded or tested in Modeling 18.1. In particular, native Apply, dynamic page popup, page switching/selection restore, repeated searches and no-match preservation require runtime verification on a disposable model copy. ver-01/ver-02/ver-03 are preserved as baselines; ver-04 remains diagnostic.
+
