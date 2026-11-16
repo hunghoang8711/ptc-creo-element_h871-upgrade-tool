@@ -390,3 +390,33 @@ Runtime validation:
 - Do not mark Apply or double-click fixed until the user tests this exact commit.
 - Expected diagnostic distinction: compare `APPLY/NODE-STATE` displayed values before/after showing the bridge, then check `APPLY/SELECT-AND-EXECUTE-RETURN`.
 - First test one selected row via double-click or selecting one row and pressing Apply. If the temporary bridge appears, allow it to complete and note whether the Part becomes selected in the 3D model.
+
+## 18. Native bridge Apply confirmed by user in Modeling 18.1 — 2026-11-16
+
+The user tested the visible native bridge candidate and confirmed:
+- The temporary native Apply bridge window appears.
+- Clicking the bridge's native **Apply** button successfully selects the intended Part(s) in the 3D viewport, as desired.
+- This confirms the selected Part payload can be represented by BrowserNodes and handed to Modeling through the native Graphical Browser's built-in Apply action.
+
+Trace evidence:
+- `APPLY/SHOW-BRIDGE-RETURN` reports `:VISIBLE T`.
+- Bridge BrowserNode structures are created and selected; selected count is 1 for single-row tests and 8 for Select All.
+- `:select-and-execute` still returns `NIL` when called programmatically from LISP.
+- Despite that NIL return, the user confirms clicking **Apply** in the visible native bridge performs the correct 3D selection.
+
+Updated technical conclusion:
+- The native Graphical Browser's built-in Apply action is the currently verified successful hand-off path in Creo Elements/Direct Modeling 18.1.
+- The direct LISP invocation of `:select-and-execute` is not equivalent in this context and must not be treated as a successful substitute.
+- This narrows the remaining problem to invoking or reusing the native Apply action from the UICT workflow, or deciding whether the native bridge can remain as an explicit second-stage confirmation window.
+- Do not claim that UICT Apply or double-click is fully integrated yet: the user still has to click Apply in the bridge window.
+- Preserve the confirmed working UICT Results window, internal tabs, per-page results, and selected Part payload. Do not change collector, numeric Density mappings/normalization, matching predicate, or table schema.
+
+Known-good implementation reference:
+- ver-02 creates its native Graphical Browser with `:okButtonLabel "Apply"`; the source comments explicitly rely on Creo's native OK action to perform `:select-and-execute`.
+- In ver-03, the bridge also has `:okButtonLabel "Apply"`, and the user confirms that native button works.
+
+Next investigation:
+1. Inspect the Graphical Browser API and existing ver-02 behavior for any supported way to invoke the native OK/Apply action or configure its action callback. Do not invent an undocumented command or simulate a mouse click.
+2. If no supported programmatic invocation exists, retain the bridge as an explicit native confirmation step temporarily, and ask the user whether that two-window interaction is acceptable before making it the production behavior.
+3. Do not remove the bridge's native Apply button or close the bridge before the user has applied it.
+4. Runtime status: native bridge Apply = **user-confirmed working**; programmatic `:select-and-execute` = **returns NIL**; end-to-end one-window UICT Apply = **not yet solved**.
