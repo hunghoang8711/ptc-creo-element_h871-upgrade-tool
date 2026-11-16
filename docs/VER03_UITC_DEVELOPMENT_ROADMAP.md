@@ -1187,3 +1187,46 @@ Trace markers:
 - Diagnostic file was fetched back from GitHub.
 - Static Lisp delimiter validation: depth 0, minimum depth 0, no unclosed string.
 - This diagnostic has not yet been executed in Creo 18.1; no runtime result is claimed.
+
+
+### User test of the first GET_SELECTION invocation — 2026-11-16
+
+The user ran the first diagnostic using:
+```lisp
+(get_selection
+  :focus-type *sd-part-seltype*
+  :select :part part-path)
+```
+
+Trace evidence:
+- The Results page supplied five selected Part items at diagnostic initialization.
+- The diagnostic resolved the first item's full path:
+  `/B_NAV2610-02/05.cum-ve-sinh_do/03.CUM-DO/01.CUM-EP/02.CO-DINH/C-SHFMQ25.stp.1.1/truc.1.1`
+- `sd-call-cmds` failed with:
+  `("OLI" "SD-CALL-ACTION-ERROR" "You have specified an unexpected input value." NIL)`
+- Status was `:FAILURE`; result was NIL.
+
+Interpretation:
+- The Part `SEL_ITEM` and pathname were obtained successfully.
+- Failure occurred inside SELECT parameter parsing; this does not establish that the object path is invalid or that GET_SELECTION cannot work.
+- The shorthand `:select :part <path>` is not accepted by this Creo 18.1 runtime and must not be reused.
+
+### Corrected SELECT grammar experiment
+
+The SELECT Commands Reference describes a COMPOUND-NAME route with `:FULL_NAME` and `:START_NAME`, terminated by `:END_NAME`. The diagnostic was updated to test:
+```lisp
+(get_selection
+  :focus-type *sd-part-seltype*
+  :select :part
+          :full_name :start_name part-path :end_name)
+```
+
+Reference:
+https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/comref/com-sd-sub21.html
+
+The reference's diagram describes the full-name sequence in the compound-name grammar; using it with a Part pathname is an isolated 18.1 compatibility experiment, not a confirmed selection setter.
+
+Updated diagnostic file:
+`src/part-filter/ver-03/diagnostics/H871_PF_V03_GET_SELECTION_DIAG.lsp`
+
+The production ver-03 source remains unchanged. The corrected diagnostic must be tested in Creo 18.1 before further conclusions.
