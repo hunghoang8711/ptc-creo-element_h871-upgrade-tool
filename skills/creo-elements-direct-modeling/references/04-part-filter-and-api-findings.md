@@ -64,3 +64,13 @@ Important: a custom Apply callback previously replaced native Apply and caused r
 - An uploaded diagnostic prototype attempted `sd-inq-part-density` with `:contents`, `:instance`, `:realized`, and used `HANDLER-CASE`. User later reported `HANDLER-CASE` undefined in Modeling 18.1; do not reuse the prototype unchanged.
 - User also reported `SEL_ITEM-P` undefined in earlier diagnostics.
 - Treat the diagnostic source as a failed experiment, not a working tool.
+
+
+## 2026-11-16 – Single-Browser multi-page Apply diagnostic
+
+- Keep selection and native Apply in the same Graphical Browser instance, as in ver-02.
+- A hidden temporary Browser is not an equivalent selection context for UICT Display Table rows.
+- A single Browser Tree can hold multiple page roots; the table root determines which direct Part children are displayed.
+- Dynamic popup menu entries can provide a page selector, with Previous/Next toolbar buttons for navigation. This is a diagnostic page-navigation UI, not a horizontal tab strip.
+- Preserve the Browser's native Apply default. Do not override :okButtonAction without a proven reason and a runtime regression test.
+- Do not retry the failed Browser reparenting/host-shell integration without a newly isolated root cause.
