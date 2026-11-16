@@ -272,3 +272,13 @@ Resolved:
 - Removed the incorrect modeMenu page configuration and the redundant Results Pages popup installer call.
 - Source commit: ca85cf158cdb345381f989f46f3e6cadbfe9bdc4.
 - Static checks: balanced Lisp, page callback forms present, Select All/Clear Selection retained, native Apply default retained. Modeling 18.1 runtime test pending.
+
+
+## 2026-11-16 – correction of modeMenu documentation interpretation
+
+- Re-opened the complete PTC Graphical Browser reference and verified the exact parameter descriptions.
+- Correct interpretation: modeMenu is a visible horizontal row of toggle buttons directly above buttonMenu. buttonMenu is another visible row above topMenu. Both are also mapped to right-click popup entries for compatibility.
+- The earlier claim that modeMenu was popup-only was wrong. Reverted the temporary page-selector move to buttonMenu.
+- Restored page navigation to modeMenu and added trace markers UI/MODE-MENU-SPEC, UI/INITIAL-MODE-BUTTON and UI/BROWSER-CREATED.
+- Source commit: 7763d35f74850090a9853a059a5294edc27aaa47.
+- Actual cause of the missing page buttons is still unknown; require trace and runtime observation.
