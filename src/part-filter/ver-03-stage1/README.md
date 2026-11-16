@@ -2,7 +2,7 @@
 
 **Branch:** `rebuild/ver-03-from-ver-02`  
 **Target:** PTC Creo Elements/Direct Modeling 18.1  
-**Status:** Explicit `sd-dock-graphical-browser` experiment committed; runtime test pending.
+**Status:** Restored to the user-confirmed standalone single-browser diagnostic baseline. No docking experiment is active.
 
 ## Current source
 
@@ -22,7 +22,7 @@ Before the current experiment, the user confirmed that the Stage 0-equivalent St
 
 ## Current experiment — one API difference
 
-The current source retains `:createAsTab t` and, immediately after `sd-show-graphical-browser`, makes one additional isolated call to `sd-dock-graphical-browser` with `:show t`. The docking call is protected by `ignore-errors` so it cannot prevent the known-good floating Results window from appearing if the API is unavailable or rejected. User confirmed that the `:createAsTab t`-only revision still opened a separate floating window. PTC documentation notes that the saved PDS preference may override `:createAsTab`, and documents the explicit docking function. The explicit docking experiment is committed but still requires runtime testing in Modeling 18.1.
+The docking experiment was rejected by the user because the required tabs are internal pages inside one standalone Results window, not Browser Bar tabs. Both `:createAsTab t` and `sd-dock-graphical-browser` have been removed from the active Stage 1 source. The active Stage 1 file is again a single standalone Graphical Browser diagnostic baseline, with the same behavior as Stage 0. Do not use this branch as the implementation of multi-page results.
 
 ## Previous diagnostic design
 
@@ -72,3 +72,8 @@ The correct requirement is one standalone Results window with its own internal, 
 The remaining user-reported ver-03 defect is Apply: #:NODE241 is not of type BROWSERNODE. Stage 0 is only the single-window native Graphical Browser baseline; it does not implement internal pages. Do not confuse Stage 0 with the earlier UICT ver-03 prototype.
 
 The :createAsTab t and sd-dock-graphical-browser experiment was the wrong direction and has been removed from the active Stage 1 source. Future work must return to the UICT Apply bridge and prove the BrowserNode object type expected by :set-object-selection without changing the UICT window/tab architecture.
+
+
+## Comparison decision – Stage 1 is not the multi-page architecture
+
+The user is evaluating two distinct architectures. Stage 1 remains only a diagnostic baseline proving the single native Graphical Browser workflow under an isolated helper prefix. It recreates/refreshes one Results Browser and does not retain one page per process/material pair. Do not add Browser Bar tabs, multiple Graphical Browser instances, or reparenting to a host shell. The failed host-shell/reparenting history is recorded in main-branch LL-002 and ENGINEERING_KNOWLEDGE_BASE Section 5. For a single standalone Results window with internal named pages, use the UICT ver-03 source as the architectural candidate and isolate its Apply bridge as the next task.
