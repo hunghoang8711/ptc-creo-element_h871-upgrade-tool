@@ -117,3 +117,15 @@ Resolved:
 - Found a separate partial-initialization bug: shell, grid area and tab control were created under a single shell-existence check. If a previous failed run left only the shell alive, later runs skipped creation of missing child controls and tried to insert pages into an incomplete UI.
 - Updated shell initialization to recover each layer independently with sd-control-p; changed tab callback binding to a function object as shown in PTC's official UICT examples.
 - Density search logic and ver-01/ver-02 remain unchanged. Modeling 18.1 retest pending.
+
+
+## 2026-11-16 – instrument ver-03 NIL/STRING failure (no speculative fix)
+
+- User retested the previous callback guard and partial-UI recovery revision; the same `NIL is not of type STRING` error remains.
+- The earlier callback and partial-shell explanations are therefore **not confirmed root causes** and must not be treated as resolved.
+- Added a diagnostic trace writer to the canonical ver-03 source. It appends stage markers and relevant handle values to `H871_PART_FILTER_VER_03_TRACE.txt` in the Modeling user's home directory.
+- Trace markers cover the run entry, collection/report completion, shell/grid/tab checks and creation, tab insertion, logical-table creation/check, text/display-table/button creation, current-tab activation, and logical-table refresh.
+- The last `BEGIN` marker in the trace identifies the exact call being entered when the uncaught NIL/STRING error occurs. This allows the next fix to target the failing API argument rather than guessing.
+- No filtering predicate or Density mapping was changed. CNC-SUS304 remains numeric Density Instance=1 and Density Base=304, with API values normalized by /1000. ver-01/ver-02 remain untouched.
+- Commit: `8c0a1cd56f25f125958080b3ab6316e55827b141`.
+- Runtime diagnosis is pending the user's next test and trace file.
