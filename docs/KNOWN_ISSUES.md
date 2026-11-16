@@ -26,13 +26,12 @@ Only unresolved or unverified items belong here. Move resolved root causes into 
 - **Details:** Mapped choice dialog uses `:range`, `:label`, `:after-input` and `:display-only`. Standard dialog positions code fields on separate rows. A same-row custom layout is not implemented.
 - **Next step:** Preserve current mappings and dialog behavior. Re-test only if changing this area.
 
-## KI-006 – ver-03 internal tabs and native selection hand-off
-- **Status:** UICT prototype implemented and static-checked; Creo 18.1 runtime unverified; Apply not implemented.
-- **Details:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp` now contains the ver-02 Density filter engine integrated with one UICT Dialog Shell, one horizontal internal Tab Control, per-page multi-select lists, Select All/Clear Selection, pair-key refresh and no-match protection.
-- **Compatibility gap:** UICT API patterns were found in PTC 20.7/20.8 Integration Kit references. Their availability/signatures in Modeling 18.1 are not proven.
-- **Selection gap:** The prototype keeps actual Part objects mapped to result rows, but no verified Modeling 18.1 operation has been established to transfer UICT-selected rows into Modeling selection. Apply is intentionally not wired.
-- **Next step:** User loads the exact file in Modeling 18.1 and tests shell creation, tab creation/switching, repeated-pair refresh, page-specific selection, Select All/Clear Selection and no-match preservation. Then verify the Part selection hand-off before adding Apply.
-- **Production boundary:** ver-01/ver-02 remain the working baseline for actual selection and native Apply.
+## KI-006 – ver-03 UICT compatibility and Apply runtime validation
+- **Status:** Results UI runtime-confirmed by user; Apply source fix committed; Modeling 18.1 Apply retest pending.
+- **Details:** One UICT Results window, internal tabs, multi-column table, and Apply button are user-confirmed working. Apply now resolves each symbolic node ID returned by `sd-create-browsernode` through `sd-get-browsernode-struct` before passing the resulting BrowserNode structure to `:set-object-selection`.
+- **Compatibility gap:** UICT Display Table/logical-table APIs are documented in PTC 20.7/20.8 references; exact Modeling 18.1 availability/signatures are not all proven.
+- **Next step:** In Modeling 18.1, select one result row and Apply, then select multiple rows and Apply. Verify only those actual Parts become selected. Capture the exact error if any.
+- **Production boundary:** ver-01/ver-02 remain unchanged as known-good selection/apply baselines. Do not mark ver-03 Apply resolved until user confirms runtime behavior.
 
 ## Resolved baseline behavior
 
