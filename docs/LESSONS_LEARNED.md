@@ -67,3 +67,16 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 ## LL-012 – Units must be derived from the current environment
 - **Lesson:** The legacy Arrange_sheets2 macro reads a unit factor from `INQ_ENV 6` / `INQ 2` and converts a 25 mm spacing before arranging sheets.
 - **Prevention:** Never hard-code drawing/model distances without verifying active units and conversion direction.
+
+
+## LL-013 – Keep multi-Browser result contexts independent
+- **Lesson:** A single shared `active-parts` / `active-instance` variable is unsafe when several Graphical Browser trees can refresh or reopen independently. A callback may run after another pair has become active and rebuild the wrong Browser's rows.
+- **Prevention:** Give every Browser/Tree unique handles and a distinct update callback closure that captures that Browser's own tree name, pair label and immutable result snapshot. Do not depend on whichever pair was most recently filtered.
+
+## LL-014 – Do not add UICT Display Table when a native Graphical Browser already owns selection and Apply
+- **Lesson:** VER-03's Display Table required an additional conversion/Apply bridge, while VER-02 already demonstrated native Graphical Browser row selection and Apply. A second UICT table layer adds API compatibility and object-type boundaries without being necessary for native Browser selection.
+- **Prevention:** For workflows whose result rows must be selected and applied to the 3D viewport, prefer the native Graphical Browser as the result surface. Use a lightweight manager window only for opening/organizing pair-specific Browsers. Verify native Apply in the actual viewport.
+
+## LL-015 – Treat fatal `0xc00000fd` as unresolved until runtime evidence identifies its source
+- **Lesson:** Recursive Assembly traversal is a plausible stack-overflow source, but an iterative traversal experiment did not resolve the reported fatal exception. Therefore recursion alone is not a confirmed root cause.
+- **Prevention:** Do not label the crash fixed based on static checks or a rewritten collector. Capture the last trace marker and reproduce only on a disposable model copy. Avoid overwriting original customer model data.
