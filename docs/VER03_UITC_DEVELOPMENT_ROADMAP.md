@@ -269,3 +269,34 @@ Next runtime test, in order:
 5. Select multiple rows and press Apply; confirm only those Parts are selected.
 6. Switch to another page and verify Apply/double-click never selects Parts from the previous page.
 7. If an error remains, provide the exact LISP error and a trace/log if available. Do not change the UICT architecture or search pipeline while investigating.
+
+
+## 14. Apply reaches native hand-off but no objects are accepted — 2026-11-16
+
+User runtime result after candidate commit `f92834af7c28fa172768f552431bb06315b72ee6`:
+- Double-click still does not select the Part.
+- Selecting a row and pressing Apply no longer reports the Symbol-vs-BrowserNode type error.
+- Instead, Apply reports: `H871 Apply: No objects were handed to Modeling. Check the active command.`
+
+Interpretation:
+- The BrowserNode type mismatch has been passed far enough for the code to reach the native browser hand-off.
+- The message is emitted when `sd-browser-exec-cmd ... :select-and-execute` returns NIL.
+- PTC Graphical Browser documentation states that `:select-and-execute` returns NIL if no objects are selected in that browser. It also states that `:set-object-selection` only selects items that are visible in the browser. This makes it important to distinguish: (a) node ID resolution, (b) node displayed state, (c) set-object-selection return, (d) browser selected-object count, and (e) hand-off return.
+- The current temporary Graphical Browser is intentionally not shown. This may be relevant because its table rows may not be considered displayed/selectable, but this is a hypothesis, not yet proven.
+- The phrase "Check the active command" in the custom message should not be treated as proof that the active-command state is the root cause. First establish whether the temporary browser actually contains selected BrowserNodes before hand-off.
+
+Diagnostic-only source update:
+- Commit: `eade2709d7ebc5a1839690ec4137a33bb75c76c7`
+- Blob: `7aed33cea9c6e5a8bb44895eeab08eee01858d46`
+- Added trace checkpoints for UICT selection payload, double-click callback entry/page resolution, number and types of generated bridge nodes, table-mode/root setup return values, per-node BrowserNode type/displayed state/selection return, browser selected count/list types, and select-and-execute return.
+- No behavior changes to the bridge, Results UI, table contents, search, or mappings; instrumentation only.
+- Static check: 797 lines; parentheses balanced (depth 0, minimum 0); no unterminated strings.
+- Not yet tested in Modeling 18.1.
+
+Next test:
+1. Load this exact source.
+2. Search one known-positive pair and select one result row.
+3. Press Apply once.
+4. Send the appended trace section beginning at `APPLY/UICT-SELECTION`.
+5. Double-click one row and send whether `APPLY/DOUBLE-CLICK-CALLBACK` appears in the trace.
+Do not change the Results UICT architecture or replace it with the Stage 0/1 browser.
