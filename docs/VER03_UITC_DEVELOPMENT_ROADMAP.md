@@ -509,3 +509,77 @@ Runtime status:
 - Direct programmatic `:select-and-execute`: returns NIL in the earlier test.
 - `sd-call-cmds` wrapper from UICT callback: **user-tested and failed** with `Illegal call to action routine`.
 - One-window Apply/double-click: **not solved**.
+
+## 22. Apply candidate: queue a zero-input Modeling User Action from UICT — 2026-11-16
+
+### Why this candidate exists
+
+The user tested section 20's direct `sd-call-cmds` call from UICT and received:
+- `Illegal call to action routine.`
+- `H871 Apply: Modeling did not confirm the native selection hand-off.`
+
+PTC documentation explicitly states that `sd-call-cmds` may only be used inside a User Action. Calling it without a surrounding User Action produces `SD-CALL-ACTION-ILLEGAL-CALL`.
+Reference: https://support.ptc.com/help/creo_elements_direct/r20.4.0.0/advanced_documentation/integration_kit/reference/sd-call-cmds.html
+
+### New implementation candidate
+
+Source commits on `feature/ver03-uict-apply`:
+- Initial trampoline: `f93dc1d0aaada84758fdcab588628c616e230e52`
+- Explicit action success/failure diagnostics: `d0a0efecac3b0f463bc9860a37ac735cb9bd6fc8`
+- Source blob after latest commit: `7a195dfdc6970a1fed53e37000925f254bd7f996`
+
+Source file:
+`src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`
+
+Implementation:
+1. The UICT Apply/double-click callback only reads the active table selection, stores the real Part objects and page name in globals, then calls `sd-put-buffer "H871_PF_V03_APPLY_ACTION"`.
+2. A new zero-input sequential Dialog Generator command, `h871_pf_v03_apply_action`, is defined with `:variables '()`.
+3. PTC Dialog Generator documentation says a sequential dialog executes its `:ok-action` immediately when no dialog variables remain. Thus this action is intended to execute without opening a second user-facing dialog.
+4. The new command's `:ok-action` calls the existing native bridge builder/selection routine. That routine now calls `sd-call-cmds` from inside the actual Dialog Generator User Action context.
+5. The `sd-call-cmds` call has explicit `:success` and `:failure` branches. A NIL return from the browser command is not incorrectly treated as an execution error; actual action failure is recorded using `sd-inq-error-obj :all`.
+
+PTC references:
+- `sd-put-buffer` feeds the Modeling command-line buffer and is the documented way for UI controls to send input to Modeling: https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/reference/ui_util.html
+- A dialog can be activated by entering its command name into the input buffer; a sequential dialog with no remaining variables immediately executes its `:ok-action`: https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
+- `sd-call-cmds` success/failure forms and the User Action context restriction: https://support.ptc.com/help/creo_elements_direct/r20.4.0.0/advanced_documentation/integration_kit/reference/sd-call-cmds.html
+
+Compatibility caveat:
+- These online references are for Modeling 20.4–20.8, not the user's 18.1 installation. This implementation is a documented-API hypothesis and must be runtime-tested in 18.1.
+- No source-level test can establish that the command buffer is processed immediately after a UICT callback or that the hidden Graphical Browser's programmatic `:select-and-execute` produces the same viewport result as clicking its native Apply button.
+
+### Scope guard
+
+- No changes to the UICT Results window, tabs, table schema, collector, numeric Density mappings/normalization, matching predicate, or per-page selection extraction.
+- The UICT callback no longer calls `sd-call-cmds` directly.
+- No visible Graphical Browser bridge is opened by the candidate.
+- No mouse simulation, guessed widget IDs, or undocumented private UI calls.
+
+### Static validation
+
+- Source was re-fetched from GitHub after the latest commit.
+- Parentheses balanced; no negative nesting; no unterminated strings.
+- Confirmed the Apply callback queues `H871_PF_V03_APPLY_ACTION`.
+- Confirmed the dedicated `sd-defdialog` exists and has zero variables.
+- Confirmed the native browser hand-off is called from the dedicated command's `:ok-action`, not directly from the UICT callback.
+- Confirmed explicit `:success` / `:failure` diagnostics are present.
+
+### Runtime validation
+
+**Not yet tested in Creo Elements/Direct Modeling 18.1.**
+
+User test sequence:
+1. Reload the new ver-03 source.
+2. Search one known matching pair, e.g. CNC + SUS304.
+3. Select one row and click UICT Apply.
+4. Repeat by double-clicking one row.
+5. Test Select All + Apply.
+6. Confirm whether any additional dialog/window appears and whether the intended Part(s) become selected in the 3D viewport.
+
+If the test fails, capture the trace stages:
+- `APPLY/QUEUE-USER-ACTION`
+- `APPLY/QUEUE-USER-ACTION-RETURN`
+- `APPLY/USER-ACTION-ENTER`
+- `APPLY/SELECT-AND-EXECUTE-SUCCESS-CONTEXT` or `APPLY/SELECT-AND-EXECUTE-ACTION-ERROR`
+- `APPLY/SELECT-AND-EXECUTE-STATUS`
+
+Do not mark one-window Apply as fixed until the user confirms the 3D selection in Modeling 18.1.
