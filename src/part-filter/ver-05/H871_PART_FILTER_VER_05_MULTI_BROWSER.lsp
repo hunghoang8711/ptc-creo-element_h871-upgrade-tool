@@ -179,10 +179,13 @@
       (sd-display-error "H871 VER-05: Cannot create Browser Manager layout.")
       (return-from h871-pf-v05-create-manager nil)))
   (unless (sd-control-p *h871-pf-v05-manager-header*)
-    (sd-create-text-control
-      *h871-pf-v05-manager-header* *h871-pf-v05-manager-grid*
-      :x 0 :y 0 :width 108 :height 3
-      :editable nil :showModified nil)
+    (unless
+      (sd-create-text-control
+        *h871-pf-v05-manager-header* *h871-pf-v05-manager-grid*
+        :x 0 :y 0 :width 108 :height 3
+        :editable nil :showModified nil)
+      (sd-display-error "H871 VER-05: Cannot create Manager header control.")
+      (return-from h871-pf-v05-create-manager nil))
     (sd-set-text-control-value *h871-pf-v05-manager-header*
       :text "DENSITY PAIR / PART COUNT                         DENSITY PAIR / PART COUNT"))
   (unless (sd-dialog-shell-visible-p *h871-pf-v05-manager*)
@@ -213,19 +216,31 @@
            (x (if (= column 0) 0 56))
            (y (+ 4 (* (floor row-index 2) 4))))
       (unless (sd-control-p text-name)
-        (sd-create-text-control
-          text-name *h871-pf-v05-manager-grid*
-          :x x :y y :width 38 :height 3
-          :editable nil :showModified nil))
-      (sd-set-text-control-value text-name
-        :text (h871-pf-v05-manager-row-label entry))
+        (unless
+          (sd-create-text-control
+            text-name *h871-pf-v05-manager-grid*
+            :x x :y y :width 38 :height 3
+            :editable nil :showModified nil)
+          (sd-display-error
+            (format nil "H871 VER-05: Cannot create Manager row ~A." text-name))
+          (return-from h871-pf-v05-refresh-manager nil)))
+      (unless
+        (sd-set-text-control-value text-name
+          :text (h871-pf-v05-manager-row-label entry))
+        (sd-display-error
+          (format nil "H871 VER-05: Cannot update Manager row ~A." text-name))
+        (return-from h871-pf-v05-refresh-manager nil))
       (unless (sd-control-p button-name)
-        (sd-create-pushbutton-control
-          button-name *h871-pf-v05-manager-grid*
-          :x (+ x 39) :y y :width 15 :height 3
-          :title "Open"
-          :pushAction
-            (list 'h871-pf-v05-show-pair instance base)))))
+        (unless
+          (sd-create-pushbutton-control
+            button-name *h871-pf-v05-manager-grid*
+            :x (+ x 39) :y y :width 15 :height 3
+            :title "Open"
+            :pushAction
+              (list 'h871-pf-v05-show-pair instance base))
+          (sd-display-error
+            (format nil "H871 VER-05: Cannot create Manager button ~A." button-name))
+          (return-from h871-pf-v05-refresh-manager nil)))))
   (when (sd-dialog-shell-p *h871-pf-v05-manager*)
     (unless (sd-dialog-shell-visible-p *h871-pf-v05-manager*)
       (sd-show-dialog-shell *h871-pf-v05-manager*)))
@@ -327,6 +342,7 @@
         :update-func callback-symbol)
       (sd-display-error
         (format nil "H871 VER-05: Cannot create Browser Tree ~A." tree))
+      (ignore-errors (sd-destroy-browser-tree tree))
       (h871-pf-v05-release-callback callback-symbol)
       (return-from h871-pf-v05-create-browser nil))
     (unless
