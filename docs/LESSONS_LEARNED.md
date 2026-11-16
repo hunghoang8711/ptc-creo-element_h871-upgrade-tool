@@ -93,3 +93,10 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 - **Cause:** The parent grid area's `:width` and `:height` are pixel dimensions, while child control `:x`, `:y`, `:width` and `:height` are grid units. With `:cellSize 10,10`, a 112 × 82 pixel area provides only about 11 × 8 grid units.
 - **Correction:** Size the parent grid in pixels to match the child layout's grid-unit extent. VER-05 was changed from 112 × 82 pixels to 1120 × 820 pixels for a layout extending to about 112 × 75 grid units.
 - **Prevention:** Before changing UICT layouts, calculate the parent pixel dimensions from the required grid-unit extent and cell size. Preserve child coordinates and test the result in the target Modeling release; later-release documentation alone is not runtime proof.
+
+
+## LL-018 – Treat Browser reopen crashes as a separate lifecycle defect
+
+- **Observation:** VER-05's independent result Browser display, row selection and native Apply were user-confirmed, but a later Open action intended to show another Browser was reported to trigger fatal exception `0xc00000fd`.
+- **Evidence limit:** The exact UI control/action path and root cause are not yet isolated. The Manager Open handler currently calls `sd-show-graphical-browser` on the stored Browser name; this is a candidate for investigation, not a confirmed cause.
+- **Prevention:** Do not mark Browser reopen/lifecycle as verified merely because initial Browser creation and Apply work. Test reopen separately on a disposable Assembly copy, capture the last trace marker, and never overwrite the original customer model after a fatal exception.
