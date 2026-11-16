@@ -102,3 +102,14 @@ Active decisions that constrain implementation. Superseded experiments are recor
 
 ver-05 now constructs one dynamic `:modeMenu` entry per stored Density-pair page. The mode menu is intended to appear as a horizontal page-button strip within the one Results Browser, with the current page set via `:modeMenuInitialButton`. This is not Browser Bar docking. Detailed PTC documentation for these parameters is later-release evidence only; Modeling 18.1 compatibility is pending runtime testing. The same Browser Tree/table and native Apply architecture remain unchanged.
 
+
+
+## TD-014 – Enforce one active table root per ver-05 page (2026-11-16)
+
+Decision: At all times, the single Results Browser must have exactly one active table root: the currently selected Density-pair page.
+
+Reason: Graphical Browser table roots are additive unless cleared. A page switch that merely calls :change-table-root can leave prior roots active, mixing result rows and breaking active-page-only selection/Apply.
+
+Implementation: ver-05 page activation now buffers display, clears selected objects and all table roots, sets the new page root, resumes display, and logs :number-of-table-roots. This preserves the same visible Browser as the native selection/Apply context.
+
+Evidence boundary: PTC 20.6 documentation supports the command sequence; Modeling 18.1 runtime confirmation is pending. This correction does not establish that the horizontal :modeMenu renders or that native Apply works in the new multi-page tree.
