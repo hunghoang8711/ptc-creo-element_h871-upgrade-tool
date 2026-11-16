@@ -236,3 +236,6 @@ The corrected h871-pf-v05-activate-page now performs a buffered transition:
 - trace :number-of-table-roots.
 
 This sequence follows the PTC 20.6 Graphical Browser reference example. Treat the 18.1 API compatibility and resulting UI behavior as pending until tested in the target application. Require one active root and only active-page rows before accepting Select All or native Apply.
+
+
+Fail-safe refinement: ver-05 now requires both :clear-table-roots and :change-table-root to return success before completing page activation. The :number-of-table-roots query is diagnostic-only and guarded with ignore-errors. This prevents an unverified diagnostic query from interrupting the core UI transition, while failing closed if page isolation itself cannot be established.
