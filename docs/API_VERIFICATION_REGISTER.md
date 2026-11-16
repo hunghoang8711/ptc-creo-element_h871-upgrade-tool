@@ -135,3 +135,10 @@ Trace evidence for the tested filter: COLLECT/PROGRESS reached 500 and COLLECT/C
 PTC Integration Kit UICT documentation for later releases describes `:width` and `:height` of `sd-append-grid-area` in pixels, while child control coordinates and dimensions are expressed in the grid coordinate system. The cell size defines pixels per grid unit. This distinction explains the VER-05 Manager clipping: a 112 × 82 pixel grid with 10 × 10 pixel cells provides only about 11 × 8 grid units, although the two-column child layout extends to about 112 × 75 grid units.
 
 The VER-05 Manager grid dimensions were corrected to 1120 × 820 pixels while retaining `:cellSize 10,10`. This is a source-level correction based on the documented units; actual appearance and exact 18.1 behavior still require runtime confirmation. The API evidence remains later-release documentation, not proof of a new 18.1 API.
+
+
+## VER-05 follow-up – Manager sizing runtime evidence and Open crash
+
+- The user confirmed after the 1120 × 820 pixel grid-area correction that the H871 Graphic/Manager window became larger in Modeling 18.1. This confirms the sizing change had a visible effect. It does not yet establish that every Manager row and Open button is fully visible/readable.
+- A later user report described fatal exception `0xc00000fd` after an Open action intended to show another Browser. The current Manager Open handler calls `sd-show-graphical-browser` with the stored Browser name. This is only a source-level candidate path; the precise clicked control and crash cause remain unconfirmed.
+- Keep the crash unresolved. Do not equate a successful collection trace or working native Apply with proof that Browser reopening is safe.
