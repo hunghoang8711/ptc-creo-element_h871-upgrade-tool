@@ -115,3 +115,8 @@ The first ver-05 implementation incorrectly used Graphical Browser :modeMenu for
 The source now builds the Density-pair page selectors dynamically through :buttonMenu. Each page gets a horizontal push button whose callback activates that page root. Select All and Clear Selection are appended to the same horizontal row. The incorrect modeMenu page selector configuration and duplicate right-click Results Pages popup installation have been removed.
 
 These are horizontal page-navigation buttons, not proven native UICT-style tab controls with mutually-exclusive selected styling. The active page is identified in the Browser status line. Runtime visibility and callback behavior in Modeling 18.1 remain unverified.
+
+
+### Correction to the page-selector diagnosis (2026-11-16)
+
+The previous note incorrectly stated that :modeMenu does not create a horizontal row. PTC's reference explicitly documents both :modeMenu and :buttonMenu as visible horizontal button rows: :modeMenu appears directly above :buttonMenu; :buttonMenu appears above :topMenu. The menus are additionally mapped to right-click popup entries for compatibility. Therefore the original use of :modeMenu for page buttons was conceptually valid. The subsequent temporary move to :buttonMenu is not retained. Source commit 7763d35 restores the page selectors to :modeMenu and adds trace entries UI/MODE-MENU-SPEC, UI/INITIAL-MODE-BUTTON and UI/BROWSER-CREATED to establish whether the expected page-button definitions are actually passed to the Browser. Do not claim the missing UI is solved until the user confirms it in Modeling 18.1.
