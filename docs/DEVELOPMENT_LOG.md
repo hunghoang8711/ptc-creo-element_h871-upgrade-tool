@@ -328,3 +328,29 @@ A fresh source/documentation audit was performed on branch `rebuild/ver05-ver03-
 - Safe handling: do not repeat the failing Open action on the only/original customer model. If reproducing, use a disposable Assembly copy and preserve the trace/crash details.
 
 No production LISP code was changed in this audit. This entry records status and evidence only.
+
+
+## 2026-11-16 – Correct VER-05 UI architecture after user retest
+
+The user retested the current VER-05 build and reported that the Part List remains split into one window per machining-process/material pair.
+
+A full source inspection confirms this is exactly what the current code instructs Modeling to do:
+
+- `h871-pf-v05-run` creates a new Browser by calling `h871-pf-v05-create-browser` for each successful pair.
+- `h871-pf-v05-create-browser` creates a separate Graphical Browser and Browser Tree.
+- The Manager stores a Browser reference per pair and its Open action calls `sd-show-graphical-browser` for that Browser.
+- There is no shared Results shell with an internal tab control in the VER-05 source.
+
+**This is an architecture mismatch, not a UI sizing issue or a missed click.** The accepted requirement from 2026-11-14 to 2026-11-16 is one shared `H871 - PART FILTER RESULTS` window containing internal tabs. Each new process/material pair adds a tab; filtering the same pair refreshes that tab. The user does not want a separate Graphical Browser window for every pair.
+
+The earlier VER-05 native multi-Browser test remains valid evidence that individual row selection, double-click selection, Select All and native Apply can work in Modeling 18.1. However, that implementation is not the accepted final layout and must not be called complete.
+
+Next development direction:
+1. Retain the proven Density filter and collector semantics.
+2. Retain the verified native Apply behavior as a reference, not as justification for multiple top-level windows.
+3. Rebuild the Results presentation around one persistent top-level shell with internal tabs.
+4. Do not blindly copy VER-03's Display Table/Apply bridge: its UICT table APIs and Apply workflow have unresolved 18.1 compatibility/behavior history, and the user explicitly rejected a hidden Browser bridge as the final UI.
+5. Before implementing a new Apply route, document the exact visible interaction and verify it preserves the user's direct-to-3D selection requirement.
+6. Keep this multi-Browser branch isolated as a reference/experiment; do not overwrite its working native Browser baseline.
+
+No LISP source was changed in this correction.
