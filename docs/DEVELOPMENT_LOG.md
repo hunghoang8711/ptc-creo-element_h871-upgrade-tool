@@ -213,3 +213,13 @@ Resolved:
 - No change to UICT Results tables/tabs, selection extraction, Density matching, or the native hand-off sequence before it completes.
 - Source commit: `c1f6f79ba6e53147d93bfd4c32d8ce119994c1c6`.
 - Runtime status: NOT TESTED. User must verify (1) Part remains selected in 3D, (2) bridge window closes, and (3) a second Apply works. Do not merge to main until confirmed.
+
+
+## 2026-11-16 – Prevent Results row double-click from auto-running Apply
+
+- User's latest trace shows repeated `APPLY/DOUBLE-CLICK-CALLBACK` immediately after Results interaction, followed by queuing and running the native Apply action. This means the Display Table's double-click callback is wired to Apply; a double-click/rapid row interaction can unexpectedly launch the bridge, trigger repeated heavy work, and make the cursor appear busy.
+- The trace confirms the selection callback itself is separate and correctly receives selected `ELAN::SEL_ITEM` values. The dedicated Apply pushbutton is already wired to `h871-pf-v03-apply`.
+- Narrow fix: remove `:doubleClickAction 'h871-pf-v03-double-click` from both Display Table creation paths (initial page creation and table recreation). Selecting a row now only changes table selection/status; Apply must be explicitly invoked using the Apply button. No automatic Apply on double-click.
+- Native bridge/handoff and destroy sequence are deliberately unchanged in this patch. The trace's `:SUCCESS` and destroy return `T` do not prove viewport selection; runtime viewport verification remains mandatory.
+- Source commit: `e357cc7f3ecbd1fc04d0e6870f480450e8a1f35b`.
+- Runtime status: NOT TESTED. Verify single-click and multi-select only update selection/status without opening a bridge or spinning; then press Apply once and verify the intended Parts are selected in the 3D viewport and the temporary bridge closes.
