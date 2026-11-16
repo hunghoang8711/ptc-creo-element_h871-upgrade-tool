@@ -23,7 +23,7 @@ This register prevents a symbol seen in a code sample or later-release manual fr
 | `sd-browser-define-table`, `sd-browser-set-active-table`, `sd-browser-exec-cmd`, `sd-show-graphical-browser`, `sd-query-browser` | Production-source + user-confirmed workflow | Preserve tested call signatures from current ver-01/ver-02 source. |
 | `browsernode-objclientdata` | Production-source observed | Reads actual Part object stored in browser row client data. |
 | `sd-browser-set-status-text` | User-confirmed fix | Must supply `:value` keyword/value; omitting it caused odd keyword argument error. |
-| `sd-defdialog` | Source-observed in diagnostic | Diagnostic itself failed due other unsupported symbols; verify any new dialog callbacks separately. |
+| `sd-defdialog` | Source-observed in diagnostic | Dialogs exist in current source; verify new callbacks separately. |
 
 ## B. Known unavailable / failed symbols
 
@@ -60,17 +60,24 @@ The following symbols were found in uploaded Annotation macro source. Their appe
 - `CREATE_LTAB`, `READ_LTAB`, `WRITE_LTAB`, `LTAB_ROWS`, `DELETE_LTAB_ROW`, `DELETE_LTAB`, `SORT_LTAB`
 - `INQ_ENV 6/7`, `Move_sheet`
 
-## D. UICT research candidates – later PTC releases
+## D. UICT APIs used by ver-03 prototype – later-release evidence only
 
-Research found later-release references to:
-- `sd-create-dialog-shell`
-- `sd-create-tab-control`
-- `sd-insert-tab-control-page`
-- `sd-create-display-table-control`
-- `sd-create-list-control`
-- `sd-get-list-control-selected-items`
+The following signatures/patterns were inspected in official PTC Integration Kit documentation for releases 20.7/20.8 and used in the ver-03 prototype:
+- `sd-create-dialog-shell`, `sd-dialog-shell-p`, `sd-dialog-shell-visible-p`
+- `sd-append-grid-area`
+- `sd-create-tab-control`, `sd-insert-tab-control-page`, `sd-set-current-tab-control-page`
+- `sd-create-text-control`, `sd-set-text-control-value`
+- `sd-create-list-control`, `sd-set-list-control-items`, `sd-set-list-control-selected-items`, `sd-get-list-control-selected-items`
+- `sd-create-pushbutton-control`
 
-**Status:** Later-release documentation only. Exact 18.1 availability, signatures and real-Part Apply hand-off are unverified. Do not use in production until a minimal Modeling 18.1 test succeeds.
+**Evidence:** Later-release documentation only. Modeling 18.1 function availability, exact signatures and callback execution have not been runtime-verified. The current ver-03 source is a prototype, not proof of compatibility.
+
+PTC references:
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/uict_create.html
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/uict_specutil.html
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/examples/vertical_tabs_lsp.html
+
+**Apply hand-off gap:** No Modeling 18.1 method has yet been proven to transfer selected Part objects from a UICT list into native Modeling selection. Do not invent or infer this from later-release examples. Preserve native Graphical Browser Apply in ver-01/ver-02.
 
 ## E. Measurement/export
 - No measurement API has been verified in Modeling 18.1 in the recovered project history.
