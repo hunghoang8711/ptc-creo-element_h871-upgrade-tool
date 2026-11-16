@@ -86,3 +86,10 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 - **Next issue:** The separate H871 Graphic/Manager window appears in a screen corner but is too small to display all its information legibly.
 - **Prevention:** Treat Browser selection and native Apply as a confirmed baseline. When improving Manager layout, change only the Manager window sizing/layout and test that all Browser windows and Apply behavior remain unchanged. Do not reintroduce UICT Display Table or a custom Apply bridge.
 - **Evidence limit:** The supplied trace reached COLLECT/COMPLETE | (0 530) after progress markers through 500. Do not infer the tuple's field meanings. One successful run does not prove every earlier fatal-exception scenario is resolved.
+
+
+## LL-017 – Keep UICT pixel dimensions separate from grid-unit coordinates
+- **Symptom:** A UICT Manager window appeared too small and clipped most of its child controls.
+- **Cause:** The parent grid area's `:width` and `:height` are pixel dimensions, while child control `:x`, `:y`, `:width` and `:height` are grid units. With `:cellSize 10,10`, a 112 × 82 pixel area provides only about 11 × 8 grid units.
+- **Correction:** Size the parent grid in pixels to match the child layout's grid-unit extent. VER-05 was changed from 112 × 82 pixels to 1120 × 820 pixels for a layout extending to about 112 × 75 grid units.
+- **Prevention:** Before changing UICT layouts, calculate the parent pixel dimensions from the required grid-unit extent and cell size. Preserve child coordinates and test the result in the target Modeling release; later-release documentation alone is not runtime proof.
