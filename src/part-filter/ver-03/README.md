@@ -155,3 +155,10 @@ This directly addresses the reported runtime type error `#:NODE241 is not of typ
 ## Architecture direction reaffirmed – continue from ver-03
 
 The user has explicitly reaffirmed that ver-03's one Results window with internal Density-pair tabs is the accepted UI direction. Continue from ver-03; do not continue ver-05's single-Graphical-Browser UI experiment. Preserve ver-03's tab shell, per-page Display Tables, row multi-selection and Select All/Clear Selection. Focus remaining work on making selected rows Apply to actual Modeling Parts in the same user-facing Results workflow. ver-04/ver-05 remain diagnostic/experimental history only.
+
+
+## Superseding architecture correction – do not use UICT ver-03 as active base (2026-11-16)
+
+This README's earlier instruction to use UICT ver-03 as the active architecture is superseded. The UICT ver-03 path is associated with fatal exception `0xC00000FD`; its Apply bridge is not the final implementation. Preserve this folder as historical/forensic source only.
+
+The user-confirmed native selection baseline is Stage 0 at `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`. The ver-04 single-Browser diagnostic separately demonstrated multi-page root switching and selection restoration. The final implementation must combine Stage 0's native row selection/Apply with ver-04's page-root algorithm in one visible standalone Results Browser. Do not use an intermediate-window workflow, UICT Display Table/hidden Browser bridge, Browser Bar docking, multiple Browser windows, or host-shell reparenting.
