@@ -280,3 +280,27 @@ Resolved:
 - Final source content SHA after these follow-ups: `f0c0f3dc89bbc6e620b19c685b44a6a91eccec41` (590 lines).
 - Static checks re-run: balanced parentheses, closed strings, no duplicate local DEFUN names, no missing local helper definitions, and no Display Table/logical-table/Apply-Bridge code.
 - Runtime status unchanged: NOT TESTED in Modeling 18.1.
+
+## 2026-11-16 – VER-05 first successful native multi-Browser runtime test
+
+User tested VER-05 in Creo Elements/Direct Modeling 18.1 and confirmed that filtering creates separate, independent Graphical Browser windows for each result type/pair. Selecting an individual Part works; double-click selection and Select All followed by native Apply both work as well as the VER-02 workflow, and Apply correctly selects the Parts in the 3D viewport.
+
+The separate H871 Graphic/Manager window appears in a screen corner but is too small to read all displayed information. Treat this as the next focused UI/layout issue. Preserve the working Browser windows, row-selection behavior, Select All and native Apply implementation. Do not refactor the filter engine or Browser callbacks while adjusting Manager dimensions/layout.
+
+User-provided trace:
+
+~~~text
+H871 VER-05 TRACE START
+RUN/BEGIN | (ELAN::SEL_ITEM 1 6061)
+COLLECT/BEGIN | "/05.cum-ve-sinh_do"
+COLLECT/PROGRESS | 100
+COLLECT/PROGRESS | 200
+COLLECT/PROGRESS | 300
+COLLECT/PROGRESS | 400
+COLLECT/PROGRESS | 500
+COLLECT/COMPLETE | (0 530)
+~~~
+
+Collection reached its completion marker after visiting progress milestones through 500; final reported tuple is (0 530). Its fields are not interpreted because their exact meaning is not established. No fatal exception was reported in this test. This is positive runtime evidence for this tested case, not proof that the previously reported 0xc00000fd is universally resolved.
+
+**Status:** native multi-Browser selection/Apply is now user-confirmed in Modeling 18.1 for the tested workflow. Manager readability and the remaining multi-window lifecycle regression cases are still open.
