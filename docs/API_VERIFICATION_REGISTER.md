@@ -102,3 +102,26 @@ Documented resolution pattern:
 ```
 
 The ver-03 Apply bridge now follows this pattern. The PTC reference establishes the return/lookup contract for the documented release; ver-02's existing root lookup provides additional project evidence. Do not label the full ver-03 Apply workflow as 18.1 runtime-confirmed until the user tests it.
+
+
+
+## G. Single Graphical Browser page navigation (ver-04 diagnostic)
+
+| API / behavior | Evidence | Status |
+|---|---|---|
+| sd-browser-add-popup-entry | PTC Graphical Browser reference 20.6, exact callback signature and string-client-data behavior documented | Later-release documented; Modeling 18.1 runtime pending |
+| :change-table-root | Used in preserved ver-02 source; PTC Graphical Browser reference describes children of a table root as the visible table rows | Project source-observed; 18.1 runtime baseline |
+| :get-selected-objects | Used by ver-02 to read the current Graphical Browser selection | Project source-observed and user-confirmed through ver-02 behavior |
+| :set-object-selection on visible nodes | PTC docs say only visible BrowserNodes can be selected | Used only to restore page-local selection in the diagnostic; 18.1 runtime test pending |
+| :select-and-execute default Apply | ver-02's own native Graphical Browser Apply/OK action; user-confirmed in Modeling 18.1 | Confirmed baseline; must remain the Browser's native default |
+
+The ver-04 diagnostic uses one Browser Tree containing a synthetic page root per Density pair. Each page root has the matching Part BrowserNodes as direct children. One Graphical Browser table is reused by changing the active table root. Previous/Next toolbar actions and a dynamic Results Pages popup submenu switch roots; selection paths are saved per page and restored only after its root is active.
+
+Important UI distinction: the diagnostic uses page navigation controls and a right-click page menu, not a horizontal tab strip. It is a proof-of-concept for same-Browser selection ownership and native Apply, not the final approved UI.
+
+PTC reference:
+- https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+
+The documented Graphical Browser reference says sd-browser-add-popup-entry creates push/toggle/submenu entries and that functions receive (BrowserNode, browser-name) or (BrowserNode, browser-name, string-client-data) when client data is supplied. Modeling 18.1 compatibility and the full page-switch/selection-restore flow still require runtime testing.
+
+The previously attempted sd-set-graphical-browser-parent host-shell integration is not used by this diagnostic. Earlier project attempts to reparent the Browser into a UICT host shell failed; do not retry that route without isolating and proving the exact failure cause.
