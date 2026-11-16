@@ -33,6 +33,7 @@
 (defvar *h871-pf-v03-current-page* nil)
 (defvar *h871-pf-v03-assembly* nil)
 (defvar *h871-pf-v03-diagnostic-samples* nil)
+(defvar *h871-pf-v03-collect-visited-count* 0)
 
 (defvar *h871-pf-v03-shell* "h871-pf-v03-results")
 (defvar *h871-pf-v03-grid* "h871-pf-v03-results-grid")
@@ -41,21 +42,31 @@
 ;; Native Apply bridge: temporary Graphical Browser objects are not shown.
 (defvar *h871-pf-v03-apply-parts* nil)
 (defvar *h871-pf-v03-apply-nodes* nil)
+(defvar *h871-pf-v03-pending-apply-page* nil)
 (defvar *h871-pf-v03-apply-browser* "h871-pf-v03-apply-bridge")
 (defvar *h871-pf-v03-apply-tree* "h871-pf-v03-apply-tree")
 
-;; Diagnostic trace: records the last UICT/API stage reached before a runtime error.
-;; The trace is written beside the existing result report in the user's home folder.
+;; Diagnostic trace uses the independently user-validated file-write method.
+;; File errors are deliberately visible; never report false success.
+(defun h871-pf-v03-trace-file ()
+  (merge-pathnames
+    "H871_PART_FILTER_VER_03_TRACE.txt"
+    (user-homedir-pathname)))
+
+(defun h871-pf-v03-trace-reset ()
+  (with-open-file
+    (stream (h871-pf-v03-trace-file)
+      :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (format stream "H871 VER-03 TRACE START~%")
+    (force-output stream))
+  t)
+
 (defun h871-pf-v03-trace (stage &optional detail)
-  (ignore-errors
-    (let ((trace-file
-            (merge-pathnames
-              "H871_PART_FILTER_VER_03_TRACE.txt"
-              (user-homedir-pathname))))
-      (with-open-file
-        (stream trace-file
-          :direction :output :if-exists :append :if-does-not-exist :create)
-        (format stream "~%~A | ~A" stage detail))))
+  (with-open-file
+    (stream (h871-pf-v03-trace-file)
+      :direction :output :if-exists :append :if-does-not-exist :create)
+    (format stream "~A | ~S~%" stage detail)
+    (force-output stream))
   t)
 
 ;; Page entry:
@@ -82,6 +93,14 @@
          (<= (abs (- a b)) 0.0000001))))
 
 (defun h871-pf-v03-collect (obj matches requested-instance requested-base)
+  ;; Progress checkpoints expose the last completed traversal depth/volume if
+  ;; Modeling terminates during recursive assembly traversal. Filter semantics
+  ;; and traversal order are unchanged.
+  (incf *h871-pf-v03-collect-visited-count*)
+  (when (= (mod *h871-pf-v03-collect-visited-count* 100) 0)
+    (h871-pf-v03-trace
+      "COLLECT/PROGRESS"
+      *h871-pf-v03-collect-visited-count*))
   ;; Keep the ver-02 search semantics: compare numeric Density Instance and
   ;; Density Base values after /1000 normalization; labels are never inputs.
   (when (sd-inq-part-p obj)
@@ -246,45 +265,28 @@
 ;; ---------------------------------------------------------------------------
 
 (defun h871-pf-v03-build-apply-tree ()
-  ;; sd-create-browsernode returns a node ID (symbol), not a BrowserNode
-  ;; structure. Resolve every ID before passing it to Browser selection APIs.
-  (let* ((root-id
-           (sd-create-browsernode
-             :tree *h871-pf-v03-apply-tree*
-             :parent nil
-             :objPath "/H871_V03_APPLY"
-             :objPname "H871 Apply Selection"
-             :objClientData (list :kind :root)))
-         (root
-           (and root-id
-                (sd-get-browsernode-struct
-                  *h871-pf-v03-apply-tree* root-id))))
+  (let ((root
+          (sd-create-browsernode
+            :tree *h871-pf-v03-apply-tree*
+            :parent nil
+            :objPath "/H871_V03_APPLY"
+            :objPname "H871 Apply Selection"
+            :objClientData (list :kind :root))))
     (setf *h871-pf-v03-apply-nodes* nil)
-    (h871-pf-v03-trace
-      "APPLY/ROOT-RESOLVED"
-      (list root-id (and root (type-of root))))
     (dolist (part *h871-pf-v03-apply-parts*)
-      (let* ((node-id
-               (sd-create-browsernode
-                 :tree *h871-pf-v03-apply-tree*
-                 :parent root-id
-                 :objPath (h871-pf-v03-path part)
-                 :objPname (h871-pf-v03-name part)
-                 :objClientData (list :kind :part :part part)))
-             (node
-               (and node-id
-                    (sd-get-browsernode-struct
-                      *h871-pf-v03-apply-tree* node-id))))
-        (h871-pf-v03-trace
-          "APPLY/PART-NODE-RESOLVED"
-          (list (h871-pf-v03-name part)
-                node-id
-                (and node (type-of node))))
-        (when node
-          (push node *h871-pf-v03-apply-nodes*))))
-    root-id))
+      (push
+        (sd-create-browsernode
+          :tree *h871-pf-v03-apply-tree*
+          :parent root
+          :objPath (h871-pf-v03-path part)
+          :objPname (h871-pf-v03-name part)
+          :objClientData (list :kind :part :part part))
+        *h871-pf-v03-apply-nodes*))
+    root))
 
 (defun h871-pf-v03-native-apply (parts)
+  (h871-pf-v03-trace "APPLY/NATIVE-BEGIN"
+    (list (length parts) (mapcar #'type-of parts)))
   (when (null parts)
     (sd-display-message "H871: Select one or more Part rows before Apply.")
     (return-from h871-pf-v03-native-apply nil))
@@ -324,51 +326,146 @@
   ;; The browser update callback may also rebuild them when the browser opens.
   (unless (sd-get-browsernode-struct *h871-pf-v03-apply-tree* :root)
     (h871-pf-v03-build-apply-tree))
+  (h871-pf-v03-trace "APPLY/NODES-BUILT"
+    (list (length *h871-pf-v03-apply-nodes*)
+          (mapcar #'type-of *h871-pf-v03-apply-nodes*)))
 
   ;; Mirror ver-02: make the bridge root's direct Part children the table rows.
-  (sd-browser-exec-cmd *h871-pf-v03-apply-browser* :set-table-mode)
+  (h871-pf-v03-trace "APPLY/SET-TABLE-MODE"
+    (sd-browser-exec-cmd *h871-pf-v03-apply-browser* :set-table-mode))
   (let ((root
           (sd-get-browsernode-struct *h871-pf-v03-apply-tree* :root)))
+    (h871-pf-v03-trace "APPLY/ROOT-STRUCT" (type-of root))
     (when root
-      (sd-browser-exec-cmd
-        *h871-pf-v03-apply-browser* :change-table-root root t)))
+      (h871-pf-v03-trace "APPLY/CHANGE-TABLE-ROOT"
+        (sd-browser-exec-cmd
+          *h871-pf-v03-apply-browser* :change-table-root root t))))
 
-  ;; Only resolved BrowserNode structures may be passed here.
-  (h871-pf-v03-trace
-    "APPLY/RESOLVED-NODE-COUNT"
-    (list (length *h871-pf-v03-apply-nodes*)
-          (length parts)))
-  (unless (= (length *h871-pf-v03-apply-nodes*) (length parts))
-    (sd-display-error
-      "H871 Apply: Could not resolve every selected row to a BrowserNode.")
-    (return-from h871-pf-v03-native-apply nil))
-  (dolist (node *h871-pf-v03-apply-nodes*)
-    (h871-pf-v03-trace
-      "APPLY/SET-OBJECT-SELECTION"
-      (type-of node))
-    (sd-browser-exec-cmd
-      *h871-pf-v03-apply-browser* :set-object-selection node t))
+  ;; DIAGNOSTIC EXPERIMENT:
+  ;; Show the bridge before querying displayed-state and before native hand-off.
+  ;; Earlier traces showed DISPLAYED=NIL for every resolved BrowserNode.
+  ;; This isolates whether the hidden bridge is the reason Modeling does not
+  ;; transfer the selected Parts into the active 3D selection.
+  (let ((shown
+          (sd-show-graphical-browser *h871-pf-v03-apply-browser*)))
+    (h871-pf-v03-trace "APPLY/SHOW-BRIDGE-RETURN" shown))
 
-  ;; Native ver-02 hand-off: selected objects enter Modeling's select list.
-  (unless
-    (sd-browser-exec-cmd
-      *h871-pf-v03-apply-browser* :select-and-execute)
-    (sd-display-message
-      "H871 Apply: No objects were handed to Modeling. Check the active command.")
-    (return-from h871-pf-v03-native-apply nil))
+  ;; Resolve each symbolic ID to a BrowserNode structure, then record whether
+  ;; Modeling considers it displayed and whether it enters the browser selection.
+  (dolist (node-id *h871-pf-v03-apply-nodes*)
+    (let* ((node-struct
+             (sd-get-browsernode-struct *h871-pf-v03-apply-tree* node-id))
+           (displayed
+             (and node-struct
+                  (sd-query-browser
+                    *h871-pf-v03-apply-browser* :is-object-displayed node-struct)))
+           (selected
+             (and node-struct
+                  (sd-browser-exec-cmd
+                    *h871-pf-v03-apply-browser*
+                    :set-object-selection node-struct t))))
+      (h871-pf-v03-trace "APPLY/NODE-STATE"
+        (list node-id (type-of node-struct) displayed selected))))
+  (h871-pf-v03-trace "APPLY/SELECTED-COUNT"
+    (sd-query-browser *h871-pf-v03-apply-browser* :number-of-selected-objects))
+  (h871-pf-v03-trace "APPLY/SELECTED-NODES"
+    (mapcar #'type-of
+      (or (sd-query-browser
+            *h871-pf-v03-apply-browser* :get-selected-objects)
+          nil)))
+
+  ;; This function is now called by the dedicated no-input Modeling
+  ;; User Action below. Its sd-call-cmds call therefore runs in a valid
+  ;; action context, unlike a direct UICT :pushAction callback.
+  (let ((handoff
+          (sd-call-cmds
+            (sd-browser-exec-cmd
+              *h871-pf-v03-apply-browser* :select-and-execute)
+            :success
+              (progn
+                (h871-pf-v03-trace
+                  "APPLY/SELECT-AND-EXECUTE-SUCCESS-CONTEXT"
+                  *sd-action-result*)
+                :success)
+            :failure
+              (progn
+                (h871-pf-v03-trace
+                  "APPLY/SELECT-AND-EXECUTE-ACTION-ERROR"
+                  (sd-inq-error-obj :all))
+                :error))))
+    ;; A NIL browser-command result is not itself an error. The explicit
+    ;; sd-call-cmds success/failure branch distinguishes execution failure
+    ;; from a command that completed without a meaningful return value.
+    (h871-pf-v03-trace "APPLY/SELECT-AND-EXECUTE-STATUS" handoff)
+    (when (eq handoff :error)
+      (sd-display-message
+        "H871 Apply: Modeling rejected the native hand-off. See the trace file.")
+      (return-from h871-pf-v03-native-apply nil)))
   t)
+
+;; A zero-input sequential Dialog Generator command runs its :ok-action
+;; immediately, without opening a second dialog. UICT callbacks are not
+;; Modeling User Actions, so they must queue this command through the
+;; Modeling command line using sd-put-buffer. The :ok-action then provides
+;; the real User Action context required by sd-call-cmds.
+(sd-defdialog 'h871_pf_v03_apply_action
+  :dialog-title "H871 Apply Selection"
+  :dialog-control :sequential
+  :variables '()
+  :ok-action
+    '(progn
+       (h871-pf-v03-trace "APPLY/USER-ACTION-ENTER"
+         (list (length *h871-pf-v03-apply-parts*)
+               *h871-pf-v03-pending-apply-page*))
+       (let ((result
+               (h871-pf-v03-native-apply
+                 *h871-pf-v03-apply-parts*)))
+         (h871-pf-v03-trace "APPLY/USER-ACTION-RESULT" result)
+         (when result
+           (h871-pf-v03-update-status
+             *h871-pf-v03-pending-apply-page*))
+         result)))
+
+;; Display Table double-click callback. UICT passes the table name;
+;; route the action to the owning page so only that page's selected Part(s)
+;; are handed to Modeling.
+(defun h871-pf-v03-double-click (table-name)
+  (h871-pf-v03-trace "APPLY/DOUBLE-CLICK-CALLBACK" table-name)
+  (let ((entry (h871-pf-v03-page-by-table table-name)))
+    (h871-pf-v03-trace "APPLY/DOUBLE-CLICK-PAGE"
+      (and entry (getf entry :page)))
+    (when entry
+      (h871-pf-v03-apply (getf entry :page)))))
 
 (defun h871-pf-v03-apply (page-name)
   (let* ((entry (h871-pf-v03-page-by-name page-name))
-         (selection (sd-get-display-table-selection (getf entry :table)))
+         (selection (and entry
+                         (sd-get-display-table-selection (getf entry :table))))
          (columns (if selection (cadr selection) nil))
          (parts (if columns (getf columns :part-object) nil)))
+    (h871-pf-v03-trace "APPLY/UICT-SELECTION"
+      (list page-name (and entry (getf entry :table))
+            (and selection (type-of selection))
+            (and columns (type-of columns))
+            (and parts (length parts))
+            (and parts (mapcar #'type-of parts))))
     (if (null parts)
         (sd-display-message
           "H871: No Part rows selected. Select rows or use Select All, then press Apply.")
       (progn
-        (h871-pf-v03-native-apply parts)
-        (h871-pf-v03-update-status page-name)))))
+        ;; Preserve the active page's real Part objects, then queue a
+        ;; dedicated no-input Modeling User Action. Do not call
+        ;; sd-call-cmds from this UICT callback: it is not an action context.
+        (setf *h871-pf-v03-apply-parts* parts)
+        (setf *h871-pf-v03-pending-apply-page* page-name)
+        (h871-pf-v03-trace "APPLY/QUEUE-USER-ACTION"
+          (list page-name (length parts)))
+        (let ((queued
+                (sd-put-buffer "H871_PF_V03_APPLY_ACTION")))
+          (h871-pf-v03-trace "APPLY/QUEUE-USER-ACTION-RETURN" queued)
+          (unless queued
+            (sd-display-message
+              "H871 Apply: Could not queue the Modeling Apply action.")))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Results window and internal tabs
@@ -471,7 +568,8 @@
         :columns '(:part-name :density-instance :density-base :assembly-path)
         :entryAlignment '(:left :right :right :left)
         :selectionMode :multiple-rows
-        :selectionAction 'h871-pf-v03-table-selection-changed)
+        :selectionAction 'h871-pf-v03-table-selection-changed
+        :doubleClickAction 'h871-pf-v03-double-click)
       (sd-display-error "H871 ver-03: Could not create the multi-column results table.")
       (return-from h871-pf-v03-create-page nil))
 
@@ -574,22 +672,34 @@
           :columns '(:part-name :density-instance :density-base :assembly-path)
           :entryAlignment '(:left :right :right :left)
           :selectionMode :multiple-rows
-          :selectionAction 'h871-pf-v03-table-selection-changed)
+          :selectionAction 'h871-pf-v03-table-selection-changed
+        :doubleClickAction 'h871-pf-v03-double-click)
         (sd-display-error
           "H871 ver-03: Could not restore the result table control.")
         (return-from h871-pf-v03-refresh-page nil)))
 
+    ;; Capture the row shape before calling the 18.1 logical-table API.
+    ;; This is diagnostic only: no row values, filter semantics or UI layout
+    ;; are changed. Each row must contain one value for each of the 6 columns.
+    (h871-pf-v03-trace
+      "REFRESH/CONTENTS-SHAPE"
+      (list (length contents)
+            (mapcar #'length contents)
+            (mapcar (lambda (row) (mapcar #'type-of row)) contents)))
+
     ;; Replacing logical-table contents refreshes its Display Table in place.
     ;; Selection is cleared so stale object references are never applied.
     (h871-pf-v03-trace "REFRESH/CHANGE-CONTENTS/BEGIN" (list logical-table (length contents)))
-    (unless
-      (sd-change-logical-table-contents
-        logical-table :contents contents)
-      (sd-display-error
-        (format nil
-          "H871 ver-03: Could not refresh logical table ~A."
-          logical-table))
-      (return-from h871-pf-v03-refresh-page nil))
+    (let ((change-result
+            (sd-change-logical-table-contents
+              logical-table :contents contents)))
+      (h871-pf-v03-trace "REFRESH/CHANGE-CONTENTS/RETURN" change-result)
+      (unless change-result
+        (sd-display-error
+          (format nil
+            "H871 ver-03: Could not refresh logical table ~A."
+            logical-table))
+        (return-from h871-pf-v03-refresh-page nil)))
     (sd-reset-display-table-selection table-name :row t)
     (setf (getf entry :results) parts)
     (setf *h871-pf-v03-current-page* page-name)
@@ -617,6 +727,7 @@
     report))
 
 (defun h871-pf-v03-run (assembly requested-instance requested-base)
+  (h871-pf-v03-trace-reset)
   (h871-pf-v03-trace "RUN/BEGIN" (list (type-of assembly) requested-instance requested-base))
   ;; Never use display labels as search criteria. Reject missing/non-numeric
   ;; dialog values before touching the assembly or creating any UI.
@@ -631,7 +742,9 @@
         (entry nil)
         (report nil))
     (setf *h871-pf-v03-diagnostic-samples* nil)
+    (setf *h871-pf-v03-collect-visited-count* 0)
     (setf *h871-pf-v03-assembly* assembly)
+    (h871-pf-v03-trace "COLLECT/BEGIN" (h871-pf-v03-path assembly))
     (setf matches
       (h871-pf-v03-collect assembly nil requested-instance requested-base))
     (h871-pf-v03-trace "RUN/COLLECT-DONE" (length matches))
