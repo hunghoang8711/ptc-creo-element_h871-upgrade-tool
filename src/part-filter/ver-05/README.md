@@ -70,7 +70,7 @@ H871_PART_FILTER_VER_05
 
 Static source audit passed: balanced parentheses, closed strings, no duplicate local DEFUN names, all referenced `h871-pf-v05-*` functions defined, no UICT Display Table/logical-table APIs, native Browser Apply present, and per-Browser callback closures present.
 
-No Creo Elements/Direct Modeling 18.1 runtime is available in the development environment. Therefore multiple simultaneous Browser windows, Browser Tree callback timing, manager control layout, native Apply and the fatal `0xc00000fd` behavior are NOT runtime-confirmed. Do not call VER-05 fixed until the mandatory runtime sequence is completed.
+The user has runtime-confirmed in Modeling 18.1 that separate result Graphical Browsers are independent; individual selection, double-click selection, and Select All followed by native Apply correctly select Parts in the 3D viewport for the tested workflow. The Manager's original small/clipped layout was reported by the user. Its pixel/grid sizing correction is now committed but awaits runtime confirmation. Remaining multi-window lifecycle cases and the earlier fatal `0xc00000fd` root cause are still open.
 
 ## Known risk
 
@@ -112,3 +112,12 @@ Updated test status:
 - [ ] H871 Graphic/Manager window displays all information legibly.
 - [ ] Full regression sequence (same-pair replacement, no-match preservation, Manager reopen buttons and fresh-session repeat) confirmed.
 - [ ] Root cause/status of the earlier fatal exception conclusively established.
+
+
+## 2026-11-16 – H871 Graphic/Manager grid sizing correction
+
+Static layout review found a pixel/grid-unit mismatch in the Manager's grid area. The grid was declared as 112 × 82 pixels while its child controls use a 10 × 10 pixel cell size and coordinates extending to approximately 112 × 75 grid units. The available grid was therefore only about 11 × 8 units, clipping most of the intended two-column layout.
+
+Changed only the Manager grid-area pixel dimensions to 1120 × 820, preserving the 10 × 10 cell size, all child-control coordinates, two-column arrangement, pair callbacks and native Browser implementation.
+
+**Runtime status:** source change committed; not yet tested in Modeling 18.1. Confirm that all Manager rows/buttons are visible and legible at the new size. Do not treat the sizing correction as runtime-verified until the user tests it.
