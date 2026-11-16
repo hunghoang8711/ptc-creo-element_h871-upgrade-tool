@@ -223,3 +223,14 @@ Resolved:
 - Native bridge/handoff and destroy sequence are deliberately unchanged in this patch. The trace's `:SUCCESS` and destroy return `T` do not prove viewport selection; runtime viewport verification remains mandatory.
 - Source commit: `e357cc7f3ecbd1fc04d0e6870f480450e8a1f35b`.
 - Runtime status: NOT TESTED. Verify single-click and multi-select only update selection/status without opening a bridge or spinning; then press Apply once and verify the intended Parts are selected in the 3D viewport and the temporary bridge closes.
+
+
+## 2026-11-16 – Remove custom callback from Display Table row selection
+
+- User retested the revision that removed automatic Apply on double-click. The Results interaction still produces a brief busy cursor with no visible result; the previous patch therefore did not resolve the reported symptom.
+- Source review found a second custom callback on every row-selection event: `:selectionAction 'h871-pf-v03-table-selection-changed`. It queries the current Display Table selection and updates a UICT text control while the native table is processing the selection.
+- Narrow isolation change: removed this callback from both the initial Display Table creation path and the recovery/recreation path. Row selection is now left entirely to the native Display Table; the Apply button still reads the selected rows when explicitly pressed. Select All/Clear Selection still update the status text through their own button actions.
+- Also confirmed that no `:doubleClickAction` binding remains and the explicit Apply button binding remains present.
+- Source commit: `dd266a318eaa6d9f4699ad3435859e4bb5b037f0`.
+- Static checks: exactly two selection callback bindings removed; no selectionAction or doubleClickAction bindings remain; Apply binding and selected-row reader remain. No Creo LISP runtime test has been performed.
+- Next acceptance test: single-click a row and Ctrl+click another row. The table should visibly mark the selected rows without a busy pause or launching the Apply bridge. Then press Apply once and verify actual 3D viewport selection separately.
