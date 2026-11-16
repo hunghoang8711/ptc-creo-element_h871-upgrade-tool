@@ -118,3 +118,14 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - **Interpretation:** The option is accepted without breaking the existing single-browser workflow. This test does not yet establish whether the Browser is visibly presented as a tab, because the user described the functionality as the same as Stage 0.
 - **Next step:** Confirm whether the Results Browser is actually shown as a tab or remains a separate window. Do not add multiple browsers or more tab arguments until this behavior is clear.
 - **Preservation:** Stage 0, ver-01 and ver-02 source files remain unchanged. The current Stage 1 single-browser baseline is now user-runtime-confirmed.
+
+
+## KI-015 – Stage 1 Browser remains floating despite createAsTab
+
+- **User runtime result (2026-11-16):** Results Browser still appears as a separate floating window. Searching a different Density pair refreshes/replaces the displayed Results window. Core filter/selection/Apply behavior remains successful.
+- **PTC API finding:** PTC Graphical Browser reference documents that `:createAsTab t` requests an initially docked Browser, but the setting can be overwritten by the docking preference saved in PDS from the previous Modeling session. The same reference documents `sd-dock-graphical-browser` as the explicit API to dock a floating Browser into the Browser Bar.
+- **Next isolated experiment:** After the existing `sd-show-graphical-browser` call, Stage 1 now calls `(sd-dock-graphical-browser *h871-pf-mt-browser-name* :show t)`. This is wrapped in `ignore-errors` so an unavailable/rejected docking API cannot prevent the already-working floating Results window from opening.
+- **Scope:** One Browser and one Browser Tree only. No second result session, unique tab per pair, `:tabname`, callback changes, filter changes, or selection/Apply changes.
+- **Static status:** Source patch committed; parenthesis/API availability not yet runtime-verified in the user's Modeling 18.1 installation.
+- **User test required:** Run one known matching pair. Confirm whether Results is now docked in the Browser Bar and whether row selection, Select All, double-click and Apply still work. If it remains floating, report whether any error appears; because the docking call is protected, the window should still be available if the API is unsupported.
+- **References:** PTC Creo Elements/Direct Modeling Integration Kit, Graphical Browsers reference (20.6/20.7 documentation; exact 18.1 runtime compatibility still requires user test).
