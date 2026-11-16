@@ -204,3 +204,16 @@ The first runtime feedback confirmed Close Results restores the old ver-03 UICT 
 Previous/Next callbacks now log `PAGE/NAVIGATION-REQUEST` and `PAGE/NAVIGATION-TARGET`, allowing a runtime trace to distinguish actual button callback invocation from the initial page activation during Browser startup. Existing right-click Results Pages submenu remains.
 
 Static source check passed, but target-version runtime verification is still required for button placement, pushAction callback, repeat close/reopen, page navigation and viewport Apply. A non-NIL `SELECT-AND-EXECUTE-SUCCESS-CONTEXT` is diagnostic evidence only, not proof that the viewport selection changed.
+
+## 16. Part Filter ver-05 – one Browser owns search, pages and native selection (2026-11-16)
+
+ver-05 is the first self-contained candidate that removes the ver-03 UICT page dependency. It uses the ver-02 recursive Assembly collector and Process/Material mapping, then stores each exact numeric Density Instance/Base pair in a page record. One Browser Tree contains one page root per pair, and one Graphical Browser displays the active page. Native Apply is not overridden; the visible Browser rows and selection are intended to be the same native context that ver-02 proved.
+
+Page rules:
+- new pair → new page;
+- same pair → refresh that page and clear its old selection;
+- no match → leave existing pages unchanged;
+- page navigation → save/restore selected Part paths per page.
+
+Current navigation is Previous/Next plus the Results Pages popup, not a horizontal tab strip. This is intentionally honest about the gap between multiple data pages and a true tab bar. ver-05 is static-checked only; all Creo 18.1 behavior, especially actual viewport Apply, remains to be user-tested.
+
