@@ -272,3 +272,9 @@ Resolved:
 - Runtime risks explicitly requiring verification: whether `:update-events nil` is accepted for snapshot trees; when the Browser Tree update callback is invoked; whether UICT selection returns hidden numeric key columns; multiple simultaneous Graphical Browser instances; and safe replacement of one pair without affecting another.
 - Do not merge to main or treat as working until the user completes the runtime checklist in the source header.
 - Commits: `507317e75030eed2df792539b12abcc44f068510` (initial VER-04 source), `bbe2974f4ad97a1fd1876a34597d8d8f6726ec25` (use multi-row manager selection).
+
+
+- Follow-up static review: cache the actual Part list in each in-memory pair registry entry and restore that pair's context before reopening its Browser. This reduces the risk of a tree refresh using the most recently filtered pair's global context.
+- Static checks after the follow-up: balanced parentheses (depth 0, no negative depth), closed strings, no duplicate DEFUN names, deterministic Browser/Tree naming present, native `:okButtonLabel "Apply"` present, and no programmatic `:select-and-execute` / Apply bridge in VER-04.
+- Latest source commit: `0a9f326324a859aedbe6199137c9b59c7a36f14d`.
+- These are source-level checks only; they do not establish that the file loads or runs in Creo Modeling 18.1.
