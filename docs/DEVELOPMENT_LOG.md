@@ -235,3 +235,14 @@ Resolved:
 - Select All and Clear Selection remain in the Browser button menu. The Results Pages popup remains as an alternate same-window selector.
 - The detailed PTC modeMenu reference is from a later release, so this is static-checked but not yet verified in Modeling 18.1. Do not claim a final tab strip until the user confirms button rendering and switching.
 
+
+
+## 2026-11-16 – ver-05 critical table-root isolation fix
+
+- Re-read the latest ver-05 source and compare against the known-good ver-02 Apply architecture and the ver-03 page-local selection requirement.
+- Found a critical page-switch defect: h871-pf-v05-activate-page set a new table root but did not clear the previous root. Graphical Browser can retain multiple table roots, so the table could show rows from more than one Density page; Select All and native Apply would no longer be safely page-scoped.
+- Updated src/part-filter/ver-05/H871_PART_FILTER_VER_05.lsp: buffer redraw, clear Browser selection, clear all table roots, set only the requested page root, resume redraw, and trace :number-of-table-roots.
+- Source commit: c510c7c76243f9ceed5430eee86e68111d183f3a.
+- Static checks passed: balanced parentheses/strings; :clear-table-roots present; native :okButtonLabel "Apply" remains default with no :okButtonAction; all Density mappings unchanged.
+- PTC 20.6 reference documents the command sequence. Modeling 18.1 runtime compatibility remains unverified.
+- Remaining acceptance gaps: horizontal page button strip rendering and callback, root count exactly one after each switch, page-local selection save/restore, same-pair refresh, no-match preservation, Select All/Clear Selection, and actual 3D viewport Apply.
