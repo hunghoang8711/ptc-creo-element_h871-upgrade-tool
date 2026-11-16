@@ -174,3 +174,6 @@ The single Browser now receives a dynamically generated `:modeMenu` row with one
 Source review found that switching a page did not clear the previous Graphical Browser table root before setting the new one. Since a Browser can retain multiple table roots, this could cause mixed-page rows and invalidate Select All/Apply page scope. ver-05 now executes a buffered sequence: :buffer-display t → :clear-select-list → :clear-table-roots → :change-table-root active-page t → :buffer-display nil, then records :number-of-table-roots in the trace. Source commit: c510c7c76243f9ceed5430eee86e68111d183f3a.
 
 This is a static source correction based on the PTC 20.6 documented command sequence, not a Modeling 18.1 runtime confirmation. The modeMenu horizontal page buttons and their callbacks, one-root-only behavior, page-local selection restore, and actual native Apply to the 3D viewport still require a disposable-model test. Do not call ver-05 complete until all acceptance tests pass.
+
+
+ver-05 follow-up: page activation now fails closed if :clear-table-roots or :change-table-root does not return success. The :number-of-table-roots inquiry is wrapped as diagnostic-only so an unavailable query cannot interrupt the Browser. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4. Runtime confirmation remains pending.
