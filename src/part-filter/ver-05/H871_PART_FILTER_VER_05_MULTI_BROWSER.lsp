@@ -210,7 +210,7 @@
            (text-name (h871-pf-v05-manager-row-text-name instance base))
            (button-name (h871-pf-v05-manager-row-button-name instance base))
            (row-index (getf entry :row-index))
-           (y (+ 4 (* row-index 4))))
+           (y (+ 4 (* (1- row-index) 4))))
       (unless (sd-control-p text-name)
         (sd-create-text-control
           text-name *h871-pf-v05-manager-grid*
