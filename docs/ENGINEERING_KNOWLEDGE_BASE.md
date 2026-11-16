@@ -221,3 +221,18 @@ Current navigation is Previous/Next plus the Results Pages popup, not a horizont
 
 Graphical Browser `:modeMenu` accepts a row of mode buttons and a named initial button in later-release PTC documentation. ver-05 uses one generated button per Density-pair page, with each push action activating that page's root in the same Browser. This is a candidate horizontal page strip, not a confirmed 18.1 tab API. Runtime validation must verify the row appears, the callbacks fire, active-state behavior is correct, and native Apply still selects viewport Parts.
 
+
+
+### ver-05 correction – table-root isolation is mandatory (2026-11-16)
+
+A Graphical Browser can hold multiple table roots at once. The ver-05 page-switch implementation originally called :change-table-root without clearing the previous root. This can mix rows from different Density pages and invalidate active-page-only selection and Apply.
+
+The corrected h871-pf-v05-activate-page now performs a buffered transition:
+- suspend redraw with :buffer-display t;
+- clear current Browser selection;
+- clear all table roots with :clear-table-roots;
+- set the requested page root with :change-table-root page-node t;
+- resume redraw with :buffer-display nil;
+- trace :number-of-table-roots.
+
+This sequence follows the PTC 20.6 Graphical Browser reference example. Treat the 18.1 API compatibility and resulting UI behavior as pending until tested in the target application. Require one active root and only active-page rows before accepting Select All or native Apply.
