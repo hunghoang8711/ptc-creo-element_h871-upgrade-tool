@@ -76,6 +76,7 @@ The user's final product requirement is unchanged: one Results window only, with
 
 A new self-contained candidate has been added:
 - Canonical candidate: `src/part-filter/ver-05/H871_PART_FILTER_VER_05.lsp`
+- Required implementation and acceptance handover: `src/part-filter/ver-05/README.md`.
 - It owns the numeric Density search, page registry, one Browser Tree, one visible Graphical Browser, row selection, page navigation and native Apply.
 - It no longer reads ver-03 UICT page globals, opens/restores a UICT Results shell, installs an Open Native Results button, or uses a hidden Browser bridge.
 - Search/mapping behavior follows ver-02; exact Density Instance + Base pair and /1000 normalization are preserved.
