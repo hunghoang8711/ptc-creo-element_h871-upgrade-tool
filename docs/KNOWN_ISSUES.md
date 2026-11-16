@@ -51,3 +51,11 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - **Status:** Not found in currently accessible Library inventory.
 - **Details:** Recovered user files are legacy Annotation macro sources and a Part Filter diagnostic; no standalone official 18.1 Integration Kit PDF was surfaced.
 - **Next step:** If an official manual exists in older chat storage or local files, retrieve it and record its exact release/source before using it as authority.
+
+## KI-007 – ver-03 fatal exception on Search after Apply-bridge patch
+
+- **Status:** Latest Apply-bridge patch rolled back from the active `main` source. Fatal exception reported by user; root cause not yet established.
+- **User-reported error:** `Fatal exception Oxc00000fd occurred at 00000000652A9F21. Model data may have been damaged.` It occurs immediately after pressing OK to Search, before Results UI appears.
+- **Containment:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp` on `main` has been restored to commit `8c0a1cd56f25f125958080b3ab6316e55827b141`, the last source version associated with the user-confirmed Results window, tabs, table, and Apply button appearing. This rollback removes the two recent BrowserNode-resolution edits. It does not prove that the restored file is safe or that the Apply error is fixed.
+- **Important:** The recent Apply patch changed the Apply tree builder and Apply guard, not the Search dialog or `h871-pf-v03-run`. The fatal exception during Search is therefore not yet causally explained. Do not claim the BrowserNode lookup caused the Search crash without a reproducer.
+- **Next investigation:** Reproduce only on a disposable copy/model; inspect Modeling 18.1 call stack/log and trace file; isolate load-time, dialog OK-action, collect, shell, tab/page creation and refresh stages. Keep ver-01/ver-02 untouched. Do not run more tests against the original customer model.
