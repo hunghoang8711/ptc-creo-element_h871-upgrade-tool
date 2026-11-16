@@ -478,3 +478,34 @@ Runtime validation:
 - Do not report Apply/double-click fixed until the user verifies direct 3D selection with no second window.
 - First test one selected row with Apply, then one row by double-click, then Select All + Apply.
 - Capture `APPLY/SELECT-AND-EXECUTE-RETURN` and confirm whether the temporary native bridge remains absent.
+
+## 21. Modeling 18.1 runtime result: `sd-call-cmds` is illegal from UICT Apply callback — 2026-11-16
+
+User tested source commit `e2040033bc7c41895ae866e231569e522af3817f` in Creo Elements/Direct Modeling 18.1:
+- Both double-click on a Results row and pressing the UICT **Apply** button produce `Illegal call to action routine.`
+- The subsequent H871 message is `Modeling did not confirm the native selection hand-off`.
+- Therefore the one-window candidate in section 20 is **runtime-failed**. Do not describe it as a working fix.
+
+Technical interpretation:
+- The failure occurs at the attempted `sd-call-cmds` wrapper, before a successful native browser hand-off can be confirmed.
+- PTC Integration Kit documentation describes `sd-call-cmds` as legal only inside an existing Modeling User Action; invoking it outside that context produces an illegal-action-call error. A UICT `:pushAction` callback must not be assumed to be a Modeling User Action.
+- Reference (PTC 20.4 documentation; use as API guidance, not proof of 18.1 behavior): https://support.ptc.com/help/creo_elements_direct/r20.4.0.0/advanced_documentation/integration_kit/reference/sd-call-cmds.html
+- The browser's native OK button remains the only runtime-confirmed selection hand-off path: user confirmed it selects the intended Part(s) when pressed in the visible Graphical Browser.
+
+Next investigation:
+1. Do not wrap `sd-browser-exec-cmd :select-and-execute` in `sd-call-cmds` from UICT callbacks again.
+2. Find a documented Modeling 18.1-compatible way to enter a genuine Modeling User Action / command context from the UICT callback, or another supported selection-transfer API.
+3. Distinguish browser commands from Modeling Action Routines. Do not infer that calling a browser command programmatically reproduces the browser's native OK-button event.
+4. Do not use guessed internal widget callbacks, Windows mouse simulation, or undocumented private UI calls.
+5. Keep the single-window requirement. Do not promote the visible bridge to the final design without explicit user approval.
+
+Scope preserved:
+- No source-code changes made in this diagnostic update.
+- UICT Results shell, internal tabs, per-page results, collector, numeric Density mappings/normalization, match predicate, and table schema remain untouched.
+
+Runtime status:
+- Search/results/tabs/selection list: previously user-confirmed working.
+- Visible native Graphical Browser Apply: user-confirmed working.
+- Direct programmatic `:select-and-execute`: returns NIL in the earlier test.
+- `sd-call-cmds` wrapper from UICT callback: **user-tested and failed** with `Illegal call to action routine`.
+- One-window Apply/double-click: **not solved**.
