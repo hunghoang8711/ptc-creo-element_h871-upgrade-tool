@@ -168,7 +168,7 @@
         :logicalTable *h871-pf-v04-logical-table*
         :columns '(:pair-label :process :material :part-count :browser-name)
         :entryAlignment '(:left :left :left :right :left)
-        :selectionMode :single-row)
+        :selectionMode :multiple-rows)
       (sd-display-error "H871 VER-04: Cannot create manager Display Table.")
       (return-from h871-pf-v04-create-manager nil)))
   (unless (sd-control-p *h871-pf-v04-open-button*)
