@@ -98,3 +98,8 @@ A source review after the first ver-05 handoff found a critical page-switch defe
 The ver-05 activation path now buffers redraw, clears the current selection and all table roots, sets exactly the requested page root, resumes redraw, and traces the resulting table-root count. This is based on the documented Graphical Browser command sequence (:BUFFER-DISPLAY, :CLEAR-TABLE-ROOTS, :CHANGE-TABLE-ROOT) in the PTC 20.6 reference; Modeling 18.1 runtime compatibility still requires testing.
 
 Do not call ver-05 complete: page strip rendering/callbacks, page isolation, page-local selection restore and actual viewport Apply remain unverified in Modeling 18.1. The horizontal modeMenu is a candidate page-button strip, not a confirmed native tab control. Keep one visible Results Browser; no UICT launcher, hidden Browser bridge or second Results window.
+
+
+### ver-05 fail-safe page activation refinement
+
+The page-root correction now checks the return from :clear-table-roots before attempting :change-table-root. If the old roots cannot be cleared or the requested root cannot be set, page activation stops rather than risking mixed-page selection. The :number-of-table-roots trace query is diagnostic-only and wrapped with ignore-errors so an unavailable query cannot interrupt page activation. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4. Runtime testing in Modeling 18.1 is still required.
