@@ -108,3 +108,17 @@ ver-05 therefore moves search and page ownership into one standalone Browser imp
 
 PTC's Graphical Browser API documents a `:modeMenu` row of mode buttons and an initial active button. This is a promising way to render page selectors inside the same native Browser, unlike Browser Bar docking tabs. The detailed reference currently available is for a later release; therefore it is an implementation candidate, not verified Modeling 18.1 behavior. Keep the actual Part BrowserNodes and native Apply in the same Browser regardless of which page-selector UI proves compatible.
 
+
+
+## LL-016 – Always clear Graphical Browser table roots before activating another page (2026-11-16)
+
+A Graphical Browser can retain multiple table roots. Calling :change-table-root for the next page without first calling :clear-table-roots does not guarantee replacement of the old root. The visible table may then contain rows from more than one page, making page-local Select All and native Apply unreliable.
+
+Use the PTC documented buffered sequence:
+1. :buffer-display t
+2. :clear-select-list
+3. :clear-table-roots
+4. :change-table-root page-node t
+5. :buffer-display nil
+
+Then query :number-of-table-roots and require exactly 1. This is now implemented in ver-05; Modeling 18.1 runtime verification remains required.
