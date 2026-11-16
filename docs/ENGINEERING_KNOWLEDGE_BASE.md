@@ -217,3 +217,7 @@ Page rules:
 
 Current navigation is Previous/Next plus the Results Pages popup, not a horizontal tab strip. This is intentionally honest about the gap between multiple data pages and a true tab bar. ver-05 is static-checked only; all Creo 18.1 behavior, especially actual viewport Apply, remains to be user-tested.
 
+### Horizontal page-selector refinement
+
+Graphical Browser `:modeMenu` accepts a row of mode buttons and a named initial button in later-release PTC documentation. ver-05 uses one generated button per Density-pair page, with each push action activating that page's root in the same Browser. This is a candidate horizontal page strip, not a confirmed 18.1 tab API. Runtime validation must verify the row appears, the callbacks fire, active-state behavior is correct, and native Apply still selects viewport Parts.
+
