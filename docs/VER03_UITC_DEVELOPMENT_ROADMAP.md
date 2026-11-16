@@ -644,3 +644,46 @@ The following must be investigated before changing source:
 - Hidden browser native selection hand-off to viewport: failed in user test.
 - One-window Apply/double-click: not solved.
 - No source code changed in this diagnostic step; this section records the exact trace result and next investigation.
+
+
+## 24. Direct SEL_ITEM and Dialog Generator API research — 2026-11-16
+
+### Findings from official PTC documentation
+
+The following references were inspected after the failed section 23 runtime test:
+
+1. **Action Routine selection parameters accept SEL_ITEM lists.** PTC's User Defined Command guide states that screen-pick/selection inputs are represented as SEL_ITEM values and that Action Routines accept a list of SEL_ITEMs wherever a selection is expected:
+   https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/concepts/user_cmd.html
+2. **GET_SELECTION is not a selection setter.** PTC documents it as an interrupt action that invokes the standard interactive SELECT subaction and returns the selected item(s). It is intended for programmatic inquiry/selection and does not document an option to assign an arbitrary supplied list as the global viewport selection:
+   https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/concepts/inquiry.html
+   https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/get_selection.html
+3. **SEL_ITEM is a temporary object handle.** PTC warns that SEL_ITEM values can become invalid after a Modeling operation and recommends using them for a single action sequence, not as permanent stored object identifiers:
+   https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/concepts/inquiry.html
+4. **sd-call-dialog is not a silent Apply API.** It calls a Dialog Generator command from a UICT control and places the command's option menu relative to that control/cursor. It is therefore not a direct mechanism for transferring a selected Part list to viewport selection without an additional command UI:
+   https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/reference/ui_util.html
+5. **Graphical Browser Apply semantics.** The native browser's default OK action calls :select-and-execute. That command transfers browser-selected items into the Modeling input buffer for a running command; it is not documented as a generic global-selection setter. Browser selection is constrained by visibility/display state:
+   https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+
+### Engineering conclusion
+
+- The UICT callback already has the correct Part SEL_ITEM payload. This is a valid input to a Modeling Action Routine when that routine expects a selection argument.
+- That fact alone does **not** establish an API for replacing the application's global viewport selection with an arbitrary list.
+- No documented generic setter or dedicated Modeling action that performs that exact global-selection operation has been identified in the references reviewed so far.
+- Do not invent names such as sd-set-selection; do not repurpose GET_SELECTION as a setter; do not assume sd-call-dialog silently runs a command.
+- The zero-input Dialog Generator trampoline from section 22 is proven to enter a User Action in Modeling 18.1, but the hidden Graphical Browser hand-off still fails because the browser reports its nodes as not displayed.
+- The later-release PTC documentation is API guidance only. Exact API availability/semantics in Modeling 18.1 must be verified before source changes.
+
+### Next bounded investigation
+
+1. Inspect the 18.1-era Modeling Commands Reference / Integration Kit command documentation for an existing action routine whose explicit selection argument can be supplied with the stored Part SEL_ITEM list and whose documented behavior is to select/highlight those objects as the resulting Modeling selection—not merely consume them for another operation.
+2. Inspect Dialog Generator's documented `:selection` variable assignment behavior as a possible *command input* route, while keeping distinct the concepts of dialog feedback/highlighting and global viewport selection.
+3. If neither route is documented for 18.1, report that the one-window global-selection requirement is not currently achievable through a verified public API. Do not modify the working Results UI or introduce a second visible bridge without the user's approval.
+
+### Scope and runtime status
+
+- No source code changed in this research step.
+- Results UI, internal tabs, collector, numeric Density mapping/normalization, predicate, result table and UICT selection payload remain protected.
+- Section 22 command-buffer trampoline and zero-input User Action: **user-tested working**.
+- Hidden Graphical Browser hand-off: **user-tested failed**.
+- One-window Apply/double-click to global 3D selection: **not solved**.
+- All cited API documentation reviewed here is for Modeling 20.x; it does not prove Modeling 18.1 compatibility.
