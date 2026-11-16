@@ -247,3 +247,14 @@ Resolved:
 - Source commit: `875c89febb0a3409c2a7744e07aa690e1278d5f8`.
 - Static checks: native browser creation still has `:okButtonLabel "Apply"`; programmatic `:select-and-execute` call removed; immediate bridge/tree destroy removed; selected BrowserNode setup retained. No Modeling 18.1 runtime test yet.
 - Runtime acceptance: click the Results window's Apply once; confirm the Native Apply Bridge appears with the expected highlighted rows; then click **Apply inside that bridge**. Verify the matching Parts become selected in the 3D viewport. Only after that is confirmed should bridge cleanup be addressed.
+
+## 2026-11-16 – VER-03 automatic Apply experiment with native fallback
+- User reconfirmed the current two-step flow: Results Apply opens the Native Apply Bridge; pressing Apply inside that bridge selects the intended Parts in the 3D viewport.
+- Preserve this proven native bridge as the fallback. Do not remove it or replace the UICT Results architecture.
+- Created isolated branch `experiment/ver03-auto-apply-visible-bridge` from the user-tested visible-bridge baseline.
+- New experiment: after Results Apply opens the bridge and selects the corresponding BrowserNodes, invoke `:select-and-execute` programmatically while the bridge is visible.
+- Critical safety change versus the earlier failed attempt: do not immediately hide or destroy the bridge after programmatic hand-off. If automatic selection does not occur, the user can still press the bridge's native Apply button.
+- Trace markers: `APPLY/AUTO-HANDOFF/BEFORE`, `APPLY/AUTO-HANDOFF/RETURN`, `APPLY/AUTO-HANDOFF/AFTER`, and `APPLY/AUTO-HANDOFF/SKIPPED`.
+- A `:SUCCESS` return is not proof of 3D viewport selection. This branch is a runtime experiment only; it is not production-validated and must not be merged to `main` without user confirmation.
+- Runtime test: select one Part in Results and press Results Apply. First verify whether the Part is already selected in the 3D viewport. If not, press Apply in the still-open Native Apply Bridge and verify the fallback still selects it. Repeat with multiple Parts and confirm no unrelated Part is selected.
+
