@@ -1293,3 +1293,68 @@ https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentati
 - The latest GET_SELECTION diagnostic remains a failed diagnostic candidate; it must not be merged into production.
 - The hidden/offscreen Graphical Browser hand-off remains rejected as a solution.
 - Runtime status: both GET_SELECTION syntax variants = **failed** in Creo 18.1; Dialog Generator Part highlight = **user-tested success**, but global Modeling selection = **not proven**; production Apply = **not solved**.
+
+
+## 34. Correct architecture comparison: ver-02 Results is itself the native selection browser — 2026-11-16
+
+### Correction to recent discussion
+
+Do not describe the ver-02 Results browser as a separate intermediate Apply window. That framing is incorrect.
+
+The actual ver-02 user-facing Results window is a Graphical Browser. The user selects result rows directly in that Results window and presses its native Apply button. The same browser owns:
+- the result BrowserNode tree;
+- the visible result rows and their native row-selection state;
+- Select All and Clear Selection commands;
+- the native Apply/OK action, whose default behavior invokes `:select-and-execute` on that browser's selected rows.
+
+The user explicitly confirmed that ver-02 can select Parts directly from its Results window. This is the known-good reference behavior, not a separate bridge workflow.
+
+### Source verification
+
+ver-02 source (`main`, `src/part-filter/ver-02/H871_PART_FILTER_VER_02.lsp`, blob `fdd16940a751ba3e24ed108b41a19e03a38bada8`) confirms:
+1. `h871-pf-select-all` and `h871-pf-clear-selection` call browser commands on the Results browser itself.
+2. `h871-pf-selected-parts` reads `:get-selected-objects` from that same Results browser and extracts the real Part object from each row's `:objClientData`.
+3. `h871-pf-open-results-browser` creates the Results Browser Tree and Graphical Browser, defines the result columns, sets table mode, calls `sd-show-graphical-browser`, and displays the tree root in that browser.
+4. The browser is created with `:okButtonLabel "Apply"` and no custom `:okButtonAction` override. Thus the native Graphical Browser Apply/OK action runs in the same window where the user selected the result rows.
+5. The same Results browser is not a temporary bridge; it is the actual Results UI.
+
+ver-03 source (`feature/ver03-uict-apply`, `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`, blob `7a195dfdc6970a1fed53e37000925f254bd7f996`) confirms a different architecture:
+1. User-facing Results are a UICT Dialog Shell containing tab controls and Display Table controls.
+2. Display Table rows provide the selected `:part-object` values as `ELAN::SEL_ITEM` objects.
+3. The Apply implementation creates a *second*, temporary Graphical Browser/tree from those Parts, but intentionally keeps that browser hidden to satisfy the one-window requirement.
+4. It then programmatically invokes `:set-object-selection` and `:select-and-execute` on the hidden browser.
+5. Runtime traces show the hidden browser's nodes are often not displayed (`:is-object-displayed = NIL`), and even where offscreen diagnostic nodes report displayed/selected, native hand-off does not select Parts in the viewport.
+
+### Root architectural difference
+
+The failure is not that ver-03 cannot identify Parts or that ver-02 had a mysterious extra Apply window. The key difference is ownership of the selection context:
+- ver-02: the visible Results rows, selected BrowserNodes, and native Apply button all belong to the same Graphical Browser instance.
+- ver-03: the visible Results rows belong to a UICT Display Table, while the attempted native Apply belongs to a different hidden Graphical Browser instance. The selected UICT row state is copied into BrowserNodes, but this does not reproduce the native user selection event in the visible Results browser.
+
+Therefore, do not continue pursuing generic selection setters, GET_SELECTION syntax variants, or the hidden bridge as the primary route. The first engineering investigation should be how to preserve the ver-02 same-browser native selection/Apply semantics while supporting the ver-03 requirements for internal Density tabs and one Results window.
+
+### Design direction and constraints
+
+Investigate the following in order, without changing production code until a feasible architecture is established:
+1. Can a single Graphical Browser remain the user-facing Results window and support multiple result pages/tables/tabs internally, with native row selection and Apply retained on that same browser instance?
+2. Can ver-03's tab-like page navigation be represented within the Graphical Browser using supported native browser facilities, without creating one Graphical Browser per query or adding pages to the Structure Browser/Browser Bar?
+3. If native Graphical Browser cannot provide the required internal tabs, identify a supported way for UICT page navigation and the native Results Browser to share one visible host/window. Earlier attempts to embed/unify the browser in a UICT host reported errors such as `Could not embed the results browser in its host window` and `Could not create the unified results window`; those failed approaches must be studied before any retry, not repeated blindly.
+4. Keep the one-window requirement. A second visible temporary Graphical Browser is not an acceptable final design.
+
+### Non-negotiable preservation
+
+- ver-02 remains the known-good reference for direct row selection and native Apply.
+- ver-03 remains the reference for the single Results shell, internal Density Instance + Density Base pages/tabs, per-page result data and selection state, and current table columns.
+- Preserve exact numeric Density mapping/normalization and matching predicate.
+- Preserve current collector, result schema, and tested search behavior.
+- Do not replace ver-03 UI with a separate Graphical Browser per query.
+- Do not claim Apply success from BrowserNode creation, browser selected counts, `:SUCCESS`, wrapper return `T`, or Dialog Generator persistent highlight. Only user-confirmed viewport selection is proof.
+
+### Verified status
+
+- ver-02: user-facing Graphical Browser Results with native row selection and Apply — **user-confirmed working**.
+- ver-03: UICT Results shell, internal pages/tabs, result rows and UICT selection payload — **user-confirmed working**.
+- ver-03 hidden Graphical Browser bridge — **failed** to reproduce native Apply.
+- GET_SELECTION experiments — **failed** with unexpected-input error.
+- Dialog Generator persistent Part highlight — **works visually**, but is not proven equivalent to ver-02 native Apply.
+- No production source changed as part of this correction.
