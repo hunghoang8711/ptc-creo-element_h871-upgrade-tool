@@ -41,6 +41,10 @@
          (handoff nil))
     (h871-pf-v03-trace "OFFSCREEN-DIAG/BEGIN"
       (list page-name (and parts (length parts))))
+    (sd-display-message
+      (format nil "H871 diagnostic started. Active page: ~A; selected Parts: ~A."
+        (or page-name "<NONE>")
+        (if parts (length parts) 0)))
     (unless (and entry (listp parts) parts)
       (sd-display-message
         "H871 diagnostic: Select one or more result rows in the active tab first.")
@@ -95,6 +99,9 @@
         :position
           (list *h871-pf-v03-shell* :topleft -10000 -10000)))
     (h871-pf-v03-trace "OFFSCREEN-DIAG/SHOW-RETURN" shown)
+    (sd-display-message
+      (format nil "H871 diagnostic: browser show returned ~A. Continuing visibility checks."
+        shown))
     (unless shown
       (sd-display-message
         "H871 diagnostic: Could not show the offscreen browser. See trace.")
@@ -165,6 +172,9 @@
       (sd-hide-graphical-browser
         *h871-pf-v03-apply-browser* :ignore-pin t))
     (h871-pf-v03-trace "OFFSCREEN-DIAG/END" handoff)
+    (sd-display-message
+      (format nil "H871 diagnostic finished. Handoff status: ~A. Check the trace file and viewport."
+        handoff))
     (when (eq handoff :success)
       (h871-pf-v03-update-status page-name))
     handoff))
