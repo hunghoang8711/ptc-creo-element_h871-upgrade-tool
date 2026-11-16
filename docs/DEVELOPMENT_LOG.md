@@ -72,3 +72,15 @@ Resolved:
 - ver-01: user-confirmed baseline.
 - ver-02: mapped-choice source preserved; user reported very good results.
 - ver-03: UICT prototype implemented and static-checked; first runtime test in Modeling 18.1 pending; Apply hand-off pending.
+
+
+## 2026-11-16 – ver-03.1 multi-column table and explicit Apply implementation
+- User runtime-confirmed that the single Results window and internal tabs work, but identified concatenated text rows, nonfunctional row selection/Select All, and missing explicit Apply.
+- Replaced per-page List Controls with Display Table Controls backed by independent logical tables.
+- Added visible columns: Part Name, Density Instance, Density Base, Assembly Path; hidden untyped :part-object column retains the actual Part object.
+- Enabled :multiple-rows selection; added page-scoped Select All, Clear Selection, Apply and selection count.
+- Same-pair refresh updates the logical table in place and clears stale selection; other tabs remain untouched.
+- Apply reads selected Part objects and routes them through a temporary Graphical Browser using the native :set-object-selection and :select-and-execute commands used by ver-02.
+- PTC 20.7 references confirm Display Table/logical-table/multi-row selection APIs, but exact Modeling 18.1 compatibility is unverified.
+- The ver-02 native Apply pattern is user-confirmed; the new hidden Display Table-to-BrowserNode bridge is not runtime-tested yet.
+- ver-01 and ver-02 remain unchanged as regression baselines.
