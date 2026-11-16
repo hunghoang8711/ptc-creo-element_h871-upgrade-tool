@@ -420,3 +420,22 @@ Next investigation:
 2. If no supported programmatic invocation exists, retain the bridge as an explicit native confirmation step temporarily, and ask the user whether that two-window interaction is acceptable before making it the production behavior.
 3. Do not remove the bridge's native Apply button or close the bridge before the user has applied it.
 4. Runtime status: native bridge Apply = **user-confirmed working**; programmatic `:select-and-execute` = **returns NIL**; end-to-end one-window UICT Apply = **not yet solved**.
+
+## 19. Graphical Browser API research: native OK action — 2026-11-16
+
+Official PTC Integration Kit documentation for Creo Elements/Direct Modeling 20.6 was checked:
+- `sd-create-graphical-browser` supports `:okButtonAction`, a LISP form executed when the native OK button is pressed.
+- The documented default is `(sd-browser-exec-cmd name :select-and-execute)`.
+- The documentation says this default sends selected browser items to Modeling and closes the browser if it is not pinned; it is also used for the browser's default double-click action.
+- Reference: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/gbrowser.html (section `SD-CREATE-GRAPHICAL-BROWSER`, `:okButtonAction`).
+
+Implications and limitations:
+- This explains why the native Apply button is the known-good path.
+- The documented `:okButtonAction` is a configuration hook for what happens when the user presses the native button. It is not documented as an API for programmatically synthesizing that button press.
+- The documented default action is the same browser command that returned NIL when called directly from the ver-03 LISP routine. Therefore merely spelling out `:okButtonAction` in the browser constructor is not yet a proven fix for programmatic Apply.
+- The documentation checked is for Modeling 20.6, not the user's installed 18.1. Treat it as supporting API guidance only; do not assume every option or behavior is identical in 18.1.
+
+Engineering decision:
+- Do not attempt Windows mouse simulation, guessed widget names, undocumented button invocation, or direct calls to private UI internals.
+- Keep the current visible bridge candidate as a diagnostic/fallback only. The target remains one standalone UICT Results window with internal tabs; a permanent second Graphical Browser window is not accepted as the final architecture unless the user explicitly changes that requirement.
+- Continue looking for a documented 18.1-compatible way to route selected Part objects into Modeling's selection context without a second user-facing browser. If no supported route exists, report the limitation and present the native bridge as the reliable two-step fallback.
