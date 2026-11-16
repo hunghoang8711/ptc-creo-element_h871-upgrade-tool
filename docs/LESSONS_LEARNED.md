@@ -80,3 +80,9 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 ## LL-015 – Treat fatal `0xc00000fd` as unresolved until runtime evidence identifies its source
 - **Lesson:** Recursive Assembly traversal is a plausible stack-overflow source, but an iterative traversal experiment did not resolve the reported fatal exception. Therefore recursion alone is not a confirmed root cause.
 - **Prevention:** Do not label the crash fixed based on static checks or a rewritten collector. Capture the last trace marker and reproduce only on a disposable model copy. Avoid overwriting original customer model data.
+
+## LL-016 – Preserve the native multi-Browser selection and Apply path once confirmed
+- **Observation:** In VER-05, separate Graphical Browser windows for different filter pairs work independently. Individual Part selection, double-click selection and Select All followed by native Apply all work in the 3D viewport, matching VER-02 behavior.
+- **Next issue:** The separate H871 Graphic/Manager window appears in a screen corner but is too small to display all its information legibly.
+- **Prevention:** Treat Browser selection and native Apply as a confirmed baseline. When improving Manager layout, change only the Manager window sizing/layout and test that all Browser windows and Apply behavior remain unchanged. Do not reintroduce UICT Display Table or a custom Apply bridge.
+- **Evidence limit:** The supplied trace reached COLLECT/COMPLETE | (0 530) after progress markers through 500. Do not infer the tuple's field meanings. One successful run does not prove every earlier fatal-exception scenario is resolved.
