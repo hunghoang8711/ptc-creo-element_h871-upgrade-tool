@@ -168,3 +168,12 @@ Resolved:
 - Static source check passed: balanced parentheses, no negative nesting, no unterminated strings, and no self-recursive call remains in the collector.
 - This is a strong candidate mitigation for stack exhaustion, not a runtime-confirmed root-cause fix. Modeling 18.1 testing must use a separate disposable model copy; never test against or overwrite the original customer model.
 - Apply remains unresolved. ver-01 and ver-02 remain unchanged.
+
+
+## 2026-11-16 – Iterative traversal did not resolve Search fatal exception
+
+- User retested the iterative collector intended to mitigate possible stack exhaustion. The same fatal exception `0xC00000FD` occurred.
+- This disproves the claim that the collector's explicit self-recursion alone explains the crash; root cause remains unknown.
+- Rolled active ver-03 source back to the last revision associated with user-confirmed Results UI appearance (`8c0a1cd56f25f125958080b3ab6316e55827b141`). The iterative traversal candidate is retained in Git history, not active.
+- Updated Known Issues with a strict evidence requirement: obtain the trace file and use its last marker to localize the failing stage before making another code change.
+- No runtime success is claimed. ver-01 and ver-02 remain untouched.
