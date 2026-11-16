@@ -218,7 +218,7 @@
                                      (sd-inq-part-density part :contents))))))
             (push (list page-name part-path node-id)
                   *h871-pf-v06-part-node-map*))))
-    root))
+    root)))
 
 (defun h871-pf-v06-save-current-selection ()
   (when (stringp *h871-pf-v06-current-page*)
