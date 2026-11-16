@@ -76,3 +76,17 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 - New experiment: One Graphical Browser can represent multiple result pages by keeping a page root for each Density pair and changing the table root. The native Apply button remains attached to the same Browser.
 - Navigation: A dynamic Browser popup submenu can expose page names, with Previous/Next controls for quick switching. This is a page-navigation prototype, not a horizontal tab implementation.
 - Prevention: Preserve the ver-02 native Apply default. Never replace :okButtonAction casually. Do not infer viewport selection from a hidden Browser, a SUCCESS trace, or a Dialog Generator highlight.
+
+
+## LL-014 – Destroy named Browser objects before rerunning a diagnostic
+
+A Graphical Browser window being hidden/closed does not prove that its named Browser Tree has been released. A second call to sd-create-browser-tree with the same name can fail with an “already exists” error even though the first diagnostic's window is no longer visible.
+
+For diagnostic tools that create named Browser/Tree objects:
+1. Capture any source UI state/data that must survive.
+2. Hide and destroy the Graphical Browser first.
+3. Destroy its Browser Tree second.
+4. Only then create a new Tree/Browser with the same names.
+5. Keep a dedicated recovery action that restores the original UI shell.
+
+Treat sd-destroy-graphical-browser and sd-destroy-browser-tree behavior as requiring target-version runtime confirmation; a static call or a cleanup attempt is not proof that the objects were released.
