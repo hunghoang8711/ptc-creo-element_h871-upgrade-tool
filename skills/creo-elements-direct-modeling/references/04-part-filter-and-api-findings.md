@@ -102,3 +102,8 @@ ver-05 now also clears the Browser selection before changing roots and logs :num
 
 
 Fail-safe refinement: ver-05 checks both :clear-table-roots and :change-table-root return values and refuses to mark a page active if either fails. The :number-of-table-roots query is diagnostic-only and guarded with ignore-errors. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4. Modeling 18.1 runtime validation is still required.
+
+
+## 2026-11-16 – modeMenu/buttonMenu UI placement lesson
+
+Do not treat Graphical Browser :modeMenu as the visible horizontal page strip. PTC documentation states modeMenu is mapped to right-click popup entries for compatibility; :buttonMenu is the visible horizontal row. ver-05 originally used the wrong parameter, which explains why the user saw no multi-page selector. The corrected source builds page selectors through :buttonMenu. Modeling 18.1 runtime validation is pending.
