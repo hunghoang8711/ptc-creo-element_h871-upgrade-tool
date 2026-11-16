@@ -17,7 +17,7 @@
 ;; Preconditions:
 ;; 1. Load the current ver-03 source.
 ;; 2. Run at least two searches so two Results pages exist.
-;; 3. Run H871_PF_V03_SINGLE_BROWSER_PAGES_DIAG.
+;; 3. Run H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.
 ;; ============================================================================
 
 (in-package :oli)
@@ -453,12 +453,12 @@
   :ok-action '(h871-pf-v04-run-diagnostic))
 
 ;; COMMAND:
-;; H871_PF_V03_SINGLE_BROWSER_PAGES_DIAG
+;; H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG
 ;;
 ;; TEST:
 ;; 1. Load ver-03 source and create at least two Density result pages.
 ;; 2. Select one or more rows in the active ver-03 page (optional).
-;; 3. Run H871_PF_V03_SINGLE_BROWSER_PAGES_DIAG.
+;; 3. Run H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.
 ;; 4. Confirm only one Results window is visible.
 ;; 5. Switch pages with Previous/Next or right-click > Results Pages.
 ;; 6. Verify each page shows only its own Parts.
