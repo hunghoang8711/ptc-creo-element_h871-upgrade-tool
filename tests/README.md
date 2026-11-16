@@ -21,29 +21,33 @@ Store sanitized test assets and repeatable test procedures here. Do not commit c
 9. Search an Assembly with no matches and confirm the normal no-match message.
 10. For ver-02, verify CNC/KH/CG/COVER and Material mapping values, display-only code fields and default CNC + SUS304 (1/304).
 
-## ver-03 internal-tab prototype validation plan
+## ver-03.1 multi-column Display Table and Apply validation
 
 Source: `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`
 
 1. Load the file in Creo Elements/Direct Modeling 18.1 and confirm no LOAD-time errors.
 2. Run `H871_PART_FILTER_VER_03` and search CNC + SUS304.
    - Expected: one Results window with internal tab `SUS304-CNC`.
+   - Expected: four visible columns: Part Name, Density Instance, Density Base, Assembly Path.
 3. Search KH + A6061.
    - Expected: tab `A6061-KH` appears inside the same Results window.
 4. Search CNC + SUS304 again.
    - Expected: existing `SUS304-CNC` page refreshes; no duplicate tab.
-5. Switch pages; verify each page's result list is isolated.
-6. Select individual/multiple rows; verify selected count is page-specific.
-7. Use Select All and Clear Selection on each page.
-8. Run a no-match search; verify existing valid pages/results remain unchanged.
-9. Record exact runtime errors and the action that caused them.
+5. Click one row; status should show 1 selected.
+6. Ctrl-click/Shift-click more rows; verify multi-row selection.
+7. Use Select All; all rows in the active tab should be selected.
+8. Use Clear Selection; only the active tab should clear.
+9. Select a subset and press Apply; verify only those actual Parts transfer to Modeling selection.
+10. Switch tabs; verify selection is independent per page.
+11. Refresh a pair; its result data should update and stale selection should clear.
+12. Run a no-match search; existing valid tabs/results should remain unchanged.
+13. Record exact runtime errors, action and whether the temporary Apply bridge appeared.
 
-**Not yet in this prototype:** Apply to Modeling selection. Do not mark that acceptance item as passed or use ver-03 for production selection until a Modeling 18.1 hand-off is implemented and tested.
+## ver-03 compatibility boundary
 
-## ver-03 production acceptance (future gate)
-1. Confirm a verified Modeling 18.1 method to transfer the selected real Part objects from the active UICT page to Modeling selection.
-2. Add Apply only after that method is demonstrated.
-3. Confirm Apply transfers only the active page's selected Parts.
-4. Repeat the ver-01/ver-02 row selection and native Apply regression tests.
+- PTC Display Table and logical-table APIs are documented in the 20.7 Integration Kit; exact Modeling 18.1 availability/signatures remain unverified.
+- The ver-02 Graphical Browser selection-and-execute pattern is user-confirmed. The new hidden bridge from Display Table-selected Part objects to temporary BrowserNodes has not been runtime-tested in 18.1.
+- Do not mark ver-03.1 production-ready until the table, multi-row selection and Apply tests above pass.
+- ver-01/ver-02 remain the known-good fallback and must not be overwritten.
 
 No automated Creo runtime harness or sanitized CAD fixture is currently committed. Never describe source/static review as a runtime test.
