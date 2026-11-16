@@ -42,6 +42,7 @@
 ;; Native Apply bridge: temporary Graphical Browser objects are not shown.
 (defvar *h871-pf-v03-apply-parts* nil)
 (defvar *h871-pf-v03-apply-nodes* nil)
+(defvar *h871-pf-v03-pending-apply-page* nil)
 (defvar *h871-pf-v03-apply-browser* "h871-pf-v03-apply-bridge")
 (defvar *h871-pf-v03-apply-tree* "h871-pf-v03-apply-tree")
 
@@ -368,20 +369,43 @@
             *h871-pf-v03-apply-browser* :get-selected-objects)
           nil)))
 
-  ;; Execute the native browser hand-off inside Modeling's command context.
-  ;; Integration Kit guidance requires Modeling action routines invoked from
-  ;; UI callbacks to be wrapped in sd-call-cmds. The native bridge remains
-  ;; hidden so the UICT Results shell is the only user-facing Results window.
+  ;; This function is now called by the dedicated no-input Modeling
+  ;; User Action below. Its sd-call-cmds call therefore runs in a valid
+  ;; action context, unlike a direct UICT :pushAction callback.
   (let ((handoff
           (sd-call-cmds
             (sd-browser-exec-cmd
               *h871-pf-v03-apply-browser* :select-and-execute))))
     (h871-pf-v03-trace "APPLY/SELECT-AND-EXECUTE-RETURN" handoff)
-    (unless handoff
-      (sd-display-message
-        "H871 Apply: Modeling did not confirm the native selection hand-off.")
-      (return-from h871-pf-v03-native-apply nil)))
+    ;; Graphical Browser command return values are not a reliable success
+    ;; indicator (the known-good native Apply also returns NIL in direct
+    ;; programmatic tests). Keep the trace; runtime viewport selection is
+    ;; the authoritative acceptance test.
+    (h871-pf-v03-trace "APPLY/HANDOFF-COMMAND-ISSUED" (not (null handoff))))
   t)
+
+;; A zero-input sequential Dialog Generator command runs its :ok-action
+;; immediately, without opening a second dialog. UICT callbacks are not
+;; Modeling User Actions, so they must queue this command through the
+;; Modeling command line using sd-put-buffer. The :ok-action then provides
+;; the real User Action context required by sd-call-cmds.
+(sd-defdialog 'h871_pf_v03_apply_action
+  :dialog-title "H871 Apply Selection"
+  :dialog-control :sequential
+  :variables '()
+  :ok-action
+    '(progn
+       (h871-pf-v03-trace "APPLY/USER-ACTION-ENTER"
+         (list (length *h871-pf-v03-apply-parts*)
+               *h871-pf-v03-pending-apply-page*))
+       (let ((result
+               (h871-pf-v03-native-apply
+                 *h871-pf-v03-apply-parts*)))
+         (h871-pf-v03-trace "APPLY/USER-ACTION-RESULT" result)
+         (when result
+           (h871-pf-v03-update-status
+             *h871-pf-v03-pending-apply-page*))
+         result)))
 
 ;; Display Table double-click callback. UICT passes the table name;
 ;; route the action to the owning page so only that page's selected Part(s)
@@ -410,8 +434,19 @@
         (sd-display-message
           "H871: No Part rows selected. Select rows or use Select All, then press Apply.")
       (progn
-        (h871-pf-v03-native-apply parts)
-        (h871-pf-v03-update-status page-name)))))
+        ;; Preserve the active page's real Part objects, then queue a
+        ;; dedicated no-input Modeling User Action. Do not call
+        ;; sd-call-cmds from this UICT callback: it is not an action context.
+        (setf *h871-pf-v03-apply-parts* parts)
+        (setf *h871-pf-v03-pending-apply-page* page-name)
+        (h871-pf-v03-trace "APPLY/QUEUE-USER-ACTION"
+          (list page-name (length parts)))
+        (let ((queued
+                (sd-put-buffer "H871_PF_V03_APPLY_ACTION")))
+          (h871-pf-v03-trace "APPLY/QUEUE-USER-ACTION-RETURN" queued)
+          (unless queued
+            (sd-display-message
+              "H871 Apply: Could not queue the Modeling Apply action.")))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Results window and internal tabs
