@@ -1,10 +1,11 @@
 # Part Filter ver-03 – Single Results Window with Internal Tabs
 
-**Status: UICT prototype implemented; static-checked; Creo 18.1 runtime validation pending. Native Apply hand-off not implemented yet.**
+**Current revision: ver-03.1 – multi-column Display Table + explicit Apply.**  
+**Status: committed to `main`; Creo Elements/Direct Modeling 18.1 runtime validation pending.**
 
 ## Authoritative requirement
 
-Build exactly one separate Results window. Inside that window, provide horizontal tabs/pages similar to a desktop browser. Do not create multiple Graphical Browser windows and do not use Creo Browser Bar tabs.
+Build exactly one separate Results window. Inside that window, provide horizontal tabs/pages similar to a desktop browser. Do not create multiple user-facing Graphical Browser windows and do not use Creo Browser Bar tabs.
 
 ## Page identity and lifecycle
 
@@ -13,54 +14,58 @@ Build exactly one separate Results window. Inside that window, provide horizonta
 - First search for a pair creates its page.
 - Repeating the same pair refreshes/replaces the existing page; no duplicate tab.
 - A different pair creates a new page in the same window.
-- Each page owns its result list and selection state.
-- Each page has its own multi-select list, Select All and Clear Selection controls.
-- A no-match search does not silently erase a previously valid page.
-- **Apply to Modeling selection is still pending**; do not use ver-03 as a production selection tool until that hand-off is implemented and tested.
+- Each page owns its result data and selection.
+- No-match does not silently erase an existing valid page.
 
-## Source baseline
+## ver-03.1 result table
 
-Start from ver-02 behavior. Preserve:
-- Assembly selection and recursive scan.
-- Density Instance + Base exact pair matcher and normalization.
-- Material/Process mapping.
-- Result row data and display fields.
-- Known-good native Graphical Browser selection/Apply semantics as a regression boundary.
+Each page uses a UICT Display Table backed by its own logical table.
 
-Do not modify ver-01 or ver-02.
+Visible columns:
+1. Part Name
+2. Density Instance
+3. Density Base
+4. Assembly Path
 
-## Implemented prototype
+An additional hidden/unshown untyped `:part-object` column stores the actual Part object for Apply. Rows are not concatenated text strings.
 
-Canonical source:
-`H871_PART_FILTER_VER_03.lsp`
+## Selection and buttons
 
-The source now integrates the ver-02 search engine with one UICT Dialog Shell, one internal horizontal Tab Control and per-page List Controls. It maintains page state by Density pair, refreshes existing pages, creates pages for new pairs and keeps previous pages when a search has no matches.
+- Multi-row selection is enabled.
+- **Select All** selects all rows in the active page only.
+- **Clear Selection** clears only the active page.
+- **Apply** transfers only selected Part objects from the active page.
+- Status line reports total Parts and selected count.
+- Re-running the same Density pair refreshes its table and clears its previous selection to avoid stale object references.
+- Selection state in other tabs is independent.
 
-The prototype stores the actual Part object against each displayed row internally. The current list selection API returns display labels/positions, however, and a safe Modeling 18.1 operation to transfer the selected Part objects into Modeling selection has not yet been verified. Therefore the Apply action is deliberately not wired.
+## Apply implementation
+
+Apply reads selected row values using `sd-get-display-table-selection`, retrieves the hidden `:part-object` column, and builds BrowserNodes for those Part objects using their Modeling paths. It then uses the native Graphical Browser commands `:set-object-selection` and `:select-and-execute`, matching the known-good ver-02 selection hand-off pattern.
+
+The ver-02 Apply workflow is user-confirmed in Modeling 18.1. The new hidden bridge from Display Table to Graphical Browser is not yet runtime-tested in 18.1. If it fails, keep ver-02 as the known-good fallback and diagnose the exact bridge stage; do not substitute a guessed selection API.
 
 ## Technical compatibility boundary
 
-UICT Tab Control / Dialog Shell / List Control patterns were found in PTC Integration Kit documentation for releases 20.7/20.8. Exact Modeling 18.1 availability and signatures are not established. The first runtime load/test in Modeling 18.1 is required before treating these calls as compatible.
+PTC's official 20.7 Integration Kit documentation covers UICT Display Tables, logical tables and multi-row selection. The exact signatures in Modeling 18.1 are not yet confirmed. The tab shell and page flow were already confirmed by the user in 18.1; this revision changes the row-control implementation and adds the Apply bridge, both requiring runtime validation.
 
-See [VER03_IMPLEMENTATION_NOTES](../../../docs/VER03_IMPLEMENTATION_NOTES.md) for API references, static-check results and test instructions.
+References:
+- [UICT control creation](https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/uict_create.html)
+- [Logical and Display Tables](https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/tables.html)
+- [Graphical Browsers](https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html)
 
-## First runtime test
+## Runtime test
 
 1. Load `H871_PART_FILTER_VER_03.lsp` in Modeling 18.1.
 2. Run `H871_PART_FILTER_VER_03`.
-3. Search CNC + SUS304; expect one Results window with tab `SUS304-CNC`.
-4. Search KH + A6061; expect a second tab `A6061-KH` in the same window.
-5. Search CNC + SUS304 again; expect the existing tab to refresh, not duplicate.
-6. Switch tabs; confirm result lists and selection are isolated.
-7. Test row multi-selection, Select All and Clear Selection.
-8. Search a no-match pair; verify existing tabs/results remain unchanged.
+3. Search CNC + SUS304; verify four separate columns.
+4. Click one row; verify selected count is 1.
+5. Ctrl-click/Shift-click multiple rows.
+6. Select All; verify all rows in this tab are selected.
+7. Clear Selection; verify zero selected.
+8. Select a subset and press Apply; verify only those actual Parts are selected in Modeling.
+9. Switch tabs and verify each page's selection is independent.
+10. Refresh an existing pair; verify its table updates and selection clears.
+11. Search a no-match pair; verify existing tabs remain.
 
-Do not test Apply yet; it is not connected in this prototype.
-
-## Acceptance tests before production
-
-1. All runtime tests above pass in Creo Elements/Direct Modeling 18.1.
-2. Selection state remains page-specific across tab switches and refresh.
-3. A verified Modeling 18.1 mechanism transfers only selected real Parts from the active page into Modeling selection.
-4. Apply behavior is regression-tested without replacing the proven ver-01/ver-02 native Apply path prematurely.
-5. ver-01/ver-02 regression checklist passes.
+If the Display Table fails to load, capture the exact error. If Apply fails, report whether the bridge browser was created and provide the exact error/status.
