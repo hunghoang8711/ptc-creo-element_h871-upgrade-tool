@@ -167,3 +167,10 @@ Density mapping and search rules remain unchanged: CNC=1, KH=2, CG=3, COVER=4; A
 
 The single Browser now receives a dynamically generated `:modeMenu` row with one page button per stored Density pair; the active page is supplied through `:modeMenuInitialButton`. This is the current attempt to approximate the requested horizontal internal tabs inside the same Results Browser, not Browser Bar docking. The active page action changes the table root in that same Browser. PTC's detailed modeMenu documentation is from a later release; exact Modeling 18.1 behavior is unverified. Native Apply remains the default action.
 
+
+
+### ver-05 critical page-root isolation correction (2026-11-16)
+
+Source review found that switching a page did not clear the previous Graphical Browser table root before setting the new one. Since a Browser can retain multiple table roots, this could cause mixed-page rows and invalidate Select All/Apply page scope. ver-05 now executes a buffered sequence: :buffer-display t → :clear-select-list → :clear-table-roots → :change-table-root active-page t → :buffer-display nil, then records :number-of-table-roots in the trace. Source commit: c510c7c76243f9ceed5430eee86e68111d183f3a.
+
+This is a static source correction based on the PTC 20.6 documented command sequence, not a Modeling 18.1 runtime confirmation. The modeMenu horizontal page buttons and their callbacks, one-root-only behavior, page-local selection restore, and actual native Apply to the 3D viewport still require a disposable-model test. Do not call ver-05 complete until all acceptance tests pass.
