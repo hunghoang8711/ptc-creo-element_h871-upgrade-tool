@@ -262,6 +262,10 @@
     (sd-display-error "H871 Apply: Could not create the native selection bridge.")
     (return-from h871-pf-v03-native-apply nil))
 
+  ;; Force construction of the bridge nodes even when its browser is not shown.
+  ;; The browser update callback may also rebuild them when the browser opens.
+  (h871-pf-v03-build-apply-tree)
+
   ;; Programmatically select each real Part-backed BrowserNode.
   (dolist (node *h871-pf-v03-apply-nodes*)
     (sd-browser-exec-cmd
