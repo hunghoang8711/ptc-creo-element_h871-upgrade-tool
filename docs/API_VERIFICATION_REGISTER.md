@@ -155,3 +155,8 @@ ver-05 now uses this sequence and traces the table-root count after switching. E
 PTC Graphical Browser reference (20.6/20.7) specifies that modeMenu, buttonMenu and topMenu are mapped to right-click popup menu entries for compatibility. Separately, the reference explicitly defines buttonMenu as a visible row of buttons directly above topMenu; modeMenu is a row of mode toggle buttons above buttonMenu in the UI description but its menu compatibility behavior means it must not be assumed to provide the desired page-tab row. The official UI examples show buttonMenu specifications with :label and :push/:release actions.
 
 For ver-05, use :buttonMenu to render Density-pair page navigation buttons. Keep the active page identity in the status line unless an exclusive toggle state is proven available. Modeling 18.1 rendering and callback compatibility still require runtime verification.
+
+
+### Correction to section I – modeMenu UI placement
+
+PTC Graphical Browser documentation explicitly defines modeMenu as a row of toggle buttons directly above buttonMenu. It separately states that buttonMenu provides a row of toggle buttons directly above topMenu. The statement that modeMenu is only a right-click popup was incorrect; the compatibility note means these menu definitions are also mapped into right-click popup entries. Both are visible UI rows. ver-05 restores page selectors to modeMenu and logs the evaluated specification, initial button and Browser creation stage.
