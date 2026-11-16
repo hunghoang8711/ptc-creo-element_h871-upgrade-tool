@@ -69,3 +69,19 @@ For a new tool in this repository:
 Before any Creo task (including a new tool), also read [`skills/creo-elements-direct-modeling/SKILL.md`](../skills/creo-elements-direct-modeling/SKILL.md) and its relevant references. This package includes knowledge recovered from prior chats and user-provided Annotation macro files, not only the current Part Filter thread.
 
 Use [API_VERIFICATION_REGISTER](API_VERIFICATION_REGISTER.md) to check symbol evidence and [USER_REFERENCE_INVENTORY](USER_REFERENCE_INVENTORY.md) to identify the historical source material. Do not confuse Lisp with Annotation/ME10 command language. Do not copy full CoCreate confidential legacy sources into this public repository.
+
+## Current direction – Part Filter single-window implementation (2026-11-16)
+
+The user's final product requirement is unchanged: one Results window only, with direct native Part selection/Apply as in ver-02 and multiple Density-pair pages as in ver-03. ver-04 remains a diagnostic experiment only; its UICT launcher/return workflow is not the product architecture.
+
+A new self-contained candidate has been added:
+- Canonical candidate: `src/part-filter/ver-05/H871_PART_FILTER_VER_05.lsp`
+- It owns the numeric Density search, page registry, one Browser Tree, one visible Graphical Browser, row selection, page navigation and native Apply.
+- It no longer reads ver-03 UICT page globals, opens/restores a UICT Results shell, installs an Open Native Results button, or uses a hidden Browser bridge.
+- Search/mapping behavior follows ver-02; exact Density Instance + Base pair and /1000 normalization are preserved.
+- Each pair has one page; same-pair search refreshes that page; a no-match leaves existing pages unchanged.
+- Page navigation is currently Previous/Next plus a Results Pages popup. A horizontal tab strip is still not implemented.
+- The Browser is rebuilt under the same named Browser/Tree after each successful search so the active Browser contains all current page roots. This is one Results Browser, not multiple simultaneous Results windows.
+
+**Status:** source added and static-checked only. Not loaded or functionally tested in Modeling 18.1. Native Apply must be proven by selecting one/multiple rows and confirming the actual 3D viewport selection. Test only on a disposable model copy. Preserve ver-01/ver-02/ver-03 and the Density mapping. Do not treat ver-05 as user-confirmed until runtime testing.
+
