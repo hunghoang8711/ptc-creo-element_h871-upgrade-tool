@@ -83,3 +83,18 @@ Active decisions that constrain implementation. Superseded experiments are recor
 - Decision: Keep one visible Results window at a time. Close Results returns to the existing ver-03 UICT shell; a persistent `Open Native Results` button in that shell reopens the native Browser using the latest UICT page state.
 - Implementation: ver-04 installs the uniquely named button in the existing ver-03 grid and routes it to the diagnostic rebuild function. The Browser is rebuilt rather than merely shown, so searches made in UICT after returning are captured.
 - Scope: diagnostic only; this does not yet implement horizontal tabs inside the native Browser. Verify UICT control placement, callback and repeat open/close in Modeling 18.1 before adopting this as final UI.
+
+## TD-013 – One self-contained Results Browser owns pages and native Apply (2026-11-16)
+
+**Decision:** The final Part Filter architecture must use exactly one standalone Results Graphical Browser for all Density-pair pages. Search results, active page, BrowserNode selection and native Apply must belong to that same Browser instance.
+
+**Implementation candidate:** `src/part-filter/ver-05/H871_PART_FILTER_VER_05.lsp`.
+
+**Preserved:** ver-02 recursive collector, numeric Density Instance/Base pair matching, /1000 normalization, user mappings, native default Apply (no :okButtonAction override); ver-03 page semantics (one page per pair, same-pair refresh, no-match preservation, page-local selection paths).
+
+**Rejected as product direction:** UICT Results + hidden Browser bridge, two visible Results windows, Open Native Results launcher, Close-to-UICT return workflow, and custom Apply callback.
+
+**Current navigation:** Previous/Next and a Results Pages popup in the one Browser. Horizontal tab-strip UI is not yet implemented because available Graphical Browser documentation does not establish a native horizontal internal-tab API. Do not confuse Browser Bar docking tabs with internal result pages.
+
+**Validation:** ver-05 is static-checked only. No runtime success is claimed. User must test in Modeling 18.1 on a disposable model copy.
+
