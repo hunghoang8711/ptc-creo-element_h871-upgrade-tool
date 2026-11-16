@@ -228,3 +228,10 @@ Resolved:
 - Runtime status: not loaded or functionally tested in Creo Elements/Direct Modeling 18.1. Native Apply, search lifecycle, page navigation, selection restore and no-match preservation require user test on a disposable model copy.
 - Horizontal tab strip remains unimplemented; current same-window page navigation is Previous/Next + Results Pages popup.
 
+### ver-05 refinement – horizontal page buttons in the single Browser
+
+- Replaced the Previous/Next toolbar pair with a dynamic Graphical Browser `:modeMenu` row: one page button per stored Density pair.
+- The active page's button name is supplied using `:modeMenuInitialButton`; each page button invokes the same Browser page activation function.
+- Select All and Clear Selection remain in the Browser button menu. The Results Pages popup remains as an alternate same-window selector.
+- The detailed PTC modeMenu reference is from a later release, so this is static-checked but not yet verified in Modeling 18.1. Do not claim a final tab strip until the user confirms button rendering and switching.
+
