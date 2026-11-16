@@ -52,7 +52,7 @@ Never promote a feature to runtime-tested without an explicit test result from t
 - A Search candidate produced Modeling fatal exception 0xC00000FD; the iterative traversal candidate did not fix it and was reverted. Search root cause is unresolved. Use a disposable model and inspect the trace before changing the collector.
 - ver-04 diagnostic: `src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp`. User confirmed native Browser opens and Close Results restores ver-03 UICT. The updated source installs a persistent `Open Native Results` button in UICT so the Browser can be reopened without retyping the command; Previous/Next now write navigation trace markers. Static-checked only: button placement/callback, repeat close/reopen, user-operated page switching and actual viewport Apply still require Modeling 18.1 testing. This is not yet a horizontal-tab UI.
 - Keep ver-01/ver-02 untouched. Do not retry Browser reparenting or hidden Browser Apply without a new, proven cause.
-- Read TD-008, TD-010, TD-011 and KI-012 before changing multi-search or Apply architecture.
+- Read TD-008, TD-010, TD-011, TD-012, KI-012, KI-013 and KI-014 before changing multi-search, Results navigation or Apply architecture.
 
 ## New tool development
 
