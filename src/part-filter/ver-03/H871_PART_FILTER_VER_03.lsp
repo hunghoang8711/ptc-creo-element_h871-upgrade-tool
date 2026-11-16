@@ -246,24 +246,43 @@
 ;; ---------------------------------------------------------------------------
 
 (defun h871-pf-v03-build-apply-tree ()
-  (let ((root
-          (sd-create-browsernode
-            :tree *h871-pf-v03-apply-tree*
-            :parent nil
-            :objPath "/H871_V03_APPLY"
-            :objPname "H871 Apply Selection"
-            :objClientData (list :kind :root))))
+  ;; sd-create-browsernode returns a node ID (symbol), not a BrowserNode
+  ;; structure. Resolve every ID before passing it to Browser selection APIs.
+  (let* ((root-id
+           (sd-create-browsernode
+             :tree *h871-pf-v03-apply-tree*
+             :parent nil
+             :objPath "/H871_V03_APPLY"
+             :objPname "H871 Apply Selection"
+             :objClientData (list :kind :root)))
+         (root
+           (and root-id
+                (sd-get-browsernode-struct
+                  *h871-pf-v03-apply-tree* root-id))))
     (setf *h871-pf-v03-apply-nodes* nil)
+    (h871-pf-v03-trace
+      "APPLY/ROOT-RESOLVED"
+      (list root-id (and root (type-of root))))
     (dolist (part *h871-pf-v03-apply-parts*)
-      (push
-        (sd-create-browsernode
-          :tree *h871-pf-v03-apply-tree*
-          :parent root
-          :objPath (h871-pf-v03-path part)
-          :objPname (h871-pf-v03-name part)
-          :objClientData (list :kind :part :part part))
-        *h871-pf-v03-apply-nodes*))
-    root))
+      (let* ((node-id
+               (sd-create-browsernode
+                 :tree *h871-pf-v03-apply-tree*
+                 :parent root-id
+                 :objPath (h871-pf-v03-path part)
+                 :objPname (h871-pf-v03-name part)
+                 :objClientData (list :kind :part :part part)))
+             (node
+               (and node-id
+                    (sd-get-browsernode-struct
+                      *h871-pf-v03-apply-tree* node-id))))
+        (h871-pf-v03-trace
+          "APPLY/PART-NODE-RESOLVED"
+          (list (h871-pf-v03-name part)
+                node-id
+                (and node (type-of node))))
+        (when node
+          (push node *h871-pf-v03-apply-nodes*))))
+    root-id))
 
 (defun h871-pf-v03-native-apply (parts)
   (when (null parts)
@@ -314,8 +333,19 @@
       (sd-browser-exec-cmd
         *h871-pf-v03-apply-browser* :change-table-root root t)))
 
-  ;; Programmatically select each real Part-backed BrowserNode.
+  ;; Only resolved BrowserNode structures may be passed here.
+  (h871-pf-v03-trace
+    "APPLY/RESOLVED-NODE-COUNT"
+    (list (length *h871-pf-v03-apply-nodes*)
+          (length parts)))
+  (unless (= (length *h871-pf-v03-apply-nodes*) (length parts))
+    (sd-display-error
+      "H871 Apply: Could not resolve every selected row to a BrowserNode.")
+    (return-from h871-pf-v03-native-apply nil))
   (dolist (node *h871-pf-v03-apply-nodes*)
+    (h871-pf-v03-trace
+      "APPLY/SET-OBJECT-SELECTION"
+      (type-of node))
     (sd-browser-exec-cmd
       *h871-pf-v03-apply-browser* :set-object-selection node t))
 
