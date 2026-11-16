@@ -325,3 +325,41 @@ Next evidence:
 3. Send the trace block beginning at `APPLY/UICT-SELECTION` through `APPLY/SELECT-AND-EXECUTE-RETURN`.
 4. Double-click once and confirm whether `APPLY/DOUBLE-CLICK-CALLBACK` and `APPLY/DOUBLE-CLICK-PAGE` are present.
 5. Runtime status: Apply and double-click hand-off = **failed** in Modeling 18.1; root cause = **not yet isolated**.
+
+
+## 16. Apply trace isolates hidden-browser visibility / native hand-off — 2026-11-16
+
+The user supplied the full trace from the latest diagnostic source. The trace proves:
+
+- Search completed: 500 assembly objects visited; 8 Parts matched.
+- UICT page refresh completed: `sd-change-logical-table-contents` returned T.
+- Double-click callback entered and resolved the correct page.
+- UICT selection payload contained 1 selected `ELAN::SEL_ITEM` for double-click and 8 selected `ELAN::SEL_ITEM` values for Select All / Apply.
+- Native bridge created the same number of BrowserNode IDs.
+- Each ID resolved to `G-BROWSER::BROWSERNODE`.
+- `:set-table-mode` and `:change-table-root` both returned T.
+- For every bridge node, `:is-object-displayed` returned NIL while `:set-object-selection` returned T.
+- Browser query reported selected count 1 or 8 and returned the expected number of BrowserNode structures.
+- `:select-and-execute` returned NIL in every attempt, including double-click, one selected row and eight selected rows.
+
+Evidence-based conclusion:
+- UICT row selection and callback routing are working.
+- BrowserNode construction/resolution and browser selection bookkeeping are working.
+- The failure is specifically after the hidden bridge has registered a selection and at the native `:select-and-execute` hand-off.
+- The strongest current discrepancy is that every bridge node is reported as not displayed (`NIL`) even though it is selected. The bridge browser is created but never passed to `sd-show-graphical-browser`.
+- PTC Integration Kit documentation for later releases says `:set-object-selection` only selects visible items, and describes `:select-and-execute` as transferring the browser selection into the Modeling select list / active command. The actual Modeling 18.1 behavior remains authoritative; later-version documentation is supporting context only.
+- The `SEL_ITEM` values in the UICT payload are expected Modeling selection handles, not malformed Part values. Do not convert them to names or discard them.
+- The trace does not prove whether the NIL hand-off is caused by invisible BrowserNodes, missing active-command context, or a Modeling 18.1-specific restriction. Do not claim a definitive root cause yet.
+
+Known-good comparison:
+- User-confirmed Stage 1 uses a normal visible Graphical Browser and its native Apply/OK action; user confirmed that this path selects Parts in 3D.
+- The current UICT bridge differs materially: it constructs a second Graphical Browser invisibly and calls `:select-and-execute` programmatically.
+- Therefore the next controlled experiment should isolate visibility/native browser lifecycle only, not change UICT data, search, mapping, or tab architecture.
+
+Next experiment proposal:
+1. Prepare a diagnostic-only candidate on the UICT feature branch that calls `sd-show-graphical-browser` for the temporary bridge immediately before applying the selected BrowserNodes, then performs the same selection and native hand-off.
+2. Do not change the UICT Results shell, page tabs, row data, collector, Density matching or selection payload.
+3. This may briefly show the temporary native bridge window during Apply. It is a diagnostic test only, not the intended final UI. If the user does not want even a temporary second window, stop before testing and design a different hand-off route.
+4. Test exactly one selected row first. Record `:is-object-displayed`, selected count and `:select-and-execute` return.
+5. If the visible bridge succeeds, investigate whether its native Apply can be invoked/closed without exposing a second window, or whether a different native selection bridge is required. If it still fails, investigate active-command context in Modeling 18.1.
+6. Runtime status: latest hidden-bridge Apply and double-click = **failed**; diagnostic trace = **user-supplied and conclusive for the intermediate states**; root cause = **narrowed to native hand-off, final cause not yet proven**.
