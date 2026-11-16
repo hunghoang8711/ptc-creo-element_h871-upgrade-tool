@@ -1230,3 +1230,66 @@ Updated diagnostic file:
 `src/part-filter/ver-03/diagnostics/H871_PF_V03_GET_SELECTION_DIAG.lsp`
 
 The production ver-03 source remains unchanged. The corrected diagnostic must be tested in Creo 18.1 before further conclusions.
+
+
+## 33. GET_SELECTION compound-name test failed; distinguish highlight from Modeling selection — 2026-11-16
+
+### Latest user runtime result
+
+The user tested the updated `H871_PF_V03_GET_SELECTION_DIAG.lsp` using the compound-name form:
+```lisp
+(get_selection
+  :focus-type *sd-part-seltype*
+  :select :part
+          :full_name :start_name part-path :end_name)
+```
+
+Visible result:
+- The Part was highlighted in the 3D viewport before the user pressed OK.
+- After OK, the diagnostic displayed: `Status: FAILURE. Result type: NIL.`
+- The user's trace confirms that the current Results page contained valid Part `SEL_ITEM` objects and the path was available.
+- The latest GET_SELECTION attempt again failed with: `("OLI" "SD-CALL-ACTION-ERROR" "You have specified an unexpected input value." NIL)`.
+- The earlier shorthand `:select :part <path>` had failed with the same parser error.
+
+The trace also contains old production Apply and offscreen diagnostic runs:
+- Production Apply receives one or eight valid `ELAN::SEL_ITEM` values.
+- BrowserNode construction/resolution and browser selected counts succeed.
+- Browser node state can report selected, and the offscreen diagnostic can report all nodes displayed and selected.
+- Nevertheless, `:select-and-execute` success context can be NIL, and the user confirms that no corresponding Part selection appears in the viewport.
+- Therefore the prior `:SUCCESS` and wrapper return `T` values are not evidence of successful Modeling selection hand-off.
+
+### Updated interpretation from PTC Dialog Generator documentation
+
+PTC's Dialog Generator reference explicitly describes `:persistent-highlight t` as enabling persistent visual highlighting for object selection variables such as Parts and Workplanes. It describes this as highlight feedback associated with a dialog variable; it does not describe the option as assigning the objects to Modeling's global/current selection list.
+
+Reference:
+https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
+
+The user's 18.1 test confirms the documented visual behavior:
+- The Dialog Generator receives one or multiple valid Part `SEL_ITEM` values.
+- `sd-inq-part-p` returns `T` for each item.
+- `:persistent-highlight t` visibly highlights the Part(s).
+- Pressing the Dialog Generator green check executes the diagnostic OK action and reports the values, but does not by itself establish a Modeling selection hand-off.
+
+### GET_SELECTION conclusion
+
+Both attempted named-Part selector forms are rejected by Creo Elements/Direct Modeling 18.1 with the same unexpected-input parser error. Do not repeat either syntax or treat GET_SELECTION as a setter. The documented GET_SELECTION behavior is to invoke SELECT and return selected items; no evidence shows it can set the active Modeling selection from a supplied list of Part paths.
+
+### Next investigation direction
+
+Investigate the documented Dialog Generator preselection mechanism and whether a real Modeling command with a Part selection variable can consume the UICT's Part list as preselection:
+- PTC documents that preselected objects are automatically inserted into matching selection variables when a Dialog Generator command is activated.
+- This is a command-input mechanism, not proof of a global selection setter.
+- Design an isolated, non-geometric diagnostic command that accepts one or more Part values and performs only a harmless inquiry/report after activation. Determine whether the UICT-provided Parts can be passed into that command without a second visible Graphical Browser.
+- Separately verify whether the user requirement truly needs the global selection list to be populated, or whether a supported Modeling command can act directly on the supplied `SEL_ITEM` list. Do not claim equivalence without a user-visible test.
+
+Reference:
+https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
+
+### Scope and status
+
+- No production source change was made.
+- Results shell/tabs, collector, numeric Density mappings and normalization, matching predicate, result row schema, UICT selection payload and existing Apply implementation remain unchanged.
+- The latest GET_SELECTION diagnostic remains a failed diagnostic candidate; it must not be merged into production.
+- The hidden/offscreen Graphical Browser hand-off remains rejected as a solution.
+- Runtime status: both GET_SELECTION syntax variants = **failed** in Creo 18.1; Dialog Generator Part highlight = **user-tested success**, but global Modeling selection = **not proven**; production Apply = **not solved**.
