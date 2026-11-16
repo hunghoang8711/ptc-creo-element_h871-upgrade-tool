@@ -701,3 +701,65 @@ Before a source experiment:
 - Determine whether a zero-input / non-visible Dialog Generator command can receive the stored list, validate it, and pass it to an existing Modeling action routine.
 - Identify that downstream action routine and prove that its result is the required viewport selection state. Merely consuming the list as an input to another operation does not satisfy Apply.
 - Do not add a speculative variable or command to the production source until the downstream behavior is established.
+
+
+## 25. Corrected Dialog Generator selection-variable investigation — 2026-11-16
+
+### Correction to section 24
+
+The section 24 lead needs a strict qualification: `sd-set-variable-status` is a **local function**, not a general global setter. PTC documents that it is only valid for dialogs with an options block, i.e. `:dialog-control :parallel`, and it must be called within that dialog's lexical scope. The current section 22/23 trampoline is a zero-variable `:sequential` dialog, so it cannot simply call `sd-set-variable-status` to inject the selection list.
+
+Reference:
+https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
+
+### New, more precise documented lead
+
+The PTC Dialog Generator reference exposes two separate features:
+
+1. **Selection variable initial value**
+   - A selection variable can receive an `:initial-value`.
+   - With `:multiple-items t`, the value is a list of SEL_ITEMs.
+   - The initial value is checked against the variable's selection options.
+   - The initial value does not trigger the variable's `:after-input` code.
+   - Reference: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/dg_manual.html (sections 4.1.1.1 and 4.1.5.1).
+
+2. **Hidden Parallel Dialog**
+   - `:without-show t` suppresses the UI of a Parallel Dialog when activated.
+   - `:without-show` does not itself document automatic OK execution; do not assume it runs `:ok-action` merely because its required variables already have initial values.
+   - Reference: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/dg_manual.html (section 3.1).
+
+3. **Modeling 18.1 compatibility signal**
+   - PTC's What's New page explicitly lists the selection-variable `:initial-value` / `sd-set-variable-status :value` selector validation behavior under “New in Creo Elements/Direct Modeling 18.1”.
+   - This is stronger version evidence than the later 20.x manual, but the current installation's exact maintenance release and runtime behavior still need checking.
+   - Reference: https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/whatsnew.html
+
+### What this proves — and what it does not
+
+It proves a documented way to supply the already collected Part SEL_ITEM list to a Dialog Generator selection variable, and a documented way to suppress a Parallel Dialog's visible UI.
+
+It does **not** prove:
+- that a hidden Parallel Dialog automatically invokes its `:ok-action`;
+- that assigning Parts to a dialog variable changes Modeling's global viewport selection;
+- that selection-variable highlighting is equivalent to the native browser Apply selection list;
+- that a dialog variable can be used as a generic global selection setter.
+
+PTC further distinguishes feedback from object selection: for Parts, the dialog variable normally displays the object name; persistent highlight is a separate feedback option. The manual does not say that this feedback mutates the active Modeling selection set.
+
+### Guarded next experiment — not yet implemented
+
+Before changing production source, inspect the actual ver-03 source and design a disposable isolated test command that can answer these questions without touching the Results UI:
+
+1. Can a `:parallel`, `:without-show t` dialog be invoked through the proven command-buffer trampoline?
+2. Can its single `:part` variable with `:multiple-items t` receive the pending Part SEL_ITEM list as an initial value or command argument?
+3. Does its `:ok-action` execute automatically, or does the command remain pending because no OK action was supplied?
+4. Does the resulting Modeling state show only dialog feedback/highlight, or does the same selection inquiry used by the ver-02 native Apply path report the Parts as the active selection?
+
+If steps 1–3 work but step 4 does not, stop this route: it is only a hidden command-input bridge, not an Apply solution. Do not change UICT Results, collector, filter mappings, result rows or native browser code during this isolated test.
+
+### Scope and status
+
+- No production source changed.
+- The correction and new lead are documentation-only.
+- User-confirmed runtime facts from sections 22–23 remain unchanged.
+- One-window Apply/double-click to actual Modeling viewport selection remains **not solved**.
+- API documentation is later-release material except for the What's New entry explicitly describing a feature introduced in Modeling 18.1; runtime validation is still required.
