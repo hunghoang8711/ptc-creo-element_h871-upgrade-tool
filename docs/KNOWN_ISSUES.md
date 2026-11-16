@@ -107,3 +107,13 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - **Navigation diagnostics:** Previous/Next now log `PAGE/NAVIGATION-REQUEST` and `PAGE/NAVIGATION-TARGET`; the existing Results Pages context submenu remains available. These markers will show whether the controls invoke their callbacks.
 - **Unverified:** UICT button placement/callback, repeat close/reopen, user-operated page switching and actual viewport selection after Apply.
 - **Next test:** Load updated ver-04; run once to install the button; Close Results; click `Open Native Results` in ver-03; confirm it reopens without a command; then use Previous/Next and right-click Results Pages and inspect the trace markers.
+
+## KI-015 – ver-05 runtime and horizontal-tab verification pending (2026-11-16)
+
+- New source `src/part-filter/ver-05/H871_PART_FILTER_VER_05.lsp` is a self-contained single-Graphical-Browser candidate.
+- Static source structure and local helper references pass checks, but no Modeling 18.1 runtime test has been performed.
+- Native Apply, popup menu navigation, Previous/Next, page-local selection restore, same-pair refresh, no-match preservation and repeated search lifecycle remain unverified.
+- The current page UI uses Previous/Next plus a Results Pages popup, not the final horizontal tab strip requested by the user.
+- Do not fall back to a second Results window, UICT launcher, hidden Browser bridge, or custom Apply callback to solve these issues.
+- Use a disposable model copy. If Search crashes, capture the exact ver-05 trace and error before changing traversal; retain ver-02's known-working recursive collector until evidence indicates otherwise.
+
