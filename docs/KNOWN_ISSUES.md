@@ -104,3 +104,13 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - **Remaining compatibility risk:** `:createAsTab` remains based on later-version PTC documentation and is not yet verified in Modeling 18.1. PDS preferences may override initial docking behavior.
 - **Required retest:** Use a disposable model copy. Run one CNC-SUS304 search. If the exception repeats, close the message and report the last line in `%USERPROFILE%/H871_PART_FILTER_STAGE1_TRACE.txt`; it localizes the last completed stage. If successful, test a second pair, same-pair refresh, no-match preservation, double-click, Select All, Clear Selection, and Apply.
 - **Safety:** Stage 0, ver-01, and ver-02 source files remain unchanged. Do not proceed to Stage 2 until user confirms.
+
+
+## KI-014 – Stage 1 Search fatal exception and diagnostic reset
+
+- **Status:** Root cause unresolved; previous multi-browser Stage 1 implementation retired from active source.
+- **Runtime evidence:** User reports Fatal Exception `0xC00000FD` immediately after Search OK; Results Browser does not appear. Removing Browser Tree `:update-args` and using unique zero-argument callbacks did not resolve it.
+- **Trace finding:** `H871_PART_FILTER_STAGE1_TRACE.txt` was created once but remained 0 KB and was not updated on a subsequent search. The trace writer used `ignore-errors`, so it can silently fail. An empty trace is inconclusive and must not be used to infer the last executed stage.
+- **Current isolation step:** Active Stage 1 source is now a mechanical clone of the user-confirmed Stage 0 source, with only the helper/global prefix and dialog command renamed. Multi-browser sessions, callback closures, `:createAsTab`, `:tabname`, and file tracing have been removed.
+- **Next test:** User tests one known CNC-SUS304 search in a fresh Modeling session and disposable model. If the Stage 0-equivalent Stage 1 succeeds, reintroduce one feature at a time. If it fails, compare the dialog/run path and verify the loaded file/command before changing APIs.
+- **Preservation:** Stage 0, ver-01 and ver-02 source files remain unchanged. No runtime success is claimed.
