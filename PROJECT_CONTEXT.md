@@ -16,6 +16,8 @@ Build reliable, reusable LISP tools for Creo Elements/Direct Modeling 18.1. The 
 | ver-01 | Numeric Density Instance + Base filter with standalone Graphical Browser | User-confirmed working baseline |
 | ver-02 | Machining Process + Material convention selectors mapped to Density values | Implemented; user reported very good results |
 | ver-03 | One Results window with UICT internal horizontal tabs and per-page Display Tables | Results UI/page behavior user-confirmed in project testing; UICT-to-Modeling Apply unresolved; hidden Browser bridge failed |
+| ver-04 | Single Graphical Browser page-navigation diagnostic | Diagnostic only; not final architecture |
+| ver-05 | One self-contained Graphical Browser with multiple Density-pair pages and native Apply | Implemented and static-checked; Modeling 18.1 runtime validation pending |
 
 Canonical version folders:
 - `src/part-filter/ver-01/H871_PART_FILTER_VER_01.lsp`
