@@ -163,3 +163,7 @@ Density mapping and search rules remain unchanged: CNC=1, KH=2, CG=3, COVER=4; A
 
 **Evidence status:** ver-05 is static-checked only, not loaded or tested in Modeling 18.1. In particular, native Apply, dynamic page popup, page switching/selection restore, repeated searches and no-match preservation require runtime verification on a disposable model copy. ver-01/ver-02/ver-03 are preserved as baselines; ver-04 remains diagnostic.
 
+### ver-05 horizontal page-button strip refinement (2026-11-16)
+
+The single Browser now receives a dynamically generated `:modeMenu` row with one page button per stored Density pair; the active page is supplied through `:modeMenuInitialButton`. This is the current attempt to approximate the requested horizontal internal tabs inside the same Results Browser, not Browser Bar docking. The active page action changes the table root in that same Browser. PTC's detailed modeMenu documentation is from a later release; exact Modeling 18.1 behavior is unverified. Native Apply remains the default action.
+
