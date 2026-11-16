@@ -1,5 +1,5 @@
 ;; ============================================================
-;; H871 PART FILTER - Results Browser architecture - VER-03 STAGE 1 - MULTI FILTER TABS
+;; H871 PART FILTER - Results Browser architecture - VER-03 STAGE 1 DIAGNOSTIC BASELINE
 ;; Target: PTC Creo Elements/Direct Modeling 18.1
 ;;
 ;; Search UI: machining process + material convention.
@@ -16,15 +16,12 @@
 
 (in-package :oli)
 
-(defvar *h871-pf-mt-last-results* nil)
+(defvar *h871-pf-mt-results* nil)
 (defvar *h871-pf-mt-diagnostic-samples* nil)
 (defvar *h871-pf-mt-results-assembly* nil)
 (defvar *h871-pf-mt-requested-instance* nil)
 (defvar *h871-pf-mt-requested-base* nil)
-(defvar *h871-pf-mt-sessions* nil)
 
-;; Stage 1 creates one native Graphical Browser per unique Density pair.
-;; Each browser owns a separate tree and is requested as a Browser Bar tab.
 (defvar *h871-pf-mt-browser-name* "h871-pf-mt-results")
 (defvar *h871-pf-mt-tree-name* "h871-pf-mt-results-tree")
 
@@ -125,53 +122,21 @@
   (declare (ignore browser-name))
   (getf (h871-pf-mt-row-data node) :path))
 
-;; Modeling 18.1 compatibility: use a zero-argument updater callback
-;; like the verified Stage 0 browser tree.
-(defun h871-pf-mt-register-tree-updater (tree-name key)
-  (let* ((updater-name
-           (intern (format nil "H871-PF-MT-UPDATE-~A"
-                     (substitute (code-char 45) (code-char 46) key))
-             :oli))
-         (captured-tree tree-name)
-         (captured-key key))
-    (setf (symbol-function updater-name)
-      (lambda ()
-        (h871-pf-mt-build-results-tree captured-tree captured-key)))
-    updater-name))
-
-(defun h871-pf-mt-trace (stage)
-  (ignore-errors
-    (with-open-file
-      (stream
-        (merge-pathnames "H871_PART_FILTER_STAGE1_TRACE.txt"
-          (user-homedir-pathname))
-        :direction :output :if-exists :append :if-does-not-exist :create)
-      (format stream "~A~%" stage)
-      (finish-output stream))))
-
-(defun h871-pf-mt-find-session (key)
-  (find key *h871-pf-mt-sessions*
-    :key (function (lambda (entry) (getf entry :key)))
-    :test 'equal))
-
-(defun h871-pf-mt-build-results-tree (tree-name key)
-  ;; Each browser has its own tree. The key identifies the stored result set.
-  (let* ((session (h871-pf-mt-find-session key))
-         (parts (getf session :results))
-         (tabname (getf session :tabname))
-         (root
-           (sd-create-browsernode
-             :tree tree-name
-             :parent nil
-             :objPath "/H871_RESULTS"
-             :objPname tabname
-             :objClientData (list :kind :root :key key))))
-    (dolist (part (reverse parts))
+(defun h871-pf-mt-build-results-tree ()
+  ;; Called by the Graphical Browser when its tree is built/refreshed.
+  (let ((root
+          (sd-create-browsernode
+            :tree *h871-pf-mt-tree-name*
+            :parent nil
+            :objPath "/H871_RESULTS"
+            :objPname "H871 Part Filter Results"
+            :objClientData (list :kind :root))))
+    (dolist (part (reverse *h871-pf-mt-results*))
       (let ((instance (sd-inq-part-density part :instance))
             (base (sd-inq-part-density part :contents))
             (path (h871-pf-mt-path part)))
         (sd-create-browsernode
-          :tree tree-name
+          :tree *h871-pf-mt-tree-name*
           :parent root
           :objPath path
           :objPname (h871-pf-mt-name part)
@@ -186,128 +151,125 @@
                   :base-api base))))
     root))
 
-(defun h871-pf-mt-select-all-for-browser (browser-name)
-  (sd-browser-exec-cmd browser-name :select-all))
+(defun h871-pf-mt-select-all ()
+  (sd-browser-exec-cmd *h871-pf-mt-browser-name* :select-all))
 
-(defun h871-pf-mt-clear-selection-for-browser (browser-name)
-  (sd-browser-exec-cmd browser-name :clear-select-list))
+(defun h871-pf-mt-clear-selection ()
+  (sd-browser-exec-cmd *h871-pf-mt-browser-name* :clear-select-list))
 
-(defun h871-pf-mt-selected-parts-for-browser (browser-name)
+(defun h871-pf-mt-selected-parts ()
   (let ((parts nil))
     (dolist (node
-              (sd-query-browser browser-name :get-selected-objects))
+              (sd-query-browser
+                *h871-pf-mt-browser-name* :get-selected-objects))
       (let ((data (h871-pf-mt-row-data node)))
         (when (eq (getf data :kind) :part)
           (push (getf data :part) parts))))
     (nreverse parts)))
 
-(defun h871-pf-mt-show-selection-summary-for-browser (browser-name)
-  (let ((parts (h871-pf-mt-selected-parts-for-browser browser-name)))
+(defun h871-pf-mt-show-selection-summary ()
+  (let ((parts (h871-pf-mt-selected-parts)))
     (sd-browser-set-status-text
-      browser-name
+      *h871-pf-mt-browser-name*
       :value (format nil "~A result row(s) selected." (length parts)))))
 
-(defun h871-pf-mt-open-results-browser (key)
-  (let* ((session (h871-pf-mt-find-session key))
-         (browser-name (getf session :browser))
-         (tree-name (getf session :tree))
-         (tabname (getf session :tabname))
-         (parts (getf session :results)))
-    ;; Rebuild only the browser belonging to this Density pair.
-    (ignore-errors (sd-hide-graphical-browser browser-name))
-    (ignore-errors (sd-destroy-graphical-browser browser-name))
-    (ignore-errors (sd-destroy-browser-tree tree-name))
+(defun h871-pf-mt-open-results-browser ()
+  ;; Recreate browser/tree so every search has a clean result set.
+  (ignore-errors
+    (sd-hide-graphical-browser *h871-pf-mt-browser-name*))
+  (ignore-errors
+    (sd-destroy-graphical-browser *h871-pf-mt-browser-name*))
+  (ignore-errors
+    (sd-destroy-browser-tree *h871-pf-mt-tree-name*))
 
-    (h871-pf-mt-trace "BROWSER:BEFORE-CREATE-TREE")
-    (unless
-      (sd-create-browser-tree
-        tree-name
-        :update-events oli:*SD-CHANGE-OBJECT-TREE-EVENT*
-        :update-func (h871-pf-mt-register-tree-updater tree-name key))
-      (sd-display-error "H871: Could not create the results data tree.")
-      (return-from h871-pf-mt-open-results-browser nil))
-    (h871-pf-mt-trace "BROWSER:AFTER-CREATE-TREE")
+  (unless
+    (sd-create-browser-tree
+      *h871-pf-mt-tree-name*
+      :update-events oli:*SD-CHANGE-OBJECT-TREE-EVENT*
+      :update-func 'h871-pf-mt-build-results-tree)
+    (sd-display-error "H871: Could not create the results data tree.")
+    (return-from h871-pf-mt-open-results-browser nil))
 
-    (unless
-      (sd-create-graphical-browser
-        browser-name
-        :tree tree-name
-        :topLabel (format nil "H871 - PART FILTER RESULTS: ~A" tabname)
-        :treeStatusBar
-          (format nil "Matched ~A Part(s). Select rows; Ctrl-click adds/removes."
-            (length parts))
-        :minHeight 280
-        :maxWidth 900
-        :maxHeight 760
-        :okButtonLabel "Apply"
-        :abortButtonLabel "Select All"
-        :abortButtonAction
-          (list 'h871-pf-mt-select-all-for-browser browser-name)
-        :buttonMenu
-          (list
-            (list "select-all"
-              :label "Select All"
-              :push (list 'h871-pf-mt-select-all-for-browser browser-name))
-            (list "clear-selection"
-              :label "Clear Selection"
-              :push (list 'h871-pf-mt-clear-selection-for-browser browser-name)))
-        :buttonMenuOffObjectOnly nil
-        :topMenu
-          (list
-            (list "selection"
-              :label "Selection"
-              :contents
-                (list
-                  (list "select-all"
-                    :label "Select All"
-                    :push (list 'h871-pf-mt-select-all-for-browser browser-name))
-                  (list "clear-selection"
-                    :label "Clear Selection"
-                    :push (list 'h871-pf-mt-clear-selection-for-browser browser-name))
-                  (list "selection-summary"
-                    :label "Update Selection Count"
-                    :push (list 'h871-pf-mt-show-selection-summary-for-browser browser-name)))))
-        ;; PTC Graphical Browser option: dock each Density-pair browser as its own tab.
-        :createAsTab t
-        :tabname tabname)
-      (sd-display-error "H871: Could not create the results browser.")
-      (return-from h871-pf-mt-open-results-browser nil))
-    (h871-pf-mt-trace "BROWSER:AFTER-CREATE-BROWSER")
+  (unless
+    (sd-create-graphical-browser
+      *h871-pf-mt-browser-name*
+      :tree *h871-pf-mt-tree-name*
+      :topLabel "H871 - PART FILTER RESULTS"
+      :treeStatusBar
+        (format nil "Matched ~A Part(s). Select rows; Ctrl-click adds/removes."
+          (length *h871-pf-mt-results*))
+      :minHeight 280
+      :maxWidth 900
+      :maxHeight 760
+      ;; Native footer controls in the original Graphical Browser window.
+      ;; Keep Creo's native OK action: it already performs
+      ;; :select-and-execute on the browser's selected rows.
+      ;; Do not wrap it in a callback that immediately reopens the
+      ;; browser after Creo has handed off and cleared the selection.
+      :okButtonLabel "Apply"
+      :abortButtonLabel "Select All"
+      :abortButtonAction '(h871-pf-mt-select-all)
+      :buttonMenu
+        '(("select-all"
+           :label "Select All"
+           :push (h871-pf-mt-select-all))
+          ("clear-selection"
+           :label "Clear Selection"
+           :push (h871-pf-mt-clear-selection)))
+      :buttonMenuOffObjectOnly nil
+      :topMenu
+        '(("selection"
+           :label "Selection"
+           :contents
+             (("select-all"
+               :label "Select All"
+               :push (h871-pf-mt-select-all))
+              ("clear-selection"
+               :label "Clear Selection"
+               :push (h871-pf-mt-clear-selection))
+              ("selection-summary"
+               :label "Update Selection Count"
+               :push (h871-pf-mt-show-selection-summary))))))
+    (sd-display-error "H871: Could not create the results browser.")
+    (return-from h871-pf-mt-open-results-browser nil))
 
-    (unless
-      (sd-browser-define-table
-        browser-name
-        :table-name "h871-pf-mt-bom"
-        :with-name-column nil
-        :column-definition
-          '(;; :initial-width values are character counts, not pixels.
-            (:label "Part Name"
-             :type :string-column
-             :display-func h871-pf-mt-column-name
-             :initial-width 28)
-            (:label "Density Instance"
-             :type :string-column
-             :display-func h871-pf-mt-column-instance
-             :initial-width 13)
-            (:label "Density Base"
-             :type :string-column
-             :display-func h871-pf-mt-column-base
-             :initial-width 12)
-            (:label "Assembly Path"
-             :type :string-column
-             :display-func h871-pf-mt-column-path
-             :initial-width 42)))
-      (sd-display-error "H871: Could not create the BOM result table.")
-      (return-from h871-pf-mt-open-results-browser nil))
+  (unless
+    (sd-browser-define-table
+      *h871-pf-mt-browser-name*
+      :table-name "h871-pf-mt-bom"
+      :with-name-column nil
+      :column-definition
+        '(;; :initial-width values below are character counts, not pixels.
+          (:label "Part Name"
+           :type :string-column
+           :display-func h871-pf-mt-column-name
+           :initial-width 28)
+          (:label "Density Instance"
+           :type :string-column
+           :display-func h871-pf-mt-column-instance
+           :initial-width 13)
+          (:label "Density Base"
+           :type :string-column
+           :display-func h871-pf-mt-column-base
+           :initial-width 12)
+          (:label "Assembly Path"
+           :type :string-column
+           :display-func h871-pf-mt-column-path
+           :initial-width 42)))
+    (sd-display-error "H871: Could not create the BOM result table.")
+    (return-from h871-pf-mt-open-results-browser nil))
 
-    (sd-browser-set-active-table browser-name :table-name "h871-pf-mt-bom")
-    (sd-browser-exec-cmd browser-name :set-table-mode)
-    (sd-show-graphical-browser browser-name)
-    (h871-pf-mt-trace "BROWSER:AFTER-SHOW")
-    (let ((root (sd-get-browsernode-struct tree-name :root)))
-      (when root
-        (sd-browser-exec-cmd browser-name :change-table-root root t)))
-    t))
+  (sd-browser-set-active-table
+    *h871-pf-mt-browser-name* :table-name "h871-pf-mt-bom")
+  (sd-browser-exec-cmd *h871-pf-mt-browser-name* :set-table-mode)
+  (sd-show-graphical-browser *h871-pf-mt-browser-name*)
+
+  ;; Root node is the table root; the table displays all matching Parts.
+  (let ((root (sd-get-browsernode-struct *h871-pf-mt-tree-name* :root)))
+    (when root
+      (sd-browser-exec-cmd
+        *h871-pf-mt-browser-name* :change-table-root root t)))
+  t)
 
 ;; ------------------------------------------------------------
 ;; Report and search action
@@ -346,68 +308,32 @@
           (sd-inq-part-density part :contents))))
     report))
 
-(defun h871-pf-mt-process-label (value)
-  (case value
-    (1 "CNC") (2 "KH") (3 "CG") (4 "COVER")
-    (otherwise (format nil "PROCESS-~A" value))))
-
-(defun h871-pf-mt-material-label (value)
-  (case value
-    (6061 "A6061") (201 "SUS201") (304 "SUS304") (400 "SS400")
-    (10 "POM") (20 "Bakelit") (30 "MC") (40 "MIKA") (50 "PU")
-    (otherwise (format nil "MATERIAL-~A" value))))
-
 (defun h871-pf-mt-run (assembly requested-instance requested-base)
-  (h871-pf-mt-trace "RUN:BEGIN")
   (setf *h871-pf-mt-diagnostic-samples* nil)
   (setf *h871-pf-mt-results-assembly* assembly)
   (setf *h871-pf-mt-requested-instance* requested-instance)
   (setf *h871-pf-mt-requested-base* requested-base)
-  (h871-pf-mt-trace "RUN:BEFORE-COLLECT")
-  (setf *h871-pf-mt-last-results*
-    (h871-pf-mt-collect assembly nil requested-instance requested-base))
-  (h871-pf-mt-trace "RUN:AFTER-COLLECT")
-  (let* ((report
-           (h871-pf-mt-write-report
-             assembly *h871-pf-mt-last-results*
-             requested-instance requested-base))
-         (key (format nil "~A-~A" requested-instance requested-base))
-         (browser-name (format nil "h871-pf-mt-browser-~A" key))
-         (tree-name (format nil "h871-pf-mt-tree-~A" key))
-         (tabname
-           (format nil "~A-~A"
-             (h871-pf-mt-process-label requested-instance)
-             (h871-pf-mt-material-label requested-base)))
-         (old-session (h871-pf-mt-find-session key)))
-    (h871-pf-mt-trace "RUN:AFTER-REPORT")
-    (if (null *h871-pf-mt-last-results*)
+  (setf *h871-pf-mt-results*
+    (h871-pf-mt-collect
+      assembly nil requested-instance requested-base))
+  (let ((report
+          (h871-pf-mt-write-report
+            assembly *h871-pf-mt-results*
+            requested-instance requested-base)))
+    (if (null *h871-pf-mt-results*)
         (sd-display-message
           (format nil
             "No Parts matched Density Instance ~A and Density Base ~A.~%Report: ~A"
             requested-instance requested-base (namestring report)))
       (progn
-        ;; A repeated pair replaces only its own tab's result set.
-        (when old-session
-          (ignore-errors (sd-hide-graphical-browser (getf old-session :browser)))
-          (ignore-errors (sd-destroy-graphical-browser (getf old-session :browser)))
-          (ignore-errors (sd-destroy-browser-tree (getf old-session :tree)))
-          (setf *h871-pf-mt-sessions*
-            (remove old-session *h871-pf-mt-sessions* :test 'eq)))
-        (push
-          (list :key key
-                :browser browser-name
-                :tree tree-name
-                :tabname tabname
-                :assembly assembly
-                :instance requested-instance
-                :base requested-base
-                :results *h871-pf-mt-last-results*)
-          *h871-pf-mt-sessions*)
-        (h871-pf-mt-trace "RUN:BEFORE-OPEN-BROWSER")
-        (unless (h871-pf-mt-open-results-browser key)
+        (unless (h871-pf-mt-open-results-browser)
           (return-from h871-pf-mt-run nil))
-        (h871-pf-mt-trace "RUN:AFTER-OPEN-BROWSER")))
-    (values (length *h871-pf-mt-last-results*) report)))
+        (sd-browser-set-status-text
+          *h871-pf-mt-browser-name*
+          :value (format nil
+            "~A matching Part(s). Select rows; use Select All/Clear Selection buttons."
+            (length *h871-pf-mt-results*)))))
+    (values (length *h871-pf-mt-results*) report)))
 
 ;; ------------------------------------------------------------
 ;; Dialog entry point - ver-03-rebuild baseline
@@ -432,7 +358,7 @@
 ;; compatibility with Modeling 18.1 can be verified.
 ;;
 (sd-defdialog 'h871_part_filter_ver_03_stage1
-  :dialog-title "H871 - PART FILTER VER-03 STAGE 1 - MULTI FILTER TABS"
+  :dialog-title "H871 - PART FILTER VER-03 STAGE 1 DIAGNOSTIC BASELINE"
   :variables
   '(
     ("ASSEMBLY")
