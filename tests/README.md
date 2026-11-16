@@ -21,15 +21,29 @@ Store sanitized test assets and repeatable test procedures here. Do not commit c
 9. Search an Assembly with no matches and confirm the normal no-match message.
 10. For ver-02, verify CNC/KH/CG/COVER and Material mapping values, display-only code fields and default CNC + SUS304 (1/304).
 
-## ver-03 internal-tab validation plan
-1. Confirm exactly one separate Results Browser window is created.
-2. Create first page for Density pair 1/304, caption `SUS304-CNC`.
-3. Search pair 2/6061; confirm a second page appears in the same window, caption `A6061-KH`.
-4. Search 1/304 again; confirm the existing page refreshes and no duplicate appears.
-5. Switch pages; verify each page's result list remains isolated.
-6. Verify row selection and Select All are page-specific.
-7. Apply from one page; confirm only selected Parts from the active page transfer to Modeling selection.
-8. Run a no-match search; verify existing valid pages remain intact.
-9. Repeat baseline tests after every UI change.
+## ver-03 internal-tab prototype validation plan
+
+Source: `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`
+
+1. Load the file in Creo Elements/Direct Modeling 18.1 and confirm no LOAD-time errors.
+2. Run `H871_PART_FILTER_VER_03` and search CNC + SUS304.
+   - Expected: one Results window with internal tab `SUS304-CNC`.
+3. Search KH + A6061.
+   - Expected: tab `A6061-KH` appears inside the same Results window.
+4. Search CNC + SUS304 again.
+   - Expected: existing `SUS304-CNC` page refreshes; no duplicate tab.
+5. Switch pages; verify each page's result list is isolated.
+6. Select individual/multiple rows; verify selected count is page-specific.
+7. Use Select All and Clear Selection on each page.
+8. Run a no-match search; verify existing valid pages/results remain unchanged.
+9. Record exact runtime errors and the action that caused them.
+
+**Not yet in this prototype:** Apply to Modeling selection. Do not mark that acceptance item as passed or use ver-03 for production selection until a Modeling 18.1 hand-off is implemented and tested.
+
+## ver-03 production acceptance (future gate)
+1. Confirm a verified Modeling 18.1 method to transfer the selected real Part objects from the active UICT page to Modeling selection.
+2. Add Apply only after that method is demonstrated.
+3. Confirm Apply transfers only the active page's selected Parts.
+4. Repeat the ver-01/ver-02 row selection and native Apply regression tests.
 
 No automated Creo runtime harness or sanitized CAD fixture is currently committed. Never describe source/static review as a runtime test.
