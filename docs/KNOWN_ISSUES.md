@@ -117,3 +117,7 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - Do not fall back to a second Results window, UICT launcher, hidden Browser bridge, or custom Apply callback to solve these issues.
 - Use a disposable model copy. If Search crashes, capture the exact ver-05 trace and error before changing traversal; retain ver-02's known-working recursive collector until evidence indicates otherwise.
 
+### KI-015 follow-up – horizontal modeMenu compatibility
+
+ver-05 now uses Graphical Browser `:modeMenu` as a horizontal page-button row. The detailed API reference found is for a later Elements/Direct release, not 18.1. Confirm that the mode menu is accepted, page buttons render horizontally, switching invokes the correct page callback, and the active button state follows the selected page. If the modeMenu is unsupported, retain the same single Browser and use the existing popup selector while investigating a verified 18.1-compatible horizontal UI. Do not create a second Results window.
+
