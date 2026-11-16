@@ -97,3 +97,35 @@ A new `NIL is not of type STRING` runtime failure occurred before the Results wi
 ## 2026-11-16 – recover partially-created Results UI
 
 The user retested the callback-guard revision and still received the same NIL-is-not-of-type-STRING error before the Results window appeared. A second control-flow review found a separate initialization flaw: h871-pf-v03-create-shell previously grouped shell, grid-area and tab-control creation inside one unless sd-dialog-shell-p check. If an earlier failed attempt left the dialog shell alive but did not finish creating its grid or tab control, every later search skipped all child-control creation and attempted to insert a page into a missing tab control. This is consistent with a repeatable failure after reloads/retries. The function now checks and creates the shell, grid area and tab control independently using the documented generic sd-control-p check, preserving any valid layer already present. The tab callback is also now passed as a function object (#'...) matching PTC's official UICT tab examples. This is a source-level correction; Modeling 18.1 runtime confirmation is still required.
+
+
+
+## 2026-11-16 – Runtime milestone: Results UI works; Apply BrowserNode type error
+
+User tested the latest instrumented source after restarting Modeling in a new window/session. Confirmed working:
+- One Results window is created.
+- Internal tabs are created for the searched Density pairs.
+- The result table is populated with Part Name, Density Instance, Density Base and other configured columns.
+- The Apply button is present.
+
+New runtime failure occurs only after pressing Apply:
+
+`LISP error: #:NODE241 is not of type "BROWSERNODE".`
+
+### Evidence from source comparison
+
+The ver-03 Apply bridge currently stores the direct return value of each `sd-create-browsernode` call in `*h871-pf-v03-apply-nodes*`, then passes each stored value directly to:
+
+`(sd-browser-exec-cmd ... :set-object-selection node t)`
+
+The runtime error identifies the supplied value as an uninterned symbol (`#:NODE241`), while the operation requires a BrowserNode object. This strongly localizes the defect to the conversion/lookup between BrowserNode creation and BrowserNode selection. It is not a Density filter, Display Table creation, tab creation, or Results population failure.
+
+### Required next investigation
+
+- Inspect the exact return contract of `sd-create-browsernode` in the Modeling 18.1 Integration Kit, not just later-version examples.
+- Compare how ver-02 obtains actual BrowserNode structures after creating its tree. In ver-02, selected nodes are obtained from `sd-query-browser ... :get-selected-objects`; it does not assume that a creation token is itself a BrowserNode structure.
+- Determine the supported way to resolve the returned node identifier to a BrowserNode structure (potentially via the tree's node lookup API) before calling `:set-object-selection`.
+- Do not pass `#:NODE...` tokens directly to APIs requiring `BROWSERNODE`.
+- Keep the ver-02 native selection-and-execute flow as the reference behavior. Do not alter numeric Density matching or the now-working Results UI while repairing Apply.
+
+Status: Results UI runtime-confirmed by user. Apply remains failed and unverified. This is a high-confidence localization from the exact runtime type error and source call path; the exact 18.1 node-resolution API still needs authoritative verification.
