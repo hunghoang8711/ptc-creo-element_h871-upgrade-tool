@@ -188,7 +188,9 @@
              (node (and node-id
                         (sd-get-browsernode-struct
                           *h871-pf-v05-tree* node-id)))
-             (root-set nil))
+             (clear-roots-status nil)
+             (root-set nil)
+             (root-count nil))
         (unless node
           (h871-pf-v05-trace "PAGE/ROOT-NOT-FOUND" page-name)
           (return-from h871-pf-v05-activate-page nil))
@@ -198,17 +200,25 @@
         ;; Buffer redraws so the root switch is one visual update.
         (sd-browser-exec-cmd *h871-pf-v05-browser* :buffer-display t)
         (sd-browser-exec-cmd *h871-pf-v05-browser* :clear-select-list)
-        (sd-browser-exec-cmd *h871-pf-v05-browser* :clear-table-roots)
-        (setf root-set
-          (sd-browser-exec-cmd
-            *h871-pf-v05-browser* :change-table-root node t))
+        (setf clear-roots-status
+          (sd-browser-exec-cmd *h871-pf-v05-browser* :clear-table-roots))
+        (when clear-roots-status
+          (setf root-set
+            (sd-browser-exec-cmd
+              *h871-pf-v05-browser* :change-table-root node t)))
         (sd-browser-exec-cmd *h871-pf-v05-browser* :buffer-display nil)
+        ;; The query is diagnostic only; do not let an unsupported query
+        ;; prevent the native Browser from completing the page transition.
+        (setf root-count
+          (ignore-errors
+            (sd-query-browser
+              *h871-pf-v05-browser* :number-of-table-roots)))
         (h871-pf-v05-trace
           "PAGE/CHANGE-ROOT"
-          (list page-name root-set
-                (sd-query-browser
-                  *h871-pf-v05-browser* :number-of-table-roots)))
-        (unless root-set
+          (list page-name clear-roots-status root-set root-count))
+        ;; Fail closed: never activate a page if its previous roots could
+        ;; not be cleared or the requested root could not be set.
+        (unless (and clear-roots-status root-set)
           (return-from h871-pf-v05-activate-page nil)))
       (setf *h871-pf-v05-current-page* page-name)
       (dolist (part-path (getf entry :selected-paths))
