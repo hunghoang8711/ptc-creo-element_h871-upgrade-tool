@@ -194,6 +194,8 @@
     (sd-create-graphical-browser
       *h871-pf-mt-browser-name*
       :tree *h871-pf-mt-tree-name*
+      ;; Isolated compatibility experiment: request tab presentation for this one browser.
+      :createAsTab t
       :topLabel "H871 - PART FILTER RESULTS"
       :treeStatusBar
         (format nil "Matched ~A Part(s). Select rows; Ctrl-click adds/removes."
