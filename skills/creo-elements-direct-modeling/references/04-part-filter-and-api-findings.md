@@ -92,3 +92,10 @@ The same Browser keeps the default native Apply action (no custom :okButtonActio
 
 The latest ver-05 source generates a Graphical Browser `:modeMenu` row with one page button per Density pair and sets the initial active page button. This is intended as the horizontal in-window page selector. The detailed PTC reference is later-release documentation; Modeling 18.1 compatibility is unverified. Do not confuse this with `:createAsTab` / Browser Bar docking, which is not the requested internal page UI.
 
+
+
+## 2026-11-16 – ver-05 table-root isolation correction
+
+The ver-05 page activation path must clear the previous Graphical Browser table root before setting the next one. PTC's 20.6 reference shows the buffered sequence :buffer-display t, :clear-table-roots, :change-table-root, :buffer-display nil. Without clearing roots, rows from multiple pages may be shown together and page-scoped Apply is unsafe.
+
+ver-05 now also clears the Browser selection before changing roots and logs :number-of-table-roots. Require the trace to report exactly one root after each page switch. This is a source-level fix only; Modeling 18.1 runtime behavior remains pending.
