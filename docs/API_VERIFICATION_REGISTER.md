@@ -128,3 +128,10 @@ Do not infer full VER-05 runtime compatibility from the individual VER-02 API pr
 | H871 Graphic/Manager window | User-confirmed runtime, 2026-11-16 | Window appears separately in a screen corner, but is too small to read all information. Layout/readability remains an open UI issue; exact sizing API/signature must be verified before modification. |
 
 Trace evidence for the tested filter: COLLECT/PROGRESS reached 500 and COLLECT/COMPLETE | (0 530) was recorded. Do not infer undocumented meanings for the tuple. No fatal exception was reported during this test; this does not conclusively resolve all earlier 0xc00000fd reports.
+
+
+## VER-05 – Manager grid geometry and sizing units
+
+PTC Integration Kit UICT documentation for later releases describes `:width` and `:height` of `sd-append-grid-area` in pixels, while child control coordinates and dimensions are expressed in the grid coordinate system. The cell size defines pixels per grid unit. This distinction explains the VER-05 Manager clipping: a 112 × 82 pixel grid with 10 × 10 pixel cells provides only about 11 × 8 grid units, although the two-column child layout extends to about 112 × 75 grid units.
+
+The VER-05 Manager grid dimensions were corrected to 1120 × 820 pixels while retaining `:cellSize 10,10`. This is a source-level correction based on the documented units; actual appearance and exact 18.1 behavior still require runtime confirmation. The API evidence remains later-release documentation, not proof of a new 18.1 API.
