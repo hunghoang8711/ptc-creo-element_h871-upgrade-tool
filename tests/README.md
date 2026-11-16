@@ -68,3 +68,10 @@ No automated Creo runtime harness or sanitized CAD fixture is currently committe
 A retest showed the empty logical-table error persisted. Root cause in the first recovery patch: Common Lisp treats the empty string as truthy, so `(or stored-name fallback-name)` incorrectly retained an explicitly empty `:logical-table` value. The refresh code now accepts the stored name only when it is a string with length greater than zero; otherwise it derives the name from the non-empty page ID. This directly addresses the reported `name ""` case. Modeling 18.1 runtime retest is still required.
 
 Regression test: load the latest source after a prior ver-03 session where old page state may remain, then search again. Expected: empty table name is replaced by the deterministic name derived from the tab ID. Repeat the same pair to test refresh.
+
+
+## 2026-11-16 – ver-03 numeric filter regression check
+- Expected test: choose CNC and SUS304; search inputs passed to the filter must be numeric `1` and `304`, not strings or caption `CNC-SUS304`.
+- Expected tab caption: `CNC-SUS304`.
+- Numeric guard should reject missing/non-numeric inputs before Results UI creation.
+- Still pending: identify the runtime call causing `NIL is not of type STRING` if it occurs after valid numeric inputs.
