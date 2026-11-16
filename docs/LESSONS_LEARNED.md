@@ -122,3 +122,6 @@ Use the PTC documented buffered sequence:
 5. :buffer-display nil
 
 Then query :number-of-table-roots and require exactly 1. This is now implemented in ver-05; Modeling 18.1 runtime verification remains required.
+
+
+LL-016 follow-up: treat clear-roots and set-root return values as mandatory gates. Do not mark a page active unless both succeed. Optional diagnostic queries must not be allowed to break the core page transition; guard them and retain the primary command results in the trace.
