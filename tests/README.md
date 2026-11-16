@@ -75,3 +75,11 @@ Regression test: load the latest source after a prior ver-03 session where old p
 - Expected tab caption: `CNC-SUS304`.
 - Numeric guard should reject missing/non-numeric inputs before Results UI creation.
 - Still pending: identify the runtime call causing `NIL is not of type STRING` if it occurs after valid numeric inputs.
+
+
+## 2026-11-16 – first tab initialization regression
+- Reproduce with CNC + SUS304; before Results appears, verify no `NIL is not of type STRING` error.
+- First tab callback may occur before page registration; it must safely no-op until the page's table/status handles exist.
+- Confirm numeric search remains Density Instance `1`, Density Base `304`, with `/1000.0` normalization and caption `CNC-SUS304`.
+- Verify other mapped pairs and existing-tab refresh after the first successful Results creation.
+- Runtime test pending in Modeling 18.1.
