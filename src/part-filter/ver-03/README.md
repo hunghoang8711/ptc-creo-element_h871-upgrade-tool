@@ -87,3 +87,8 @@ A retest showed the empty logical-table error persisted. Root cause in the first
 - Corrected ver-03 tab caption order from `SUS304-CNC` to `CNC-SUS304`.
 - Added an early numeric-input guard in the search entry point. Missing/non-numeric dialog values now produce a clear diagnostic before scanning or creating the Results UI.
 - This does not yet identify the reported `NIL is not of type STRING` source. The numeric mapping is now explicit and guarded; Modeling 18.1 runtime retest is required to identify the failing UI/API call if that error persists.
+
+
+## 2026-11-16 – guard tab initialization callback
+
+A new `NIL is not of type STRING` runtime failure occurred before the Results window appeared. Review against the ver-02 filter flow identified an initialization-order hazard specific to ver-03: `sd-insert-tab-control-page` can invoke the tab-change callback while the page is still being created, before its registry entry and table/status handles have been registered. The old callback immediately called `sd-get-display-table-selection` with the missing table handle. The callback/status path now validates page, table and status handles and safely does nothing until the page registry exists. The recursive filter also now explicitly skips Parts with NIL Density Instance/Base, matching ver-02's null-safe matching semantics. Runtime validation in Modeling 18.1 is still required.
