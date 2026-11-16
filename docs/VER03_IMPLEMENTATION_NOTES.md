@@ -80,3 +80,8 @@ References:
 - Updated refresh logic to derive the deterministic logical-table name from the page ID when metadata is missing; reject blank names; check `sd-logical-table-p`; recreate a missing logical table; verify the Display Table's logical-table binding; and recreate a stale Display Table control when necessary.
 - Improved the refresh error to include the actual logical-table identifier.
 - Static source update committed; requires a fresh Modeling 18.1 runtime test. No claim of runtime resolution until user confirms.
+
+
+## ver-03.2 follow-up – explicitly reject empty-string metadata
+
+A retest showed the empty logical-table error persisted. Root cause in the first recovery patch: Common Lisp treats the empty string as truthy, so `(or stored-name fallback-name)` incorrectly retained an explicitly empty `:logical-table` value. The refresh code now accepts the stored name only when it is a string with length greater than zero; otherwise it derives the name from the non-empty page ID. This directly addresses the reported `name ""` case. Modeling 18.1 runtime retest is still required.
