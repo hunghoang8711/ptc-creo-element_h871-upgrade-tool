@@ -121,3 +121,14 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 
 ver-05 now uses Graphical Browser `:modeMenu` as a horizontal page-button row. The detailed API reference found is for a later Elements/Direct release, not 18.1. Confirm that the mode menu is accepted, page buttons render horizontally, switching invokes the correct page callback, and the active button state follows the selected page. If the modeMenu is unsupported, retain the same single Browser and use the existing popup selector while investigating a verified 18.1-compatible horizontal UI. Do not create a second Results window.
 
+
+
+## KI-016 – ver-05 page switching could retain multiple table roots (2026-11-16)
+
+Symptom/risk: ver-05 switched to a new page by calling :change-table-root without clearing the previous table root. Graphical Browser supports multiple table roots; previous page rows could remain visible alongside the active page. This would also make Select All and native Apply unsafe because they operate on visible/selected BrowserNodes.
+
+Correction: h871-pf-v05-activate-page now buffers redraw, clears selection, calls :clear-table-roots, sets only the requested page root, resumes redraw and logs :number-of-table-roots.
+
+Evidence: source-level defect is confirmed. The clear-roots command sequence is documented in PTC Graphical Browser 20.6; exact Modeling 18.1 behavior remains unverified.
+
+Required runtime test: after every page switch, confirm only the active page's rows are visible and the trace reports exactly one table root. Then select one/multiple rows and verify native Apply selects only those Parts in the 3D viewport. Test on a disposable Assembly copy.
