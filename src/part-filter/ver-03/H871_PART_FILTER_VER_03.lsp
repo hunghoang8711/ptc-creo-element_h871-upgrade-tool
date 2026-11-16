@@ -147,7 +147,7 @@
           (h871-pf-v03-name part)
           (h871-pf-v03-density-display-value
             (sd-inq-part-density part :instance))
-          (sd-inq-part-density-display-value
+          (h871-pf-v03-density-display-value
             (sd-inq-part-density part :contents))
           (h871-pf-v03-path part)
           part)
