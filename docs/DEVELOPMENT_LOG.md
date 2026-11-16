@@ -304,3 +304,12 @@ COLLECT/COMPLETE | (0 530)
 Collection reached its completion marker after visiting progress milestones through 500; final reported tuple is (0 530). Its fields are not interpreted because their exact meaning is not established. No fatal exception was reported in this test. This is positive runtime evidence for this tested case, not proof that the previously reported 0xc00000fd is universally resolved.
 
 **Status:** native multi-Browser selection/Apply is now user-confirmed in Modeling 18.1 for the tested workflow. Manager readability and the remaining multi-window lifecycle regression cases are still open.
+
+
+## 2026-11-16 – VER-05 H871 Graphic/Manager sizing correction
+
+After the user confirmed native multi-Browser selection and Apply, the next reported issue was that the separate H871 Graphic/Manager window appeared too small to read. Source inspection found a unit mismatch: `sd-append-grid-area` was configured as 112 × 82 pixels, but child control positions/sizes were authored in grid units with `:cellSize 10,10`. The two-column layout uses coordinates up to roughly 112 × 75 grid units, so the original pixel area exposed only about 11 × 8 grid units.
+
+Changed only the Manager grid area's pixel dimensions to 1120 × 820. Kept the cell size, control coordinates, row arrangement, filter logic, per-Browser callbacks, independent Graphical Browser windows and native Apply path unchanged.
+
+The sizing change is committed but awaits user runtime confirmation in Modeling 18.1. Acceptance: Manager displays all populated rows and Open buttons without clipping and the text is readable; verify Browser selection and native Apply still behave exactly as before.
