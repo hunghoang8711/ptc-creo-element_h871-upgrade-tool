@@ -132,3 +132,6 @@ Correction: h871-pf-v05-activate-page now buffers redraw, clears selection, call
 Evidence: source-level defect is confirmed. The clear-roots command sequence is documented in PTC Graphical Browser 20.6; exact Modeling 18.1 behavior remains unverified.
 
 Required runtime test: after every page switch, confirm only the active page's rows are visible and the trace reports exactly one table root. Then select one/multiple rows and verify native Apply selects only those Parts in the 3D viewport. Test on a disposable Assembly copy.
+
+
+KI-016 follow-up: ver-05 now checks that :clear-table-roots and :change-table-root both succeed before considering the page active. If either fails, it stops page activation (fail-closed) instead of risking mixed results. The table-root count inquiry is diagnostic-only and guarded with ignore-errors. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4.
