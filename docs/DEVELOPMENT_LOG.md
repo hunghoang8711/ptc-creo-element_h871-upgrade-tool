@@ -202,3 +202,14 @@ Resolved:
 - Intended result: temporary bridge is shown only while Apply runs and disappears immediately after a successful hand-off, leaving the 3D Part selection intact. This refinement is NOT YET runtime-tested; verify viewport selection remains after the bridge hides and that repeated Apply still works.
 - Source commit: `0076b6cbca7e6b18d823db4f8dc7f84082795f27`.
 - Do not merge to main until the post-handoff hide behavior and repeat-Apply behavior are confirmed in Modeling 18.1.
+
+
+## 2026-11-16 – Apply bridge hide call did not close the window; try explicit destroy
+
+- User tested source commit `0076b6cbca7e6b18d823db4f8dc7f84082795f27`: the Apply bridge appears and its Apply action correctly selects the intended Part in the 3D viewport, but the bridge window remains visible afterward.
+- This proves the selection hand-off remains successful, but the prior post-handoff `sd-hide-graphical-browser` call did not achieve the intended UI cleanup in the user's Modeling 18.1 runtime.
+- Narrow follow-up on the isolated debug branch: after the successful `:select-and-execute` hand-off, explicitly call `sd-destroy-graphical-browser` for the temporary bridge and then `sd-destroy-browser-tree` for its temporary tree. Both cleanup calls are guarded with `ignore-errors` so a cleanup failure cannot undo or interrupt the already-completed Part selection.
+- Added trace markers `APPLY/DESTROY-BRIDGE-AFTER-HANDOFF` and `APPLY/DESTROY-BRIDGE-TREE-AFTER-HANDOFF`.
+- No change to UICT Results tables/tabs, selection extraction, Density matching, or the native hand-off sequence before it completes.
+- Source commit: `c1f6f79ba6e53147d93bfd4c32d8ce119994c1c6`.
+- Runtime status: NOT TESTED. User must verify (1) Part remains selected in 3D, (2) bridge window closes, and (3) a second Apply works. Do not merge to main until confirmed.
