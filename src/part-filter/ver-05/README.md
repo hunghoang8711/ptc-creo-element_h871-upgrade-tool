@@ -1,3 +1,5 @@
+> **ARCHITECTURE WARNING – NOT THE ACCEPTED FINAL UI:** This branch currently implements one Graphical Browser per machining-process/material pair. That is why each filter result opens a separate Part List window. This is a deliberate multi-Browser experiment, but it does **not** satisfy the user's required design of one shared Results window containing internal tabs. Do not describe the current multi-Browser layout as the completed VER-05 target. See the 2026-11-16 architecture correction in the Development Log.
+
 # H871 Part Filter VER-05 – VER-03 Filter + Native Multi-Browser Manager
 
 Target: PTC Creo Elements/Direct Modeling 18.1
@@ -121,3 +123,19 @@ Static layout review found a pixel/grid-unit mismatch in the Manager's grid area
 Changed only the Manager grid-area pixel dimensions to 1120 × 820, preserving the 10 × 10 cell size, all child-control coordinates, two-column arrangement, pair callbacks and native Browser implementation.
 
 **Runtime status:** source change committed; not yet tested in Modeling 18.1. Confirm that all Manager rows/buttons are visible and legible at the new size. Do not treat the sizing correction as runtime-verified until the user tests it.
+
+
+## Architecture correction – 2026-11-16
+
+The user retested the current branch and confirmed that every machining-process/material pair still opens its own Part List window. A full source inspection confirms this is expected from the current implementation, not a rendering glitch:
+
+- `h871-pf-v05-run` calls `h871-pf-v05-create-browser` for every successful filter pair.
+- `h871-pf-v05-create-browser` allocates a new Graphical Browser and Browser Tree for that pair.
+- The Manager's Open button calls `sd-show-graphical-browser` for that pair's stored Browser.
+- The source has no shared Results tab control and no internal page/tab registry.
+
+This conflicts with the user's accepted UI requirement: one `H871 - PART FILTER RESULTS` window with internal tabs. Each unique pair creates one tab; repeating a pair refreshes its existing tab; different pairs do not create extra top-level windows.
+
+The current multi-Browser implementation is therefore a proven native Apply experiment, not the accepted final UI architecture. Preserve its native Browser Apply findings as reference material, but do not extend the Manager/Open-per-pair approach as the final solution.
+
+A replacement design must first establish a single top-level Results window and internal pair tabs, then validate a visible Apply workflow without reintroducing a hidden Browser bridge. The old VER-03 source contains the intended single-shell/tab-control structure, but its Display Table/Apply behavior must not be assumed compatible or stable in Modeling 18.1 merely because the tab layout exists. Port only after reviewing the exact known-good native selection behavior and validating each API in the target release.
