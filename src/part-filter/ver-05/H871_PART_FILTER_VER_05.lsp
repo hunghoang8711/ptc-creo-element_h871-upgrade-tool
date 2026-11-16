@@ -6,14 +6,14 @@
 ;; - One standalone Results Graphical Browser owns all result pages.
 ;; - The same visible Browser owns row selection and native Apply.
 ;; - Search, page registry, page navigation and result rows are self-contained;
-;;   no ver-03 UICT Results window or hidden Browser bridge is involved.
+;;   no separate Results window or hidden Browser bridge is involved.
 ;; - One Browser Tree has one page root per numeric Density pair.
 ;; - Previous/Next and a Results Pages popup switch the active page root.
 ;; - Page-local selection paths are restored in the same visible Browser.
 ;;
-;; UI note: horizontal tab-strip rendering is not yet implemented; this
-;; version provides multiple pages in one Results window without an extra
-;; Results-window transition. The horizontal tab UI remains a separate task.
+;; UI note: the modeMenu is used as a horizontal page-button strip inside the
+;; same Browser. Its exact behavior must be checked in Modeling 18.1 because
+;; the accessible detailed PTC reference is from a later release.
 ;; Search predicate, numeric normalization and mappings follow ver-02.
 ;; ============================================================================
 
@@ -382,6 +382,24 @@
         (push new-entry *h871-pf-v05-pages*)
         page-name))))
 
+(defun h871-pf-v05-page-mode-button-name (entry)
+  (format nil "PAGE-~A" (getf entry :page)))
+
+(defun h871-pf-v05-page-mode-menu ()
+  ;; Graphical Browser modeMenu is a horizontal row of mutually exclusive
+  ;; mode buttons. Build one page button for each stored Density-pair page.
+  (mapcar
+    (lambda (entry)
+      (list
+        (h871-pf-v05-page-mode-button-name entry)
+        :label (getf entry :label)
+        :push (list 'h871-pf-v05-activate-page (getf entry :page))))
+    (reverse *h871-pf-v05-pages*)))
+
+(defun h871-pf-v05-current-mode-button ()
+  (let ((entry (h871-pf-v05-page-by-name *h871-pf-v05-current-page*)))
+    (and entry (h871-pf-v05-page-mode-button-name entry))))
+
 (defun h871-pf-v05-rebuild-results-browser ()
   ;; Rebuild one named Browser and one named Tree; never create a second
   ;; visible Results window or a hidden selection bridge.
@@ -399,15 +417,16 @@
       :tree *h871-pf-v05-tree*
       :topLabel "H871 - PART FILTER RESULTS"
       :treeStatusBar "Select Parts directly; Apply transfers the native Browser selection to Modeling."
-      :tableStatusBar "Use Previous/Next or right-click > Results Pages to switch Density-pair pages."
+      :tableStatusBar "Select a page using the horizontal Results Pages buttons or right-click > Results Pages."
+      :modeMenuLabel "Results Pages"
+      :modeMenu (h871-pf-v05-page-mode-menu)
+      :modeMenuInitialButton (h871-pf-v05-current-mode-button)
       :minHeight 280 :maxWidth 980 :maxHeight 760
       :okButtonLabel "Apply"
       :abortButtonLabel "Close Results"
       :abortButtonAction '(h871-pf-v05-close-results)
       :buttonMenu
-        '(( "previous-page" :label "Previous Page" :push (h871-pf-v05-previous-page))
-          ( "next-page" :label "Next Page" :push (h871-pf-v05-next-page))
-          ( "select-all" :label "Select All" :push (h871-pf-v05-select-all))
+        '(( "select-all" :label "Select All" :push (h871-pf-v05-select-all))
           ( "clear-selection" :label "Clear Selection" :push (h871-pf-v05-clear-selection))))
     (ignore-errors (sd-destroy-browser-tree *h871-pf-v05-tree*))
     (sd-display-error "H871: Could not create the single Results Browser.")
