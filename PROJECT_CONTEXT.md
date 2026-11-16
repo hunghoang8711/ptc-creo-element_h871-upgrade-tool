@@ -3,7 +3,7 @@
 **Last consolidated:** 2026-11-16  
 **Target application:** PTC Creo Elements/Direct Modeling 18.1  
 **Shared branch:** `main`  
-**Current focus:** ver-03 internal-tab Results UI prototype; runtime compatibility and Apply hand-off validation pending.
+**Current focus:** preserve ver-02 native Apply while validating a single-Graphical-Browser multi-page architecture; ver-03 UICT Apply remains unresolved.
 
 ## 1. Product goal
 
@@ -15,12 +15,13 @@ Build reliable, reusable LISP tools for Creo Elements/Direct Modeling 18.1. The 
 |---|---|---|
 | ver-01 | Numeric Density Instance + Base filter with standalone Graphical Browser | User-confirmed working baseline |
 | ver-02 | Machining Process + Material convention selectors mapped to Density values | Implemented; user reported very good results |
-| ver-03 | One standalone Results window with internal horizontal tabs | UICT prototype implemented; static-checked; 18.1 runtime not yet tested; Apply hand-off pending |
+| ver-03 | One Results window with UICT internal horizontal tabs and per-page Display Tables | Results UI/page behavior user-confirmed in project testing; UICT-to-Modeling Apply unresolved; hidden Browser bridge failed |
 
 Canonical version folders:
 - `src/part-filter/ver-01/H871_PART_FILTER_VER_01.lsp`
 - `src/part-filter/ver-02/H871_PART_FILTER_VER_02.lsp`
 - `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`
+- `src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp` (diagnostic only; not production)
 - `src/part-filter/ver-03/README.md` (requirements, status and test plan)
 
 ## 3. Confirmed Part Filter behavior
@@ -77,20 +78,29 @@ Do not revive the superseded experiment that creates one Graphical Browser per s
 
 ## 7. ver-03 implementation status and technical caution (2026-11-16)
 
-Implemented in `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`:
-- ver-02 Density-pair scan, normalization and mapped choice dialog retained.
-- One UICT Dialog Shell with one horizontal internal Tab Control.
-- Each unique pair creates one page; same pair refreshes the existing page.
-- Per-page list control with multi-selection, Select All and Clear Selection.
-- Selection count/status per page.
-- No-match search leaves existing tabs and results unchanged.
-- Refresh preserves selected display rows when their row labels remain present.
+ver-03's UICT Results implementation provides one Results shell with horizontal internal tabs, one page per exact Density pair, page-specific result data, multi-row selection, Select All/Clear Selection, same-pair refresh and no-match preservation. The user has confirmed the Results UI and page workflow in Modeling 18.1 project testing.
 
-Static checks passed: parentheses balanced and string delimiters balanced. No Creo 18.1 runtime test has been performed.
+Apply status:
+- UICT Display Table returns valid Part selection payloads (ELAN::SEL_ITEM).
+- A hidden temporary Graphical Browser does not reproduce ver-02's native Apply, even when BrowserNode counts and programmatic status calls look successful.
+- Dialog Generator persistent highlight works visually but is not proof of the same Modeling selection state.
+- GET_SELECTION named-Part experiments failed with an unexpected-input error.
+- Direct sd-call-cmds from UICT callbacks failed as an illegal action call.
+- Do not repeat the hidden Browser bridge, offscreen bridge, GET_SELECTION setter interpretation, or custom Apply callback.
 
-**Not yet complete:** the UICT APIs are currently supported by later-release PTC documentation only (20.7/20.8 references). Modeling 18.1 availability/signatures must be confirmed by loading and testing. The prototype does not yet transfer selected real Part objects into Modeling selection; no Apply action is wired. The user-confirmed native Apply path in ver-01/ver-02 remains the safe production baseline.
+Search safety:
+- An iterative traversal candidate still produced Modeling fatal exception 0xC00000FD. That candidate was reverted; the active ver-03 source is the revision associated with the user-confirmed Results UI. Search root cause is unresolved. Do not test on the original/customer model; use a disposable copy and obtain the exact trace before changing the collector.
 
-See [ver-03 Implementation Record](docs/VER03_IMPLEMENTATION_NOTES.md) for detailed scope, references and exact runtime test steps.
+## 8. ver-04 single-Browser diagnostic (2026-11-16)
+
+Added diagnostic-only source:
+`src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp`
+
+It copies the existing ver-03 page data into one native Graphical Browser Tree, with one page root per Density pair and one shared table. Previous/Next buttons and a dynamic right-click Results Pages submenu switch table roots. Selection paths are saved/restored per page. The Graphical Browser's native Apply default is preserved; no custom `:okButtonAction` is supplied.
+
+This is a page-navigation proof-of-concept, not the final horizontal-tab UI. It deliberately avoids the previously failed Browser reparenting/host-shell approach and does not modify ver-03 production source or ver-01/ver-02.
+
+**Status:** static-checked only. Must be loaded and functionally tested in Modeling 18.1. The acceptance test is actual Part selection in the 3D viewport after pressing native Apply.
 
 ## 8. Repository workflow
 
