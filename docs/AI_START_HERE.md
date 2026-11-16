@@ -109,3 +109,10 @@ The page-root correction now checks the return from :clear-table-roots before at
 ### ver-05 page-caption convention correction
 
 ver-05 page captions now follow the established PROCESS-MATERIAL order (for example CNC-SUS304 and CG-SS400), matching the corrected ver-03 convention and the user's numeric mapping. Do not reverse this to MATERIAL-PROCESS.
+
+
+### ver-05 page selector UI root cause and correction (2026-11-16)
+
+Root cause of the missing visible page strip: ver-05 used Graphical Browser :modeMenu for Density pages. PTC's Graphical Browser reference says modeMenu is mapped to right-click popup entries; the visible horizontal button row is :buttonMenu. The user correctly reported that the window looked like ver-02 with only Close Results.
+
+Corrected source commit: ca85cf158cdb345381f989f46f3e6cadbfe9bdc4. Density page buttons are now generated dynamically into :buttonMenu, before Select All and Clear Selection. Each button activates the corresponding page root in the same Browser. The old modeMenu page strip and duplicate popup page menu call were removed. This should create a visible horizontal page-navigation row, but it is not yet confirmed in Modeling 18.1. Do not claim success until the user sees multiple page buttons and confirms switching.
