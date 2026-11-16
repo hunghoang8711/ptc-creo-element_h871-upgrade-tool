@@ -149,3 +149,8 @@ ver-05 caption follow-up: the page label order was corrected from MATERIAL-PROCE
 **Correction:** Generate page selector buttons dynamically in :buttonMenu and append Select All/Clear Selection. Remove the incorrect modeMenu page selector and duplicate popup menu installation. Source commit: ca85cf158cdb345381f989f46f3e6cadbfe9bdc4.
 
 **Verification:** Static source checks passed. Must test in Modeling 18.1: after two successful searches, two horizontal page buttons must be visible in the same Results Browser, and clicking each must switch to only that page's Parts. Do not treat source inspection as runtime proof.
+
+
+## KI-017 correction – modeMenu is a horizontal row
+
+The previous KI-017 root-cause statement was incorrect. PTC's Graphical Browser reference explicitly documents modeMenu as a row of toggle buttons directly above buttonMenu. Both are also mapped to right-click popup entries for compatibility. Therefore modeMenu was valid in principle; moving page buttons to buttonMenu was not a proven fix and has been reverted. Source commit 7763d35 restores modeMenu and adds diagnostic trace markers. The reason the user did not see page buttons remains unresolved and must be diagnosed from the generated menu spec and runtime behavior.
