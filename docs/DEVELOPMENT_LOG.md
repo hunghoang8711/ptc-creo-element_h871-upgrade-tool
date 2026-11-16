@@ -264,3 +264,11 @@ Resolved:
 - Static audit: balanced parentheses, no unterminated strings, no duplicate local DEFUN names, all referenced `h871-pf-v05-*` functions defined, no UICT Display Table/logical-table APIs, native Graphical Browser Apply configured, and per-Browser callback closures present.
 - Runtime status: NOT TESTED in Modeling 18.1. The development environment cannot execute Creo, so it cannot truthfully supply the requested live runtime result. Multiple simultaneous Browsers, callback timing, UICT manager controls, native Apply and the reported fatal `0xc00000fd` behavior remain runtime acceptance items.
 - Important known risk: the VER-03 recursive Assembly collector was deliberately retained to preserve the exact filter engine. An earlier iterative traversal experiment did not resolve the reported `0xc00000fd`; root cause remains unknown. Do not describe the crash as fixed. Test only on a disposable Assembly copy.
+
+### VER-05 follow-up – compact Manager layout and final static audit
+
+- Changed the Manager from one pair per row to a two-column layout, supporting up to 36 Density-pair entries in one Modeling session while keeping the Manager grid bounded.
+- Fixed the example load path to the actual `H871_PART_FILTER_VER_05_MULTI_BROWSER.lsp` filename.
+- Final source audit after these changes: 564 lines; balanced parentheses; no unterminated strings; no duplicate local DEFUN names; no missing local `h871-pf-v05-*` definitions; no UICT Display Table/logical-table APIs or Apply Bridge; both Density fields are compared; native Graphical Browser Apply and per-Browser callback closures are present.
+- Latest source content SHA: `97b754f71f2ade1bbbbf6dbf7f06220061c75f47`.
+- Runtime remains pending. Static source checks do not validate Creo 18.1 API behavior or prove the `0xc00000fd` issue is fixed.
