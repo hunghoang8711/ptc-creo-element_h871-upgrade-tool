@@ -154,10 +154,9 @@
   (format nil "H871-PF-V05-ROW-~A-~A-OPEN" instance base))
 
 (defun h871-pf-v05-manager-row-label (entry)
-  (format nil "~A    |    ~A Part(s)    |    ~A"
+  (format nil "~A | ~A Part(s)"
     (getf entry :label)
-    (getf entry :count)
-    (getf entry :assembly)))
+    (getf entry :count)))
 
 (defun h871-pf-v05-create-manager ()
   (unless (sd-dialog-shell-p *h871-pf-v05-manager*)
@@ -185,7 +184,7 @@
       :x 0 :y 0 :width 108 :height 3
       :editable nil :showModified nil)
     (sd-set-text-control-value *h871-pf-v05-manager-header*
-      :text "FILTER PAIR                         RESULT COUNT / SOURCE ASSEMBLY                         ACTION"))
+      :text "DENSITY PAIR / PART COUNT                         DENSITY PAIR / PART COUNT"))
   (unless (sd-dialog-shell-visible-p *h871-pf-v05-manager*)
     (sd-show-dialog-shell *h871-pf-v05-manager*))
   t)
@@ -210,19 +209,21 @@
            (text-name (h871-pf-v05-manager-row-text-name instance base))
            (button-name (h871-pf-v05-manager-row-button-name instance base))
            (row-index (getf entry :row-index))
-           (y (+ 4 (* (1- row-index) 4))))
+           (column (if (evenp row-index) 0 1))
+           (x (if (= column 0) 0 56))
+           (y (+ 4 (* (floor row-index 2) 4))))
       (unless (sd-control-p text-name)
         (sd-create-text-control
           text-name *h871-pf-v05-manager-grid*
-          :x 0 :y y :width 82 :height 3
+          :x x :y y :width 38 :height 3
           :editable nil :showModified nil))
       (sd-set-text-control-value text-name
         :text (h871-pf-v05-manager-row-label entry))
       (unless (sd-control-p button-name)
         (sd-create-pushbutton-control
           button-name *h871-pf-v05-manager-grid*
-          :x 84 :y y :width 20 :height 3
-          :title "Open Browser"
+          :x (+ x 39) :y y :width 15 :height 3
+          :title "Open"
           :pushAction
             (list 'h871-pf-v05-show-pair instance base)))))
   (when (sd-dialog-shell-p *h871-pf-v05-manager*)
@@ -443,6 +444,10 @@
       (return-from h871-pf-v05-run (values 0 report)))
     (unless (h871-pf-v05-create-manager)
       (return-from h871-pf-v05-run nil))
+    (when (and (null entry) (>= *h871-pf-v05-manager-row-counter* 36))
+      (sd-display-error
+        "H871 VER-05: Manager capacity reached (36 Density pairs). Close this session and restart the tool before adding more pairs.")
+      (return-from h871-pf-v05-run nil))
     (setf new-browser-info
       (h871-pf-v05-create-browser
         requested-instance requested-base matches))
@@ -467,7 +472,8 @@
                 :callback (getf new-browser-info :callback)
                 :count (length matches) :results matches
                 :assembly (h871-pf-v05-path assembly)
-                :row-index (incf *h871-pf-v05-manager-row-counter*)))
+                :row-index *h871-pf-v05-manager-row-counter*))
+        (incf *h871-pf-v05-manager-row-counter*)
         (push entry *h871-pf-v05-pairs*)))
     (h871-pf-v05-refresh-manager)
     ;; The new Browser is live before the old same-pair Browser is removed.
@@ -536,7 +542,7 @@
      (sd-return-from-ok-action)))
 
 ;; LOAD:
-;; (load "D:/HH871/05-TEST-LISP-PTC/H871_PART_FILTER_VER_05.lsp")
+;; (load "D:/HH871/05-TEST-LISP-PTC/H871_PART_FILTER_VER_05_MULTI_BROWSER.lsp")
 ;; COMMAND:
 ;; H871_PART_FILTER_VER_05
 ;;
