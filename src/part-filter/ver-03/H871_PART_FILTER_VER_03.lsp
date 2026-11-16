@@ -582,8 +582,7 @@
         :columns '(:part-name :density-instance :density-base :assembly-path)
         :entryAlignment '(:left :right :right :left)
         :selectionMode :multiple-rows
-        :selectionAction 'h871-pf-v03-table-selection-changed
-        :doubleClickAction 'h871-pf-v03-double-click)
+        :selectionAction 'h871-pf-v03-table-selection-changed)
       (sd-display-error "H871 ver-03: Could not create the multi-column results table.")
       (return-from h871-pf-v03-create-page nil))
 
@@ -686,8 +685,7 @@
           :columns '(:part-name :density-instance :density-base :assembly-path)
           :entryAlignment '(:left :right :right :left)
           :selectionMode :multiple-rows
-          :selectionAction 'h871-pf-v03-table-selection-changed
-        :doubleClickAction 'h871-pf-v03-double-click)
+          :selectionAction 'h871-pf-v03-table-selection-changed)
         (sd-display-error
           "H871 ver-03: Could not restore the result table control.")
         (return-from h871-pf-v03-refresh-page nil)))
