@@ -186,3 +186,12 @@ The canonical API status is maintained in `docs/API_VERIFICATION_REGISTER.md`. I
 - Page selection is stored as Part path strings and restored only after the corresponding page root is active. The diagnostic offers Previous/Next toolbar buttons and a dynamic Results Pages popup submenu. This is not yet the final horizontal-tab UI.
 - Diagnostic file: `src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp`.
 - Modeling 18.1 runtime validation is pending. Only actual 3D viewport selection after native Apply counts as success.
+
+
+## 14. ver-04 single-Browser runtime feedback and lifecycle recovery (2026-11-16)
+
+The first Modeling 18.1 test confirmed that the ver-04 diagnostic can hide the ver-03 UICT shell and open exactly one native Graphical Browser displaying the active page's Parts. The trace showed two copied pages: CNC-SS400 (8 Parts) and CG-SS400 (2 Parts). The trace stopped after DIAG/PAGES-COPIED; it contains no evidence of page navigation, selection restoration or Apply.
+
+A second diagnostic invocation failed because the named Browser Tree already existed. The source had no normal successful-run teardown path. The revised diagnostic adds h871-pf-v04-reset-browser-objects: hide/destroy the Browser, then destroy its Tree, clear node maps, and trace the cleanup attempt. It runs before rebuilding and from Close Results. Close Results restores the ver-03 UICT shell. Recovery command: H871_PF_V04_RESTORE_UICT_RESULTS.
+
+The cleanup patch is static-checked only. Do not infer that the destroy APIs work correctly in Modeling 18.1 until retested. The one-Browser native Apply hypothesis remains unverified until the user sees the actual Part selected in the 3D viewport. Do not change ver-01/ver-02/ver-03 production code or Density mapping while validating this lifecycle fix.
