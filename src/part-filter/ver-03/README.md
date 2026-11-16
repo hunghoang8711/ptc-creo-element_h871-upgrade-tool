@@ -144,3 +144,14 @@ The lookup function is also already used by the preserved ver-02 source to obtai
 ## ver-05 integration lesson – page root isolation
 
 The single-Browser ver-05 candidate must clear all previous table roots before activating a new Density-pair page. :change-table-root is not a replacement operation by itself; a Browser can retain multiple roots. The ver-05 source now uses the buffered clear-selection/clear-roots/set-root/resume sequence and records the active root count. This fix is not a ver-03 source change and does not alter ver-03's user-confirmed UI behavior.
+
+
+## 2026-11-16 – Apply BrowserNode ID resolution correction
+
+The current ver-03 source now treats the return value of `sd-create-browsernode` as a node identifier, not as a BrowserNode structure. The Apply-tree builder resolves the root and every Part child with `sd-get-browsernode-struct` before storing or passing them to `:set-object-selection`. It traces each resolution and stops before selection hand-off if the number of resolved Part nodes does not equal the selected Part count.
+
+This directly addresses the reported runtime type error `#:NODE241 is not of type "BROWSERNODE"`. Static Lisp parenthesis validation passed after the change. **This is not yet proof that Apply selects Parts in Modeling 18.1.** The temporary hidden Graphical Browser hand-off remains a known unverified/previously problematic boundary. The next runtime test must report the node-resolution trace and whether the actual viewport selection changes. Do not claim Apply success from a successful node lookup or `:select-and-execute` return alone.
+
+## Architecture direction reaffirmed – continue from ver-03
+
+The user has explicitly reaffirmed that ver-03's one Results window with internal Density-pair tabs is the accepted UI direction. Continue from ver-03; do not continue ver-05's single-Graphical-Browser UI experiment. Preserve ver-03's tab shell, per-page Display Tables, row multi-selection and Select All/Clear Selection. Focus remaining work on making selected rows Apply to actual Modeling Parts in the same user-facing Results workflow. ver-04/ver-05 remain diagnostic/experimental history only.
