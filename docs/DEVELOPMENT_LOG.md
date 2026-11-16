@@ -104,3 +104,9 @@ Resolved:
 ### 2026-11-16 – ver-03 numeric filter / caption correction
 - Rechecked numeric search path against ver-02. `1` (Density Instance) + `304` (Density Base) is the actual CNC-SUS304 search pair; labels are presentation only.
 - Corrected tab caption order and added numeric argument validation. Runtime diagnosis of the separate NIL/STRING error remains open.
+
+
+### 2026-11-16 – ver-03 early tab callback NIL guard
+- Reviewed full ver-03 initialization against known-good ver-02.
+- Guarded tab-change/status callback against firing before the page registry and UI handles exist; prevent NIL from reaching Display Table selection APIs.
+- Matched ver-02's null-safe Density Instance/Base check in the recursive filter. Runtime retest pending.
