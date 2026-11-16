@@ -425,9 +425,15 @@
          ;; Older in-memory page records may therefore lack :logical-table.
          ;; Always recover the deterministic name from the page identifier.
          (logical-table
-           (or (getf entry :logical-table)
-               (and page-name
-                    (h871-pf-v03-logical-table-name page-name))))
+           (let ((stored-name (getf entry :logical-table)))
+             ;; In Common Lisp, "" is truthy. Do not use OR alone here:
+             ;; old page records can contain an explicitly empty table name.
+             (if (and (stringp stored-name)
+                      (> (length stored-name) 0))
+                 stored-name
+               (and (stringp page-name)
+                    (> (length page-name) 0)
+                    (h871-pf-v03-logical-table-name page-name)))))
          (table-name (getf entry :table))
          (contents (h871-pf-v03-table-contents parts)))
     (unless (and (stringp logical-table)
@@ -448,6 +454,12 @@
 
     ;; Keep the recovered name in the live page record for subsequent refreshes.
     (setf (getf entry :logical-table) logical-table)
+    ;; Also repair a stale/blank page identifier before future lookups.
+    (unless (and (stringp (getf entry :page))
+                 (> (length (getf entry :page)) 0))
+      (sd-display-error
+        "H871 ver-03: Results tab has no valid page identifier.")
+      (return-from h871-pf-v03-refresh-page nil))
 
     ;; Verify that the Display Table is still bound to this page's logical table.
     ;; A stale control bound to an empty/different name must be recreated.
