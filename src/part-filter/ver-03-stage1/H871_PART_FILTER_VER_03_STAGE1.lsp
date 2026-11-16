@@ -130,7 +130,7 @@
 (defun h871-pf-mt-register-tree-updater (tree-name key)
   (let* ((updater-name
            (intern (format nil "H871-PF-MT-UPDATE-~A"
-                     (substitute #\\- #\\. key))
+                     (substitute (code-char 45) (code-char 46) key))
              :oli))
          (captured-tree tree-name)
          (captured-key key))
