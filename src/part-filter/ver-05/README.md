@@ -13,7 +13,7 @@ Target: PTC Creo Elements/Direct Modeling 18.1
 
 1. The complete VER-03 search dialog is preserved: Assembly, Machining Process, Material and numeric display-code fields.
 2. Filtering still matches BOTH Density Instance and Density Base using the numeric codes and the existing `/1000.0` normalization.
-3. One Browser Manager window lists each successful Density pair. Each row has a dedicated Open Browser button.
+3. One Browser Manager window lists each successful Density pair in a compact two-column layout. Each pair has a dedicated Open button; the Manager supports up to 36 pair entries in one Modeling session.
 4. Each Density pair has its own Graphical Browser and Browser Tree. Browser and Tree names include the pair and a generation number.
 5. Each Browser Tree update callback is a distinct function closure over that Browser's tree name, pair label and result snapshot. No shared active-pair/global-parts variable is used.
 6. Each Graphical Browser uses native `:okButtonLabel "Apply"`, plus native Browser table columns, Select All and Clear Selection commands.
