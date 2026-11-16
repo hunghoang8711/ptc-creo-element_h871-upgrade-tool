@@ -890,3 +890,57 @@ The documented routes reviewed so far are:
 4. COM/.NET `ISelectionItem`: creates/transfers references; no documented active viewport selection setter found.
 
 No production source change was made. The one-window Apply requirement remains **not solved**. Further work must not invent an API name or equate object references, dialog feedback, browser selection, command input, and global viewport selection.
+
+
+## 28. Isolated offscreen browser diagnostic added — 2026-11-16
+
+A separate diagnostic file was added; production ver-03 source was not modified:
+
+`src/part-filter/ver-03/diagnostics/H871_PF_V03_OFFSCREEN_APPLY_DIAG.lsp`
+
+Purpose:
+- Reuse the current active UICT page's selected Part objects.
+- Create a temporary Graphical Browser using the existing tested ver-03 BrowserNode builder.
+- Show it at a large negative offset relative to the Results dialog shell, using PTC's documented Graphical Browser position format.
+- Check whether `:is-object-displayed` becomes true after the browser is shown.
+- Only call `:set-object-selection` for nodes confirmed displayed.
+- Only call native `:select-and-execute` if every requested Part node is displayed and selected.
+- Hide the temporary browser after the test.
+- Record each step in the existing trace file.
+
+PTC position-format reference:
+https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+
+The Graphical Browser uses the same position specification as `sd-show-display-table`, whose documented attachment format is `(reference-widget attachment x-offset y-offset)`; negative offsets are supported by the documented examples:
+https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/reference/tables.html
+
+### Test procedure
+
+1. Load the current ver-03 production source.
+2. Load `H871_PF_V03_OFFSCREEN_APPLY_DIAG.lsp`.
+3. In the active Results tab, select one or more rows.
+4. Do **not** press the production Apply button for this diagnostic.
+5. Enter `H871_PF_V03_OFFSCREEN_APPLY_DIAG` in the Modeling command line.
+6. Confirm that no second browser window is visible. If one appears on-screen, close it and stop the test.
+7. Inspect `H871_PART_FILTER_VER_03_TRACE.txt` and check the actual viewport selection.
+
+Expected diagnostic trace stages:
+- `OFFSCREEN-DIAG/SHOW-RETURN`
+- `OFFSCREEN-DIAG/NODE` — includes each node's displayed and selected state
+- `OFFSCREEN-DIAG/COUNTS`
+- `OFFSCREEN-DIAG/HANDOFF-STATUS`
+- `OFFSCREEN-DIAG/END`
+
+Interpretation:
+- If all nodes report displayed and selected, but the viewport still does not receive the Parts, the visibility issue is fixed but native hand-off remains unsolved.
+- If nodes remain not displayed, the offscreen position/show method is not sufficient in this Modeling 18.1 runtime.
+- If the browser appears visibly, stop; the offscreen technique has failed the one-window constraint and must not be integrated.
+- A trace success status is not itself proof of viewport selection. The user must verify the Parts are actually selected in the 3D viewport.
+
+### Static validation and scope
+
+- Diagnostic file fetched back from GitHub after commit.
+- Parenthesis balance checked: depth 0, no premature close, no unclosed string.
+- No Creo 18.1 runtime test has yet been performed.
+- Production ver-03 source, Results UI, collector, Density mappings, predicate, table schema and Apply callback remain unchanged.
+- This is a diagnostic candidate only, not a completed Apply fix.
