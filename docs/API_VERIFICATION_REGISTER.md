@@ -148,3 +148,10 @@ PTC's official Graphical Browser 20.6 reference documents:
 The PTC reference's own example uses the sequence :buffer-display t → :clear-table-roots → :change-table-root → :buffer-display nil. A Browser can retain more than one table root; therefore a page-switch implementation must clear the previous root before setting the next page root. Otherwise the table may contain multiple pages' children and Select All/native Apply can target unintended rows.
 
 ver-05 now uses this sequence and traces the table-root count after switching. Evidence is later-release documentation (20.6), not proof of Modeling 18.1 compatibility. Runtime must confirm the query/commands and verify the root count is exactly 1 after every page switch.
+
+
+## I. Graphical Browser modeMenu vs buttonMenu – page selector placement
+
+PTC Graphical Browser reference (20.6/20.7) specifies that modeMenu, buttonMenu and topMenu are mapped to right-click popup menu entries for compatibility. Separately, the reference explicitly defines buttonMenu as a visible row of buttons directly above topMenu; modeMenu is a row of mode toggle buttons above buttonMenu in the UI description but its menu compatibility behavior means it must not be assumed to provide the desired page-tab row. The official UI examples show buttonMenu specifications with :label and :push/:release actions.
+
+For ver-05, use :buttonMenu to render Density-pair page navigation buttons. Keep the active page identity in the status line unless an exclusive toggle state is proven available. Modeling 18.1 rendering and callback compatibility still require runtime verification.
