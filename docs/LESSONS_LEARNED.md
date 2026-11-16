@@ -125,3 +125,8 @@ Then query :number-of-table-roots and require exactly 1. This is now implemented
 
 
 LL-016 follow-up: treat clear-roots and set-root return values as mandatory gates. Do not mark a page active unless both succeed. Optional diagnostic queries must not be allowed to break the core page transition; guard them and retain the primary command results in the trace.
+
+
+## LL-017 – Distinguish Graphical Browser modeMenu from buttonMenu
+
+PTC Graphical Browser :modeMenu is mapped to right-click popup entries for compatibility; it is not the visible horizontal row. :buttonMenu creates the visible horizontal button row. Never infer UI placement from the names. Verify the exact PTC parameter description and example before implementing a visible tab/page strip. For Density pages, create dynamic page buttons in :buttonMenu and validate the rendered UI in the target Modeling version.
