@@ -92,3 +92,10 @@ Resolved:
 - Refresh now derives the table name from the stable page ID, validates it, recreates missing logical tables, checks the Display Table binding, and restores the control if stale.
 - Error message now includes the concrete logical-table name for further diagnosis.
 - Committed to main; Modeling 18.1 retest pending. ver-01/ver-02 untouched.
+
+
+## 2026-11-16 – ver-03.2 follow-up: empty-string truthiness
+- User retested the previous recovery patch and reported the same empty logical-table error.
+- Found the precise bug in the fallback: Common Lisp treats the empty string as truthy, so an OR expression does not replace an explicitly empty :logical-table value.
+- Corrected the refresh path to accept the stored logical-table name only if it is a non-empty string; otherwise it derives the deterministic name from the page ID.
+- Committed to main; runtime retest pending.
