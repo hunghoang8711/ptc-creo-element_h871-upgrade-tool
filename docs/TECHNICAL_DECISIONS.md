@@ -64,3 +64,14 @@ Active decisions that constrain implementation. Superseded experiments are recor
 - **Implemented behavior:** One page per exact Density pair, same-pair refresh, new-pair page creation, page-local row selection, Select All/Clear Selection and no-match preservation.
 - **Compatibility rule:** UICT references currently reviewed are PTC 20.7/20.8 documentation. Modeling 18.1 compatibility is unverified until the user loads and tests the source in 18.1.
 - **Apply rule:** Do not wire Apply until a Modeling 18.1 method is demonstrated to transfer only the selected real Part objects from the active page into Modeling selection. Preserve ver-01/ver-02 native Apply as the production baseline.
+
+
+
+## TD-011 – Keep multi-page results and native Apply in one Graphical Browser (diagnostic stage)
+
+- Date: 2026-11-16
+- Decision: Do not copy UICT Display Table selection into a hidden Graphical Browser. Keep the visible Results rows, selected BrowserNodes and native Apply button in one Graphical Browser instance, as proven in ver-02.
+- Candidate: Represent each Density pair as a page root in one Browser Tree. Use the selected page root to populate the one Browser table. Save/restore selection paths per page when switching roots.
+- Navigation prototype: Previous/Next toolbar buttons and a dynamic Results Pages popup submenu. This is not yet the required horizontal tab strip; it is intended to validate the single-Browser Apply architecture first.
+- Apply: Keep :okButtonLabel "Apply" and do not override :okButtonAction; use the native Graphical Browser default.
+- Scope: Diagnostic only. Do not change the ver-03 production source, collector, Density mappings, normalization, or ver-02 baseline until runtime tests prove the candidate.
