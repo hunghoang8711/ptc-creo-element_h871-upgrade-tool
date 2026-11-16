@@ -184,19 +184,32 @@
     (when entry
       (unless (or skip-save (equal page-name *h871-pf-v05-current-page*))
         (h871-pf-v05-save-current-selection))
-      (sd-browser-exec-cmd *h871-pf-v05-browser* :clear-select-list)
       (let* ((node-id (h871-pf-v05-page-root-id page-name))
              (node (and node-id
                         (sd-get-browsernode-struct
-                          *h871-pf-v05-tree* node-id))))
+                          *h871-pf-v05-tree* node-id)))
+             (root-set nil))
         (unless node
           (h871-pf-v05-trace "PAGE/ROOT-NOT-FOUND" page-name)
           (return-from h871-pf-v05-activate-page nil))
+        ;; A Browser can retain multiple table roots. Clear the old root
+        ;; before activating this page; otherwise rows from earlier pages
+        ;; can remain visible and native Apply could include the wrong page.
+        ;; Buffer redraws so the root switch is one visual update.
+        (sd-browser-exec-cmd *h871-pf-v05-browser* :buffer-display t)
+        (sd-browser-exec-cmd *h871-pf-v05-browser* :clear-select-list)
+        (sd-browser-exec-cmd *h871-pf-v05-browser* :clear-table-roots)
+        (setf root-set
+          (sd-browser-exec-cmd
+            *h871-pf-v05-browser* :change-table-root node t))
+        (sd-browser-exec-cmd *h871-pf-v05-browser* :buffer-display nil)
         (h871-pf-v05-trace
           "PAGE/CHANGE-ROOT"
-          (list page-name
-                (sd-browser-exec-cmd
-                  *h871-pf-v05-browser* :change-table-root node t))))
+          (list page-name root-set
+                (sd-query-browser
+                  *h871-pf-v05-browser* :number-of-table-roots)))
+        (unless root-set
+          (return-from h871-pf-v05-activate-page nil)))
       (setf *h871-pf-v05-current-page* page-name)
       (dolist (part-path (getf entry :selected-paths))
         (let* ((node-id (h871-pf-v05-part-node-id page-name part-path))
