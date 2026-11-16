@@ -75,3 +75,40 @@ No Creo Elements/Direct Modeling 18.1 runtime is available in the development en
 ## Known risk
 
 The Assembly collector is deliberately preserved from VER-03 to avoid changing the search engine while replacing the results UI. It remains recursive. Earlier iterative traversal did not resolve the user's reported `0xc00000fd` exception, so the exception's root cause is unresolved. Test only on a disposable model copy and capture the trace/crash evidence.
+
+## Runtime milestone – first user confirmation (2026-11-16)
+
+The user tested VER-05 in Creo Elements/Direct Modeling 18.1 and confirmed:
+
+- Filtering creates a separate Graphical Browser window for each result type/pair.
+- Result windows are independent.
+- Selecting an individual Part works; double-click selection and Select All followed by native Apply work as well as the known-good VER-02 workflow.
+- The native Browser Apply correctly hands the selected Parts to the 3D viewport.
+- The separate H871 Graphic/Manager window appears in a screen corner, but is currently too small to read all of its information. This is a Manager readability/layout issue, not an Apply failure.
+
+Trace supplied for the tested run:
+
+~~~text
+H871 VER-05 TRACE START
+RUN/BEGIN | (ELAN::SEL_ITEM 1 6061)
+COLLECT/BEGIN | "/05.cum-ve-sinh_do"
+COLLECT/PROGRESS | 100
+COLLECT/PROGRESS | 200
+COLLECT/PROGRESS | 300
+COLLECT/PROGRESS | 400
+COLLECT/PROGRESS | 500
+COLLECT/COMPLETE | (0 530)
+~~~
+
+The trace confirms collection reached its completion marker after progress markers through 500 and reports the final tuple (0 530). Do not assign undocumented meanings to the tuple fields. No fatal exception or Apply error was reported in this test. This single trace does not prove that the earlier 0xc00000fd issue is universally resolved.
+
+**New confirmed baseline:** preserve the independent native Graphical Browser windows, individual/double-click selection and Select All + Apply behavior. The next UI task is limited to improving the H871 Graphic/Manager window size/readability; do not modify the filter predicate, Browser selection callbacks or native Apply path while doing so.
+
+Updated test status:
+- [x] Independent result Browser windows appear for separate filter pairs.
+- [x] Individual Part selection works.
+- [x] Double-click selection works.
+- [x] Select All + native Apply selects Parts in the 3D viewport.
+- [ ] H871 Graphic/Manager window displays all information legibly.
+- [ ] Full regression sequence (same-pair replacement, no-match preservation, Manager reopen buttons and fresh-session repeat) confirmed.
+- [ ] Root cause/status of the earlier fatal exception conclusively established.
