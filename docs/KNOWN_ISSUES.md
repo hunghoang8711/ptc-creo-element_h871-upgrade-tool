@@ -27,8 +27,8 @@ Only unresolved or unverified items belong here. Move resolved root causes into 
 - **Next step:** Preserve current mappings and dialog behavior. Re-test only if changing this area.
 
 ## KI-006 – ver-03 UICT compatibility and Apply runtime validation
-- **Status:** Results UI runtime-confirmed by user; Apply source fix committed; Modeling 18.1 Apply retest pending.
-- **Details:** One UICT Results window, internal tabs, multi-column table, and Apply button are user-confirmed working. Apply now resolves each symbolic node ID returned by `sd-create-browsernode` through `sd-get-browsernode-struct` before passing the resulting BrowserNode structure to `:set-object-selection`.
+- **Status:** Results UI runtime-confirmed by user; Apply remains unresolved after rollback.
+- **Details:** One UICT Results window, internal tabs, multi-column table, and Apply button were user-confirmed working on the pre-rollback revision. The attempted BrowserNode identifier-resolution patch was rolled back after a separate Search-time fatal exception; it was never runtime-confirmed and must not be treated as a fix.
 - **Compatibility gap:** UICT Display Table/logical-table APIs are documented in PTC 20.7/20.8 references; exact Modeling 18.1 availability/signatures are not all proven.
 - **Next step:** In Modeling 18.1, select one result row and Apply, then select multiple rows and Apply. Verify only those actual Parts become selected. Capture the exact error if any.
 - **Production boundary:** ver-01/ver-02 remain unchanged as known-good selection/apply baselines. Do not mark ver-03 Apply resolved until user confirms runtime behavior.
@@ -52,10 +52,16 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - **Details:** Recovered user files are legacy Annotation macro sources and a Part Filter diagnostic; no standalone official 18.1 Integration Kit PDF was surfaced.
 - **Next step:** If an official manual exists in older chat storage or local files, retrieve it and record its exact release/source before using it as authority.
 
-## KI-007 – ver-03 fatal exception on Search after Apply-bridge patch
+## KI-010 – ver-03 fatal exception on Search
 
-- **Status:** Latest Apply-bridge patch rolled back from the active `main` source. Fatal exception reported by user; root cause not yet established.
+- **Status:** Candidate stack-overflow mitigation committed; Modeling 18.1 runtime verification pending.
 - **User-reported error:** `Fatal exception Oxc00000fd occurred at 00000000652A9F21. Model data may have been damaged.` It occurs immediately after pressing OK to Search, before Results UI appears.
 - **Containment:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp` on `main` has been restored to commit `8c0a1cd56f25f125958080b3ab6316e55827b141`, the last source version associated with the user-confirmed Results window, tabs, table, and Apply button appearing. This rollback removes the two recent BrowserNode-resolution edits. It does not prove that the restored file is safe or that the Apply error is fixed.
 - **Important:** The recent Apply patch changed the Apply tree builder and Apply guard, not the Search dialog or `h871-pf-v03-run`. The fatal exception during Search is therefore not yet causally explained. Do not claim the BrowserNode lookup caused the Search crash without a reproducer.
 - **Next investigation:** Reproduce only on a disposable copy/model; inspect Modeling 18.1 call stack/log and trace file; isolate load-time, dialog OK-action, collect, shell, tab/page creation and refresh stages. Keep ver-01/ver-02 untouched. Do not run more tests against the original customer model.
+
+
+- **Follow-up diagnosis (2026-11-16):** The active Search path called `h871-pf-v03-collect`, which recursively called itself for every child object and had no visited-object guard. Windows exception `0xC00000FD` is commonly associated with stack exhaustion, so this is a strong source-level candidate because collection runs before Results UI creation. It is not yet a proven root cause without a trace or controlled reproduction.
+- **Candidate fix:** Replaced recursive traversal with iterative depth-first traversal using an EQ-based visited hash table. This avoids consuming one native/Lisp call frame per Assembly level and prevents revisiting the same object reference. Numeric Density matching and result ordering are preserved.
+- **Static verification:** Parentheses balanced; no unterminated strings; collector no longer self-recurses. No Creo runtime test has been performed by the assistant.
+- **Next step:** User must first save a separate disposable model copy and test this source there. If the exception persists, provide `H871_PART_FILTER_VER_03_TRACE.txt` and the exact last trace marker. Keep ver-01/ver-02 untouched.
