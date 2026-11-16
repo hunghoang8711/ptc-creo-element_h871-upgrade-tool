@@ -567,17 +567,28 @@
           "H871 ver-03: Could not restore the result table control.")
         (return-from h871-pf-v03-refresh-page nil)))
 
+    ;; Capture the row shape before calling the 18.1 logical-table API.
+    ;; This is diagnostic only: no row values, filter semantics or UI layout
+    ;; are changed. Each row must contain one value for each of the 6 columns.
+    (h871-pf-v03-trace
+      "REFRESH/CONTENTS-SHAPE"
+      (list (length contents)
+            (mapcar #'length contents)
+            (mapcar (lambda (row) (mapcar #'type-of row)) contents)))
+
     ;; Replacing logical-table contents refreshes its Display Table in place.
     ;; Selection is cleared so stale object references are never applied.
     (h871-pf-v03-trace "REFRESH/CHANGE-CONTENTS/BEGIN" (list logical-table (length contents)))
-    (unless
-      (sd-change-logical-table-contents
-        logical-table :contents contents)
-      (sd-display-error
-        (format nil
-          "H871 ver-03: Could not refresh logical table ~A."
-          logical-table))
-      (return-from h871-pf-v03-refresh-page nil))
+    (let ((change-result
+            (sd-change-logical-table-contents
+              logical-table :contents contents)))
+      (h871-pf-v03-trace "REFRESH/CHANGE-CONTENTS/RETURN" change-result)
+      (unless change-result
+        (sd-display-error
+          (format nil
+            "H871 ver-03: Could not refresh logical table ~A."
+            logical-table))
+        (return-from h871-pf-v03-refresh-page nil)))
     (sd-reset-display-table-selection table-name :row t)
     (setf (getf entry :results) parts)
     (setf *h871-pf-v03-current-page* page-name)
