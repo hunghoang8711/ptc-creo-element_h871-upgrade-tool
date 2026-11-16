@@ -184,13 +184,13 @@
                 (format nil
                   "~A Part(s) | ~A selected | Density Instance ~A / Base ~A"
                   total selected-count
-                  (getf entry :instance) (getf entry :base))))))))
+                  (getf entry :instance) (getf entry :base)))))))))
 
 (defun h871-pf-v03-table-selection-changed (table-name)
   (when (stringp table-name)
     (let ((entry (h871-pf-v03-page-by-table table-name)))
       (when entry
-        (h871-pf-v03-update-status (getf entry :page)))))
+        (h871-pf-v03-update-status (getf entry :page))))))
 
 (defun h871-pf-v03-tab-changed (page-name)
   (when (stringp page-name)
