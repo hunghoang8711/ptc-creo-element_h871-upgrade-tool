@@ -3,79 +3,71 @@
 **Implementation milestone:** 2026-11-16  
 **Branch:** `main`  
 **Source:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`  
-**Status:** Prototype implemented and statically checked; Modeling 18.1 runtime validation pending.
+**Current revision:** ver-03.1 – multi-column Display Table + explicit Apply bridge  
+**Status:** Implemented and committed; Modeling 18.1 runtime validation pending.
 
-## What is implemented
+## What changed in ver-03.1
 
-- The source is based on the ver-02 recursive Assembly scan and exact Density Instance + Density Base matching.
-- The existing ver-02 mapping is retained:
+The user's first runtime test confirmed the single Results window and internal pages work, but identified three regressions: rows were concatenated into one text column, row clicks/Select All did not select Parts, and there was no explicit Apply action.
+
+The source has now been revised:
+
+- Replaced each page's List Control with a multi-column UICT Display Table.
+- Visible columns are **Part Name**, **Density Instance**, **Density Base**, and **Assembly Path**.
+- A hidden untyped logical-table column stores the actual Part object; the UI shows no object token.
+- Display Table uses `:multiple-rows` selection mode.
+- Added page-scoped **Select All**, **Clear Selection**, and **Apply** buttons.
+- Selection count is displayed per page.
+- Repeating a pair updates the existing logical table in place and clears stale selection; other pages are not changed.
+- Apply reads the selected `:part-object` values from the active page only.
+- Apply builds a temporary, non-user-facing Graphical Browser bridge and uses the native Graphical Browser selection commands already used by ver-02: `:set-object-selection` and `:select-and-execute`.
+- The one Results window and its internal tabs remain the user-facing result architecture.
+
+## Preserved behavior
+
+- Recursive Assembly scan and exact Density Instance + Density Base matching.
+- Density normalization by /1000.
+- Existing ver-02 mappings:
   - Machining Process: CNC=1, KH=2, CG=3, COVER=4.
   - Material convention: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
-- A single UICT Dialog Shell is created as the Results window.
-- One horizontal UICT Tab Control lives inside that shell.
-- Each unique Density pair is assigned one tab caption, such as `SUS304-CNC`.
-- A repeated pair refreshes the existing page rather than adding another page.
-- A different pair creates another page in the same shell.
-- Each page has its own multi-select list and selection count.
-- Select All and Clear Selection are scoped to the page that owns the buttons.
-- A no-match search returns a message and leaves existing result pages unchanged.
-- The page refresh attempts to preserve selected rows whose display keys still exist.
+- Pair identity, same-pair refresh, different-pair tab creation, no-match preservation.
+- ver-01 and ver-02 source files are unchanged.
 
-## Explicitly not complete
+## API evidence and compatibility
 
-**Apply to Modeling selection is not wired in this prototype.** UICT list selection returns display items/positions, but the reviewed references do not establish a safe Modeling 18.1 operation to transfer those selected Part objects into the native Modeling selection set. We must not invent a command or use a later-release assumption.
+PTC's official 20.7 Integration Kit documentation describes:
+- UICT Display Table creation using `sd-create-display-table-control`.
+- A logical table data store created by `sd-create-logical-table`.
+- Multi-row selection using `:multiple-rows`.
+- Selected row indices and selected column values via `sd-get-display-table-selection`.
+- Programmatic row selection/reset via `sd-set-display-table-selection` and `sd-reset-display-table-selection`.
 
-The known-good native Graphical Browser row selection and native Apply behavior remain preserved in ver-01/ver-02. Do not replace those files.
+The table's untyped `:part-object` column stores real Part objects. This follows the documented logical-table behavior that untyped cells can contain any LISP data.
 
-## API evidence
+The native hand-off reuses ver-02's Graphical Browser pattern. The user's Modeling 18.1 ver-02 workflow already confirms row selection and native Apply. However, the new hidden bridge that creates BrowserNodes from selected Display Table Part objects has not been tested in Modeling 18.1. Likewise, Display Table/UICT signatures are documented in PTC 20.7, not confirmed for 18.1.
 
-The following UICT patterns were found in official PTC Integration Kit references for releases 20.7/20.8:
-
-- `sd-create-dialog-shell`, `sd-append-grid-area`
-- `sd-create-tab-control`, `sd-insert-tab-control-page`
-- `sd-create-list-control`, `sd-create-text-control`
-- `sd-set-list-control-items`, `sd-set-list-control-selected-items`
-- `sd-get-list-control-selected-items`
-- `sd-set-current-tab-control-page`, `sd-get-current-tab-control-page`
-- `sd-dialog-shell-p`, `sd-dialog-shell-visible-p`
-
-The PTC examples explicitly describe a tab control and per-page child controls. These sources prove the API patterns for the documented newer releases only; they do not prove availability or identical signatures in Modeling 18.1.
-
-Research references:
+References:
 - https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/uict_create.html
-- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/uict_specutil.html
-- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/examples/vertical_tabs_lsp.html
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/tables.html
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
 
-## Static checks performed
+## Runtime test requested
 
-- Parenthesis balance: passed.
-- String delimiter scan: passed.
-- The source uses the current ver-02 Density query and normalization pattern.
-- No change was made to ver-01 or ver-02.
-- No Creo 18.1 runtime test was possible in this development environment.
-
-## First user runtime test
-
-1. Load the exact ver-03 file in Creo Elements/Direct Modeling 18.1:
+1. Load the updated canonical file in Creo Elements/Direct Modeling 18.1:
    `(load "D:/HH871/05-TEST-LISP-PTC/H871_PART_FILTER_VER_03.lsp")`
-2. Run command: `H871_PART_FILTER_VER_03`.
-3. Choose an Assembly and search CNC + SUS304.
-   - Expected: one Results window, one internal tab named `SUS304-CNC`, matching Parts listed.
-4. Search KH + A6061.
-   - Expected: second tab `A6061-KH` appears in the same window, not a second window.
-5. Search CNC + SUS304 again.
-   - Expected: the existing `SUS304-CNC` tab refreshes; no duplicate tab.
-6. Switch tabs and check each list remains isolated.
-7. Test selecting multiple rows, Select All and Clear Selection on each page.
-8. Search a pair with no matching Parts.
-   - Expected: a no-match message; all previous tabs and results remain intact.
+2. Run `H871_PART_FILTER_VER_03`.
+3. Search CNC + SUS304. Confirm the table has separate columns for Part Name, Density Instance, Density Base and Assembly Path.
+4. Click one row; verify the status count becomes 1 selected.
+5. Ctrl-click/Shift-click additional rows; verify multi-selection.
+6. Press Select All; verify all rows in the current tab are selected.
+7. Press Clear Selection; verify the current tab returns to 0 selected.
+8. Select a small number of rows and press Apply. Verify only those Parts become the active Modeling selection.
+9. Switch to another tab and repeat; verify selection is page-scoped.
+10. Refresh the same pair; verify its data updates and selection resets.
+11. Search a no-match pair; verify existing tabs remain intact.
 
-If loading or opening the shell fails, send the exact error text and identify whether it occurs during LOAD, dialog launch, first search, or second search.
+## Known test boundary
 
-## Next engineering gate
-
-After the user confirms the tab shell and list behavior in 18.1:
-1. Verify the native Modeling selection hand-off for actual Part objects.
-2. Add an Apply action only after the exact 18.1 API/command behavior is demonstrated.
-3. Regression-test page-specific selection and native selection hand-off.
-4. Only then consider ver-03 suitable for production use.
+- No Creo 18.1 runtime test is possible from the development environment.
+- Do not call ver-03.1 production-verified until Display Table creation, multi-row selection, and Apply hand-off all pass the above tests.
+- If Apply does not transfer Parts, report the exact error and whether the temporary bridge appeared; ver-02 remains the known-good fallback.
