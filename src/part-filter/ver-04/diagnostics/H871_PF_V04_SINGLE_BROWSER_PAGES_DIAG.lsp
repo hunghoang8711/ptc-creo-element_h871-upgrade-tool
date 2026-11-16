@@ -29,6 +29,7 @@
 (defvar *h871-pf-v04-browser* "H871-PF-V04-SINGLE-RESULTS")
 (defvar *h871-pf-v04-tree* "H871-PF-V04-SINGLE-RESULTS-TREE")
 (defvar *h871-pf-v04-menu-name* "H871-PF-V04-RESULT-PAGES-MENU")
+(defvar *h871-pf-v04-uict-launch-button* "H871-PF-V04-OPEN-NATIVE-RESULTS-PB")
 
 (defun h871-pf-v04-trace-file ()
   (merge-pathnames
@@ -256,12 +257,17 @@
            (position *h871-pf-v04-current-page* pages
              :key (lambda (entry) (getf entry :page))
              :test #'equal)))
+    (h871-pf-v04-trace
+      "PAGE/NAVIGATION-REQUEST"
+      (list *h871-pf-v04-current-page* offset current-index count))
     (when (> count 0)
       (let* ((index (if current-index
                         (mod (+ current-index offset) count)
                       0))
-             (entry (nth index pages)))
-        (h871-pf-v04-activate-page (getf entry :page))))))
+             (entry (nth index pages))
+             (target (getf entry :page)))
+        (h871-pf-v04-trace "PAGE/NAVIGATION-TARGET" target)
+        (h871-pf-v04-activate-page target)))))
 
 (defun h871-pf-v04-previous-page ()
   (h871-pf-v04-switch-offset -1))
@@ -306,6 +312,27 @@
     (sd-show-dialog-shell *h871-pf-v03-shell*))
   (h871-pf-v04-trace "LIFECYCLE/UICT-RESTORED" t)
   t)
+
+(defun h871-pf-v04-install-uict-launch-button ()
+  ;; Leave a persistent entry point in the ver-03 Results shell. Closing
+  ;; the native Browser returns to ver-03; this button opens a fresh native
+  ;; Browser from the latest ver-03 page data without requiring a LISP command.
+  (when (and (boundp '*h871-pf-v03-shell*)
+             (boundp '*h871-pf-v03-grid*)
+             (sd-dialog-shell-p *h871-pf-v03-shell*)
+             (sd-control-p *h871-pf-v03-grid*))
+    (unless (sd-control-p *h871-pf-v04-uict-launch-button*)
+      (let ((created
+              (sd-create-pushbutton-control
+                *h871-pf-v04-uict-launch-button*
+                *h871-pf-v03-grid*
+                :x 0 :y 53 :width 24 :height 3
+                :title "Open Native Results"
+                :pushAction '(h871-pf-v04-run-diagnostic))))
+        (h871-pf-v04-trace
+          "UICT/INSTALL-NATIVE-RESULTS-LAUNCHER"
+          (list *h871-pf-v04-uict-launch-button* created))))
+  t))
 
 (defun h871-pf-v04-capture-ui-selection (entry)
   (let* ((table-name (getf entry :table))
@@ -368,7 +395,7 @@
       *h871-pf-v04-browser*
       :tree *h871-pf-v04-tree*
       :topLabel "H871 - PART FILTER RESULTS"
-      :tableStatusBar "Use Previous/Next or right-click > Results Pages."
+      :tableStatusBar "Use Previous/Next or right-click > Results Pages. Close returns to ver-03; use Open Native Results there to reopen."
       :minHeight 280
       :maxWidth 980
       :maxHeight 760
@@ -422,6 +449,11 @@
   (sd-browser-set-active-table
     *h871-pf-v04-browser* :table-name "h871-pf-v04-results-table")
   (sd-browser-exec-cmd *h871-pf-v04-browser* :set-table-mode)
+
+  ;; Install a persistent return-path launcher in ver-03. After Close
+  ;; Results restores UICT, the user can reopen the native Browser by clicking
+  ;; this button; no manual LISP command is needed.
+  (h871-pf-v04-install-uict-launch-button)
 
   ;; Only one window is visible at a time: hide the current UICT Results shell
   ;; before showing the one native Graphical Browser Results window.
@@ -489,6 +521,8 @@
 ;; 3. Run H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.
 ;; 4. Confirm only one Results window is visible.
 ;; 5. Switch pages with Previous/Next or right-click > Results Pages.
+;; 5a. Close Results returns to ver-03; click Open Native Results to reopen
+;;     the native Browser without re-running the LISP command.
 ;; 6. Verify each page shows only its own Parts.
 ;; 7. Select one Part and press the native Apply button.
 ;; 8. Confirm that Part is selected in the 3D viewport.
