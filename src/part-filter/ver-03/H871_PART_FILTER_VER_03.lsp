@@ -421,16 +421,67 @@
 
 (defun h871-pf-v03-refresh-page (entry parts)
   (let* ((page-name (getf entry :page))
-         (logical-table (getf entry :logical-table))
+         ;; Pages can survive a LISP reload because these globals are not reset.
+         ;; Older in-memory page records may therefore lack :logical-table.
+         ;; Always recover the deterministic name from the page identifier.
+         (logical-table
+           (or (getf entry :logical-table)
+               (and page-name
+                    (h871-pf-v03-logical-table-name page-name))))
+         (table-name (getf entry :table))
          (contents (h871-pf-v03-table-contents parts)))
+    (unless (and (stringp logical-table)
+                 (> (length logical-table) 0))
+      (sd-display-error
+        "H871 ver-03: Invalid logical table name for this Results tab.")
+      (return-from h871-pf-v03-refresh-page nil))
+
+    ;; Recover a missing logical table instead of passing NIL/"" to the API.
+    ;; This specifically handles stale page metadata retained across LISP reloads.
+    (unless (sd-logical-table-p logical-table)
+      (unless (h871-pf-v03-create-logical-table logical-table)
+        (sd-display-error
+          (format nil
+            "H871 ver-03: Could not recreate logical table ~A."
+            logical-table))
+        (return-from h871-pf-v03-refresh-page nil)))
+
+    ;; Keep the recovered name in the live page record for subsequent refreshes.
+    (setf (getf entry :logical-table) logical-table)
+
+    ;; Verify that the Display Table is still bound to this page's logical table.
+    ;; A stale control bound to an empty/different name must be recreated.
+    (when (and (sd-display-table-p table-name)
+               (not (equal
+                      (sd-get-display-table-logical-table table-name)
+                      logical-table)))
+      (sd-destroy-display-table table-name))
+
+    (unless (sd-display-table-p table-name)
+      (unless
+        (sd-create-display-table-control
+          table-name (concatenate 'string page-name "-TAB-GA")
+          :x 0 :y 2 :width 86 :height 42
+          :logicalTable logical-table
+          :columns '(:part-name :density-instance :density-base :assembly-path)
+          :entryAlignment '(:left :right :right :left)
+          :selectionMode :multiple-rows
+          :selectionAction 'h871-pf-v03-table-selection-changed)
+        (sd-display-error
+          "H871 ver-03: Could not restore the result table control.")
+        (return-from h871-pf-v03-refresh-page nil)))
+
     ;; Replacing logical-table contents refreshes its Display Table in place.
     ;; Selection is cleared so stale object references are never applied.
     (unless
       (sd-change-logical-table-contents
         logical-table :contents contents)
-      (sd-display-error "H871 ver-03: Could not refresh the result table.")
+      (sd-display-error
+        (format nil
+          "H871 ver-03: Could not refresh logical table ~A."
+          logical-table))
       (return-from h871-pf-v03-refresh-page nil))
-    (sd-reset-display-table-selection (getf entry :table) :row t)
+    (sd-reset-display-table-selection table-name :row t)
     (setf (getf entry :results) parts)
     (setf *h871-pf-v03-current-page* page-name)
     (sd-set-current-tab-control-page *h871-pf-v03-tabs* :page page-name)
