@@ -2,7 +2,7 @@
 
 **Branch:** `rebuild/ver-03-from-ver-02`  
 **Target:** PTC Creo Elements/Direct Modeling 18.1  
-**Status:** Source replaced with a Stage 0-equivalent diagnostic baseline; runtime retest required.
+**Status:** Stage 0-equivalent diagnostic baseline passed in Modeling 18.1; no Stage 1 feature has been added yet.
 
 ## Current source
 
@@ -29,19 +29,13 @@ Stage 1 source has been replaced by a mechanical clone of the user-confirmed Sta
 - Helper/global symbols remain isolated with the `h871-pf-mt-` prefix.
 - Dialog command remains `H871_PART_FILTER_VER_03_STAGE1`.
 
-This diagnostic deliberately removes all multi-tab functionality. Its sole purpose is to determine whether the Stage 1 failure came from the multi-browser changes or from another difference between the former Stage 1 implementation and Stage 0.
+This diagnostic deliberately removes all multi-tab functionality. The user has now confirmed that it runs successfully in Modeling 18.1 and behaves exactly like Stage 0. This establishes that the renamed Stage 1 command/helper prefix is not, by itself, causing the earlier failure. The exact cause among the removed multi-browser/tab changes remains unknown.
 
-## User test — one search only
+## Runtime confirmation and next step
 
-Use a disposable model copy.
+User confirmed on 2026-11-16 that this Stage 1 source runs successfully in Creo Modeling 18.1 and has the same functionality as Stage 0. No new feature is present in this diagnostic baseline.
 
-1. Start a fresh Modeling 18.1 session.
-2. Load the latest Stage 1 LISP file from this branch.
-3. Run `H871_PART_FILTER_VER_03_STAGE1`.
-4. Search one known pair, preferably CNC + SUS304 (numeric Instance=1, Base=304).
-5. Report whether the Results Browser appears, and whether Apply works.
-
-Do not test multiple pairs yet. If this single-browser diagnostic succeeds, the next step is to reintroduce exactly one multi-tab-related change at a time. If it fails with the same fatal exception, compare the dialog/run path against Stage 0 and isolate the earliest differing expression.
+The next revision will introduce only one tab-related API change, with all search, report, native selection and Apply logic kept identical. The user must test that isolated revision before any additional tab or multi-browser behavior is added. If the fatal exception returns, revert that single experiment to this confirmed baseline.
 
 ## Preservation and safety
 
