@@ -8,7 +8,7 @@
 ;; - Search, page registry, page navigation and result rows are self-contained;
 ;;   no separate Results window or hidden Browser bridge is involved.
 ;; - One Browser Tree has one page root per numeric Density pair.
-;; - Previous/Next and a Results Pages popup switch the active page root.
+;; - A horizontal modeMenu page strip and Results Pages popup switch the active root.
 ;; - Page-local selection paths are restored in the same visible Browser.
 ;;
 ;; UI note: the modeMenu is used as a horizontal page-button strip inside the
@@ -386,8 +386,7 @@
   (format nil "PAGE-~A" (getf entry :page)))
 
 (defun h871-pf-v05-page-mode-menu ()
-  ;; Graphical Browser modeMenu is a horizontal row of mutually exclusive
-  ;; mode buttons. Build one page button for each stored Density-pair page.
+  ;; Graphical Browser modeMenu is a horizontal row of page mode buttons. Build one page button for each stored Density-pair page.
   (mapcar
     (lambda (entry)
       (list
