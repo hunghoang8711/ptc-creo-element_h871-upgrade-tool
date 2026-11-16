@@ -254,3 +254,11 @@ Resolved:
 - Wrapped the :number-of-table-roots trace query in ignore-errors because it is diagnostic-only and its Modeling 18.1 availability is not independently verified.
 - Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4.
 - Static checks passed; Modeling 18.1 runtime remains pending.
+
+
+### ver-05 page-caption order correction
+
+- Rechecked the established ver-03 caption convention and found ver-05 had reversed it to MATERIAL-PROCESS.
+- Corrected both new-page and same-pair-refresh caption generation to PROCESS-MATERIAL (e.g. CNC-SUS304, CG-SS400).
+- Search values and Density mappings are unchanged.
+- Source commit: 8a189bb6ec8e44234b5b6607deb8600af3541c0a.
