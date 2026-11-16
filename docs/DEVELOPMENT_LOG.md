@@ -189,3 +189,19 @@ Resolved:
 - No UICT Display Table, logical table, internal tabs, or hidden Apply bridge has been carried into the rebuild.
 - ver-01, ver-02 and the unstable original ver-03 source are untouched.
 - Static source inspection only; no Modeling 18.1 runtime test has been performed by the assistant. Stage 0 must be tested by the user on a disposable model copy before any feature is added.
+
+
+## 2026-11-16 – Stage 0 runtime confirmed; Stage 1 native multi-filter tabs implemented
+
+- User confirmed Stage 0 rebuild works in Creo Modeling 18.1: Results appear; Select All and Apply work; double-click selects an individual Part.
+- Preserved the Stage 0 source unchanged as the known-good rebuild baseline.
+- Added a separate Stage 1 source: `src/part-filter/ver-03-stage1/H871_PART_FILTER_VER_03_STAGE1.lsp`.
+- Stage 1 retains the same numeric Density Instance/Base search and native Graphical Browser selection/Apply workflow.
+- New design: one independent Browser Tree + Graphical Browser per unique numeric Density pair. Each browser is requested as a docked Browser Bar tab via `:createAsTab t`; each tree is unique because PTC documentation states a tree cannot be shared by multiple browsers.
+- Pair caption convention remains Process-Material, e.g. CNC-SUS304; actual search values remain numeric Instance=1 and Base=304.
+- Repeating a pair replaces only that pair's result tab; a different pair creates another tab; a no-match search preserves existing tabs.
+- Select All/Clear Selection actions are bound to the corresponding browser name. Apply remains the Graphical Browser's native default :select-and-execute; double-click remains native.
+- No UICT Display Table, logical table, custom Apply bridge, or BrowserNode handoff was introduced.
+- Static source validation passed: balanced parentheses, no unterminated strings, unique stage command and symbol prefix, separate tree update arguments, no UICT calls.
+- Compatibility caveat: `:createAsTab` and Browser Tree `:update-args` were verified in later-version PTC Integration Kit documentation, not yet in a Modeling 18.1 runtime test. Stage 1 remains unverified until user tests it.
+- Test only on a disposable model copy. Do not proceed to Stage 2 until Stage 1 passes.
