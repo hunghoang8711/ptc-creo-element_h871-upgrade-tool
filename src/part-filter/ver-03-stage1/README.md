@@ -1,59 +1,52 @@
-# ver-03 Stage 1 — Native multi-filter result tabs
+# ver-03 Stage 1 — isolated single-browser diagnostic baseline
 
 **Branch:** `rebuild/ver-03-from-ver-02`  
 **Target:** PTC Creo Elements/Direct Modeling 18.1  
-**Status:** Implemented in source; Modeling 18.1 runtime test pending.
+**Status:** Source replaced with a Stage 0-equivalent diagnostic baseline; runtime retest required.
 
-## Source
+## Current source
 
 - `H871_PART_FILTER_VER_03_STAGE1.lsp`
 - Command: `H871_PART_FILTER_VER_03_STAGE1`
-- Stage 0 baseline remains separately preserved at `src/part-filter/ver-03-rebuild/`.
+- Stage 0 canonical baseline remains unchanged at `src/part-filter/ver-03-rebuild/`.
 
-## Stage 1 objective
+## Why Stage 1 was reset
 
-Retain the verified Stage 0 native Graphical Browser workflow while allowing multiple Density Instance + Density Base searches to remain available at the same time.
+The previous multi-browser implementation caused Fatal Exception `0xC00000FD` immediately after Search OK. Removing the later-version Browser Tree `:update-args` option and switching to zero-argument callbacks did not change the runtime result.
 
-## Design
+The trace file `%USERPROFILE%/H871_PART_FILTER_STAGE1_TRACE.txt` was created once but remained 0 KB and was not updated on a later search. The trace writer swallowed its own errors with `ignore-errors`; therefore the empty file is **not reliable evidence** about which search stage was reached. The trace mechanism is retired for this diagnostic cycle.
 
-- One native Graphical Browser and one dedicated Browser Tree per unique numeric Density pair.
-- Request each browser to appear as a docked Browser Bar tab using `:createAsTab t` and a human-readable `:tabname`.
-- CNC + SUS304 uses numeric Instance=1 and Base=304; caption is `CNC-SUS304`.
-- Different pairs create separate browser tabs.
-- Repeating an existing pair replaces only that pair's result browser/tree; other pair tabs remain untouched.
-- A no-match search reports no results and preserves all existing result tabs.
-- Each browser uses its own tree; PTC documentation states a Browser Tree cannot be shared by multiple Graphical Browsers.
-- Native Graphical Browser Apply and double-click behavior are retained. There is no custom Apply bridge, UICT table, or logical table.
-- Select All and Clear Selection actions are scoped to the browser tab that owns them.
+## Current diagnostic design
 
-## Compatibility caution
+Stage 1 source has been replaced by a mechanical clone of the user-confirmed Stage 0 source:
 
-The `:createAsTab` option is documented in later-version PTC Integration Kit references; exact behavior in Modeling 18.1 remains unverified. The first Stage 1 test produced `0xC00000FD` immediately after Search OK, while Modeling remained usable after the message was closed. The source has now been changed to avoid Browser Tree `:update-args`: each tree receives a unique zero-argument callback, matching the callback shape used by the user-confirmed Stage 0. A trace file now records Search and Browser creation milestones. This is a targeted compatibility correction, not a runtime-confirmed fix.
+- Same single native Graphical Browser and single Browser Tree.
+- Same zero-argument Browser Tree updater.
+- Same recursive Assembly traversal and Density Instance/Base comparison.
+- Same report generation.
+- Same native row selection, Select All, Clear Selection and Apply behavior.
+- No multi-browser sessions, generated callback closures, `:createAsTab`, `:tabname`, or trace-file writer.
+- Helper/global symbols remain isolated with the `h871-pf-mt-` prefix.
+- Dialog command remains `H871_PART_FILTER_VER_03_STAGE1`.
 
-## Stage 1 test protocol
+This diagnostic deliberately removes all multi-tab functionality. Its sole purpose is to determine whether the Stage 1 failure came from the multi-browser changes or from another difference between the former Stage 1 implementation and Stage 0.
 
-Use a disposable model copy only.
+## User test — one search only
 
-1. Load `H871_PART_FILTER_VER_03_STAGE1.lsp`.
-2. Run `H871_PART_FILTER_VER_03_STAGE1`.
-3. Search CNC + SUS304 (1 / 304). Confirm a results browser tab appears and native Apply works.
-4. Search a second known pair, for example KH + SS400 (2 / 400). Confirm a second separate tab appears and the first remains available.
-5. Return to CNC + SUS304 and confirm its rows remain.
-6. Search CNC + SUS304 again. Confirm only that pair's tab is refreshed/replaced, with the second tab retained.
-7. Search a known no-match pair. Confirm existing tabs are not removed.
-8. In each tab, verify double-click single-Part selection, Select All, Clear Selection, and Apply.
-9. Confirm closing/hiding one browser tab does not destroy other tabs.
+Use a disposable model copy.
 
-After testing, if the exception appears, close the message and inspect `%USERPROFILE%/H871_PART_FILTER_STAGE1_TRACE.txt`. Report the last line in that file. Also record exact behavior. Do not proceed to Stage 2 until the user confirms Stage 1.
+1. Start a fresh Modeling 18.1 session.
+2. Load the latest Stage 1 LISP file from this branch.
+3. Run `H871_PART_FILTER_VER_03_STAGE1`.
+4. Search one known pair, preferably CNC + SUS304 (numeric Instance=1, Base=304).
+5. Report whether the Results Browser appears, and whether Apply works.
 
-## Next stages (not yet implemented)
+Do not test multiple pairs yet. If this single-browser diagnostic succeeds, the next step is to reintroduce exactly one multi-tab-related change at a time. If it fails with the same fatal exception, compare the dialog/run path against Stage 0 and isolate the earliest differing expression.
 
-- **Stage 2:** Result-tab lifecycle controls (close one pair, clear all result tabs, explicit refresh) with safe per-tab state cleanup.
-- **Stage 3:** Additional result metadata and usability improvements, without changing the native selection/apply path.
-- **Stage 4:** Optional advanced filtering/sorting only after the preceding stages are stable.
+## Preservation and safety
 
-## Preservation
-
-- ver-01, ver-02, and Stage 0 source remain unchanged.
-- The unstable former UICT-based ver-03 remains preserved for forensic reference.
-- No runtime success is claimed until the user tests this source in Modeling 18.1.
+- Stage 0 source, ver-01 and ver-02 remain unchanged.
+- The former multi-browser Stage 1 implementation remains in Git history.
+- The unstable former UICT-based ver-03 remains preserved separately.
+- Do not test on or overwrite the original customer model.
+- No runtime success is claimed until the user confirms it in Modeling 18.1.
