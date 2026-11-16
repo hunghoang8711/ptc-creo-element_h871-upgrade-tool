@@ -340,11 +340,9 @@
         (sd-browser-exec-cmd
           *h871-pf-v03-apply-browser* :change-table-root root t))))
 
-  ;; Show the temporary native bridge after its table root is ready.
-  ;; This diagnostic experiment checks whether Modeling requires displayed
-  ;; BrowserNodes before :select-and-execute can hand them to the active command.
-  (let ((shown (sd-show-graphical-browser *h871-pf-v03-apply-browser*)))
-    (h871-pf-v03-trace "APPLY/SHOW-BRIDGE-RETURN" shown))
+  ;; Keep the bridge hidden: the user-facing Results window must remain
+  ;; the only window. Native hand-off is attempted inside Modeling's command
+  ;; wrapper below rather than by exposing a second Graphical Browser.
 
   ;; Resolve each symbolic ID to a BrowserNode structure, then record whether
   ;; Modeling considers it displayed and whether it enters the browser selection.
@@ -370,14 +368,18 @@
             *h871-pf-v03-apply-browser* :get-selected-objects)
           nil)))
 
-  ;; Native ver-02 hand-off: selected objects enter Modeling's select list.
+  ;; Execute the native browser hand-off inside Modeling's command context.
+  ;; Integration Kit guidance requires Modeling action routines invoked from
+  ;; UI callbacks to be wrapped in sd-call-cmds. The native bridge remains
+  ;; hidden so the UICT Results shell is the only user-facing Results window.
   (let ((handoff
-          (sd-browser-exec-cmd
-            *h871-pf-v03-apply-browser* :select-and-execute)))
+          (sd-call-cmds
+            (sd-browser-exec-cmd
+              *h871-pf-v03-apply-browser* :select-and-execute))))
     (h871-pf-v03-trace "APPLY/SELECT-AND-EXECUTE-RETURN" handoff)
     (unless handoff
       (sd-display-message
-        "H871 Apply: No objects were handed to Modeling. Check the active command.")
+        "H871 Apply: Modeling did not confirm the native selection hand-off.")
       (return-from h871-pf-v03-native-apply nil)))
   t)
 
