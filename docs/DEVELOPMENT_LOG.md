@@ -214,3 +214,17 @@ Resolved:
 - Added page navigation request/target trace markers to distinguish button callback execution from initial page activation.
 - Static checks passed: balanced parentheses, no negative nesting and no unterminated strings. Source commit: 21ddfb945a40f2361cb09439522387f90f6fac54.
 - Runtime verification pending: button creation/placement and callback, repeat close/reopen, Previous/Next and popup switching, and actual viewport Apply. No ver-03 production source, ver-02 baseline or Density filtering logic was changed.
+
+## 2026-11-16 – ver-05 self-contained single Results Browser candidate
+
+- Reaffirmed the user's unchanged product requirement: one Results window only, with ver-02's direct native row selection/Apply and ver-03's multiple Density-pair pages. ver-04 UICT switching and launcher are diagnostic-only and not the final workflow.
+- Added `src/part-filter/ver-05/H871_PART_FILTER_VER_05.lsp`.
+- Removed dependency on ver-03 UICT globals/page registry. ver-05 owns the Assembly search, Process/Material mapping, page registry, Browser Tree, Graphical Browser, page navigation and selection state.
+- Preserved ver-02's recursive Assembly collector, numeric Instance/Base comparison, /1000 normalization and user mapping values. No filter predicate changes were introduced.
+- One page root is created per Density pair; same-pair search refreshes that page; new pair adds a page; no-match leaves prior pages intact.
+- Uses one named Graphical Browser and one named Browser Tree, with Previous/Next and a dynamic Results Pages popup. The native Apply button is left at its default action; no custom :okButtonAction and no hidden Apply bridge.
+- Page-local selected paths are saved/restored when navigating. A successful new search rebuilds the named Browser/Tree from the in-memory page registry; no extra Results window or manual reopen action is intended.
+- Static checks: 510 lines; balanced parentheses; no negative nesting; no unterminated strings; 40 local helper definitions; no unresolved local helper calls; no ver-03/UICT globals; exact mappings present; native Apply default retained.
+- Runtime status: not loaded or functionally tested in Creo Elements/Direct Modeling 18.1. Native Apply, search lifecycle, page navigation, selection restore and no-match preservation require user test on a disposable model copy.
+- Horizontal tab strip remains unimplemented; current same-window page navigation is Previous/Next + Results Pages popup.
+
