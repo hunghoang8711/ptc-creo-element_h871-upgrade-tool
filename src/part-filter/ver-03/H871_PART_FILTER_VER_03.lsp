@@ -106,10 +106,13 @@
       (30 "MC") (40 "MIKA") (50 "PU"))
     (format nil "M~A" material)))
 
+;; The label is presentation only. Search always uses numeric Density values:
+;; Density Instance = process code (e.g. 1), Density Base = material code (e.g. 304).
+;; Display convention is PROCESS-MATERIAL, e.g. CNC-SUS304.
 (defun h871-pf-v03-pair-label (instance base)
   (format nil "~A-~A"
-    (h871-pf-v03-material-label base)
-    (h871-pf-v03-process-label instance)))
+    (h871-pf-v03-process-label instance)
+    (h871-pf-v03-material-label base)))
 
 (defun h871-pf-v03-find-page (instance base)
   (find-if
@@ -520,6 +523,15 @@
     report))
 
 (defun h871-pf-v03-run (assembly requested-instance requested-base)
+  ;; Never use display labels as search criteria. Reject missing/non-numeric
+  ;; dialog values before touching the assembly or creating any UI.
+  (unless (and (numberp requested-instance)
+               (numberp requested-base))
+    (sd-display-error
+      (format nil
+        "H871 ver-03: Invalid numeric filter values. Density Instance=~S; Density Base=~S. Expected numeric codes such as 1 and 304."
+        requested-instance requested-base))
+    (return-from h871-pf-v03-run nil))
   (let ((matches nil)
         (entry nil)
         (report nil))
