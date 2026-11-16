@@ -67,3 +67,12 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 ## LL-012 – Units must be derived from the current environment
 - **Lesson:** The legacy Arrange_sheets2 macro reads a unit factor from `INQ_ENV 6` / `INQ 2` and converts a 25 mm spacing before arranging sheets.
 - **Prevention:** Never hard-code drawing/model distances without verifying active units and conversion direction.
+
+
+
+## LL-013 – Keep result rows and native Apply in the same Graphical Browser
+
+- Lesson: ver-02 works because the visible Results rows, BrowserNode selection state and native Apply button all belong to the same Graphical Browser instance. Copying selected Part objects from a UICT Display Table into a second hidden Browser does not recreate that native selection context.
+- New experiment: One Graphical Browser can represent multiple result pages by keeping a page root for each Density pair and changing the table root. The native Apply button remains attached to the same Browser.
+- Navigation: A dynamic Browser popup submenu can expose page names, with Previous/Next controls for quick switching. This is a page-navigation prototype, not a horizontal tab implementation.
+- Prevention: Preserve the ver-02 native Apply default. Never replace :okButtonAction casually. Do not infer viewport selection from a hidden Browser, a SUCCESS trace, or a Dialog Generator highlight.
