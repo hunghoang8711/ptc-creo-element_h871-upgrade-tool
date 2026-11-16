@@ -969,3 +969,63 @@ Static validation after re-fetch:
 The user must reload this updated diagnostic file before testing again. If the start message does not appear after invoking the command, the command did not enter the diagnostic function (or the updated file was not loaded); investigate load/command registration rather than the Browser positioning. If start appears but later messages do not, use the last trace stage to isolate the failing call. If the end message appears, its status still does not prove viewport selection; inspect the trace and verify the actual selected Parts in the viewport.
 
 No production ver-03 source was modified. Runtime validation remains pending.
+
+
+
+## 30. Offscreen Apply diagnostic failed at actual Modeling selection — 2026-11-16
+
+### User runtime result
+
+The user selected one row by double-clicking in Results, then ran `H871_PF_V03_OFFSCREEN_APPLY_DIAG`.
+
+Visible sequence:
+1. Start message identified active page `H871-PF-V03-PAGE-1` and one selected Part.
+2. After OK, the offscreen diagnostic browser appeared, but the user could not interact with it while the diagnostic message sequence was active.
+3. The show call returned a persistent-data structure containing `:VISIBLE T :TABLE-MODE T :GRAPH-MODE NIL`.
+4. Completion message reported `Handoff status: SUCCESS`.
+5. After closing the message boxes, the browser disappeared and no Part was highlighted or selected in the 3D viewport.
+
+Trace:
+- `OFFSCREEN-DIAG/NODE | (... G-BROWSER::BROWSERNODE T T)`
+- `OFFSCREEN-DIAG/COUNTS | (1 1 1)`
+- `OFFSCREEN-DIAG/HANDOFF-SUCCESS-CONTEXT | NIL`
+- `OFFSCREEN-DIAG/HANDOFF-STATUS | :SUCCESS`
+- `OFFSCREEN-DIAG/END | :SUCCESS`
+
+The production Apply path also reports `APPLY/USER-ACTION-RESULT | T`, while the actual viewport remains unchanged.
+
+### Corrected interpretation
+
+This test proves only that:
+- the requested Part is represented by a valid BrowserNode;
+- the temporary Graphical Browser reports that node as displayed;
+- the browser's internal selection list contains the node.
+
+It does **not** prove that Modeling accepted the Part into its active viewport selection. The diagnostic's `:SUCCESS` label is a false positive because it records successful execution of the wrapper, not a confirmed selection transfer. The nil success context and the user's direct viewport observation take precedence.
+
+The temporary browser appearing during the message sequence and disappearing after the messages are dismissed is not a viable interaction path. It is not the required single-window Apply solution.
+
+### New documented API lead: Dialog Generator persistent highlight
+
+PTC's Dialog Generator reference documents that:
+- a selection variable can be initialized with one `SEL_ITEM` or, when `:multiple-items t`, a list of feasible `SEL_ITEM` values;
+- `:persistent-highlight t` enables persistent highlighting for object selection variables (including Part values, for which the default is nil);
+- `:without-show t` suppresses the UI of a parallel Dialog Generator dialog;
+- the `:selection` variable option can restrict selection to focus types such as `*sd-part-seltype*`.
+
+References:
+- Dialog Generator variable definitions and `:multiple-items`: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
+- Initial values for selection variables: same Dialog Generator reference, section 4.1.5.1.
+- Persistent highlight behavior: same reference, sections 4.1.1.1 and 4.1.1.1.1.
+- `:without-show` behavior: same reference, section 3.1.
+
+This is a **new diagnostic lead only**. Persistent highlight is not documented as setting Modeling's global selection list, and a hidden parallel dialog may remain active or have lifecycle/focus side effects. It must be tested in an isolated diagnostic before any production integration. Do not claim that highlight feedback equals native selection.
+
+### Scope and next action
+
+- No production LISP source changed.
+- Results shell, tabs, table, collector, Density mappings, matching predicate and UICT payload remain protected.
+- Do not repeat hidden Graphical Browser plus programmatic `:select-and-execute`.
+- Do not mark Apply solved based on wrapper return values.
+- Next experiment, if implemented, must be a separate diagnostic that initializes a Dialog Generator selection variable from the already captured `SEL_ITEM` list and tests whether the 18.1 viewport visibly highlights the Parts without creating a second visible window. Record separately whether highlight appears, whether it persists, whether a command remains active, and whether the global selection state is actually usable by a subsequent Modeling command.
+- Runtime target remains Creo Elements/Direct Modeling 18.1; references above are 20.6 documentation and must be treated as API guidance, not proof of 18.1 compatibility.
