@@ -439,3 +439,42 @@ Engineering decision:
 - Do not attempt Windows mouse simulation, guessed widget names, undocumented button invocation, or direct calls to private UI internals.
 - Keep the current visible bridge candidate as a diagnostic/fallback only. The target remains one standalone UICT Results window with internal tabs; a permanent second Graphical Browser window is not accepted as the final architecture unless the user explicitly changes that requirement.
 - Continue looking for a documented 18.1-compatible way to route selected Part objects into Modeling's selection context without a second user-facing browser. If no supported route exists, report the limitation and present the native bridge as the reliable two-step fallback.
+
+## 20. One-window Apply candidate: execute native hand-off in Modeling command context — 2026-11-16
+
+User requirement reaffirmed:
+- Do not require the user to interact with a second native Apply bridge window.
+- Keep one standalone UICT Results window with internal pages/tabs.
+- Apply and double-click must hand selected Parts directly to the 3D Modeling selection context.
+
+Implementation candidate on `feature/ver03-uict-apply`:
+- Source commit: `e2040033bc7c41895ae866e231569e522af3817f`
+- Source blob: `e0598143bafcb2b15f828f0fc3b6c68fe8e5feb8`
+- Source file: `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp`
+- Removed the diagnostic `sd-show-graphical-browser` call, so Apply no longer intentionally opens the temporary native bridge window.
+- Kept the existing bridge data construction and selected BrowserNode payload unchanged.
+- Changed the hand-off call to execute `sd-browser-exec-cmd ... :select-and-execute` inside `sd-call-cmds`, based on PTC Integration Kit guidance that Modeling action routines invoked from UI callbacks should be wrapped in `sd-call-cmds` to manage command execution and UI state.
+- Existing trace checkpoint `APPLY/SELECT-AND-EXECUTE-RETURN` remains and now records the wrapped call's result.
+- Error text now reports that Modeling did not confirm the hand-off rather than asserting that no objects were handed over.
+
+Technical rationale:
+- The user confirmed that clicking the native bridge's Apply button works, while direct LISP invocation of `:select-and-execute` returns NIL.
+- This candidate tests whether the missing piece is Modeling command context when the call originates from the UICT callback.
+- This is a controlled hypothesis, not a proven fix. PTC documentation describes `sd-call-cmds` as the wrapper for action routines; it does not explicitly guarantee that wrapping this Graphical Browser command will reproduce the native button event.
+- Reference: PTC Integration Kit, User Defined Commands: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/concepts/user_cmd.html
+- Reference: PTC Integration Kit, Graphical Browser `:select-and-execute`: https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+
+Scope guard:
+- No changes to UICT Results shell, internal page/tab lifecycle, row payload, collector, numeric Density mappings/normalization, match predicate, table schema, or Select All behavior.
+- The temporary native bridge is no longer shown by this Apply path.
+- No mouse simulation, guessed UI widget command, or private UI internals used.
+
+Static validation:
+- Parentheses balanced; no negative nesting; no unterminated strings.
+- Source committed and re-fetched from GitHub to verify the candidate.
+
+Runtime validation:
+- **Not yet tested in Creo Elements/Direct Modeling 18.1.**
+- Do not report Apply/double-click fixed until the user verifies direct 3D selection with no second window.
+- First test one selected row with Apply, then one row by double-click, then Select All + Apply.
+- Capture `APPLY/SELECT-AND-EXECUTE-RETURN` and confirm whether the temporary native bridge remains absent.
