@@ -175,7 +175,7 @@
       (sd-append-grid-area
         *h871-pf-v05-manager-grid*
         (concatenate 'string *h871-pf-v05-manager* "-AA")
-        :width 112 :height 82 :cellSize 10,10 :margin 4 :spacing 2)
+        :width 1120 :height 820 :cellSize 10,10 :margin 4 :spacing 2)
       (sd-display-error "H871 VER-05: Cannot create Browser Manager layout.")
       (return-from h871-pf-v05-create-manager nil)))
   (unless (sd-control-p *h871-pf-v05-manager-header*)
