@@ -97,3 +97,13 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - **Patch:** Added a single reset routine that attempts to hide/destroy the Graphical Browser first and then destroy its Browser Tree. It runs before each new tree creation and from Close Results. Close Results then restores the existing ver-03 UICT shell. Added command H871_PF_V04_RESTORE_UICT_RESULTS.
 - **Not yet verified:** The destroy calls and restore command must be tested in Modeling 18.1. This patch does not establish that page switching, selection restoration or native Apply works.
 - **Next test:** Load the updated diagnostic; use Close Results / H871_PF_V04_RESTORE_UICT_RESULTS to return to ver-03; run the diagnostic twice in succession; verify no duplicate-tree error; then test Previous/Next and native Apply on a disposable model.
+
+
+## KI-014 – ver-04 return navigation and page-navigation callbacks
+
+- **Status:** Persistent UICT launcher and navigation tracing committed; Modeling 18.1 retest pending.
+- **User-confirmed baseline:** Close Results returns from the native ver-04 Browser to ver-03 UICT. Previously, reopening the native Browser required re-running `H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG`.
+- **Patch:** ver-04 now installs a persistent `Open Native Results` button in the ver-03 shell grid. The button calls the diagnostic entry point, which captures the latest UICT page state, resets stale Browser/Tree objects and recreates the native Results Browser. It should remove the need to manually re-run the LISP command after returning to UICT.
+- **Navigation diagnostics:** Previous/Next now log `PAGE/NAVIGATION-REQUEST` and `PAGE/NAVIGATION-TARGET`; the existing Results Pages context submenu remains available. These markers will show whether the controls invoke their callbacks.
+- **Unverified:** UICT button placement/callback, repeat close/reopen, user-operated page switching and actual viewport selection after Apply.
+- **Next test:** Load updated ver-04; run once to install the button; Close Results; click `Open Native Results` in ver-03; confirm it reopens without a command; then use Previous/Next and right-click Results Pages and inspect the trace markers.
