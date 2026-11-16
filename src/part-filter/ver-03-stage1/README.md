@@ -2,7 +2,7 @@
 
 **Branch:** `rebuild/ver-03-from-ver-02`  
 **Target:** PTC Creo Elements/Direct Modeling 18.1  
-**Status:** First isolated tab-presentation experiment prepared; Modeling 18.1 runtime test pending.
+**Status:** `:createAsTab t` passes basic runtime/functionality test; visible tab presentation awaits confirmation.
 
 ## Current source
 
@@ -22,7 +22,7 @@ Before the current experiment, the user confirmed that the Stage 0-equivalent St
 
 ## Current experiment — one API difference
 
-The current source adds only `:createAsTab t` to the existing `sd-create-graphical-browser` call. It still creates exactly one Browser Tree and one Graphical Browser. No multiple-browser sessions, callback closures, `:tabname`, search changes, report changes, or selection/Apply changes are included. The purpose is only to test whether Modeling 18.1 accepts the tab-presentation option in isolation.
+The current source adds only `:createAsTab t` to the existing `sd-create-graphical-browser` call. It still creates exactly one Browser Tree and one Graphical Browser. No multiple-browser sessions, callback closures, `:tabname`, search changes, report changes, or selection/Apply changes are included. User reports that this revision runs successfully and retains the same functionality as Stage 0. This confirms basic compatibility, but does not yet prove that the Browser is visibly presented as a tab.
 
 ## Previous diagnostic design
 
