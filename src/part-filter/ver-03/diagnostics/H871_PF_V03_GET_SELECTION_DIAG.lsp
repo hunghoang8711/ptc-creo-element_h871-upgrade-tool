@@ -20,9 +20,12 @@
 ;; Important:
 ;;   - This does not call the Graphical Browser.
 ;;   - It does not change geometry or production Apply.
-;;   - The command reference documents SELECT :PART name selection and
-;;     GET_SELECTION :select as the programmatic SELECT subaction entry point.
+;;   - Uses SELECT :PART followed by the documented COMPOUND-NAME form
+;;     :FULL_NAME :START_NAME <full path> :END_NAME.
+;;   - This corrects the prior invalid shorthand :SELECT :PART <path>.
 ;;   - A returned SEL_ITEM is not by itself proof of global Modeling selection.
+;;   - The full-name syntax is documented for named elements/features; its use
+;;     with a Part path is an isolated compatibility experiment for Modeling 18.1.
 ;; ============================================================================
 
 (in-package :oli)
@@ -47,7 +50,8 @@
       (sd-call-cmds
         (get_selection
           :focus-type *sd-part-seltype*
-          :select :part path)
+          :select :part
+                  :full_name :start_name path :end_name)
         :success
           (progn
             (setf result *sd-action-result*)
@@ -78,7 +82,7 @@
                    (if (listp result) result (list result))))))
     (sd-display-message
       (format nil
-        "H871 GET_SELECTION diagnostic finished. Status: ~A. Result type: ~A. Check viewport and trace."
+        "H871 GET_SELECTION full-name diagnostic finished. Status: ~A. Result type: ~A. Check viewport and trace."
         status (if result (type-of result) "NIL")))
     status))
 
