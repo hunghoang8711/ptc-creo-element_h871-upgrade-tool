@@ -88,3 +88,7 @@ It owns the Process/Material search dialog, numeric Density matching, page regis
 
 The same Browser keeps the default native Apply action (no custom :okButtonAction). Current navigation is Previous/Next plus a Results Pages popup; horizontal internal tabs are still unimplemented. Static-checked only; test in Modeling 18.1 on a disposable model copy before any user-confirmed status.
 
+### ver-05 horizontal page selector
+
+The latest ver-05 source generates a Graphical Browser `:modeMenu` row with one page button per Density pair and sets the initial active page button. This is intended as the horizontal in-window page selector. The detailed PTC reference is later-release documentation; Modeling 18.1 compatibility is unverified. Do not confuse this with `:createAsTab` / Browser Bar docking, which is not the requested internal page UI.
+
