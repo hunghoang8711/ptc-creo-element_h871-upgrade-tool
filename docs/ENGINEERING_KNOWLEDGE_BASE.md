@@ -239,3 +239,6 @@ This sequence follows the PTC 20.6 Graphical Browser reference example. Treat th
 
 
 Fail-safe refinement: ver-05 now requires both :clear-table-roots and :change-table-root to return success before completing page activation. The :number-of-table-roots query is diagnostic-only and guarded with ignore-errors. This prevents an unverified diagnostic query from interrupting the core UI transition, while failing closed if page isolation itself cannot be established.
+
+
+ver-05 page captions use PROCESS-MATERIAL order (CNC-SUS304, CG-SS400), matching the established ver-03 convention. Keep labels separate from numeric Density filter values.
