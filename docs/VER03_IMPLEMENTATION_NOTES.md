@@ -112,3 +112,30 @@ A retest showed the empty logical-table error persisted. Root cause in the first
 - Changed h871-pf-v03-create-shell to check/create the dialog shell, grid area and tab control independently. Uses sd-control-p for the child UICT handles; this is documented as checking controls, areas, grid areas and dialog shells.
 - Changed :tabChangedAction from a quoted symbol to a function object (#'h871-pf-v03-tab-changed), matching PTC's official UICT tab-control examples.
 - This is a source-level correction based on the initialization lifecycle; it has not yet been confirmed in Modeling 18.1. If the same error persists, the next revision should add per-call stage diagnostics around the remaining UICT creation calls rather than alter density matching.
+
+
+
+## 2026-11-16 – Runtime-confirmed Results UI; Apply fails on BrowserNode type
+
+The user tested the latest ver-03 source after closing/reopening Modeling in a new window/session.
+
+**Confirmed working in Modeling 18.1**
+- Results window opens.
+- Internal tabs appear for filter pairs.
+- Result rows and columns (Part Name, Density Instance, Density Base, etc.) are displayed.
+- Apply button is created.
+
+**Exact Apply error**
+`LISP error: #:NODE241 is not of type "BROWSERNODE".`
+
+### Source-level localization
+
+In `h871-pf-v03-build-apply-tree`, ver-03 pushes the direct return value of `sd-create-browsernode` into `*h871-pf-v03-apply-nodes*`. In `h871-pf-v03-native-apply`, it later passes each stored value to `sd-browser-exec-cmd :set-object-selection`.
+
+The error says the actual value is an uninterned symbol such as `#:NODE241`, not a `BROWSERNODE` structure. Therefore the bridge is confusing a BrowserNode creation identifier/token with the BrowserNode object required by the selection command. The fault is localized to the Apply bridge's node creation/lookup/selection hand-off, after the Results UI has already succeeded.
+
+### Next engineering action
+
+Verify the exact Modeling 18.1 Integration Kit contract for `sd-create-browsernode` and the corresponding node lookup function. Then resolve each returned node token into a true BrowserNode structure before calling `:set-object-selection`. Compare against ver-02, which queries selected objects from the Graphical Browser and does not treat creation tokens as BrowserNode structures.
+
+Do not modify the Density Instance/Base filter, tab lifecycle, logical-table population, or ver-02 baseline while fixing this. Results UI is user-confirmed working; Apply is still failing. Exact node-resolution API is not yet verified, so no replacement function should be guessed.
