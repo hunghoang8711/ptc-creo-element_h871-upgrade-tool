@@ -229,3 +229,14 @@ Resolved:
 - Static validation: 420 lines; opening/closing parenthesis counts match; no multi-tab options or trace writer remain; Stage 1 command and isolated helper prefix remain.
 - Next user test: one CNC-SUS304 search in a fresh Modeling 18.1 session using a disposable model. Do not test multiple pairs until this baseline is confirmed.
 - Stage 0, ver-01 and ver-02 sources remain unchanged. No runtime success is claimed.
+
+
+## 2026-11-16 – Stage 1 diagnostic baseline runtime-confirmed
+
+- User tested the current Stage 1 source after it had been reset to a mechanical clone of Stage 0.
+- User confirmed Stage 1 now runs successfully in Creo Modeling 18.1 and provides the same functionality as Stage 0.
+- This confirms the isolated Stage 1 command and helper/global prefix are compatible with the user's environment when the Stage 0 single-browser workflow is retained.
+- No new feature has been added to Stage 1 yet; the user correctly noted that the current source is functionally equivalent to Stage 0.
+- Diagnostic conclusion: the former `0xC00000FD` is associated with one or more changes removed from the multi-browser experiment, but the precise failing API/expression remains unknown.
+- Next implementation rule: introduce one tab-related API difference per revision, test it in Modeling 18.1, and revert immediately if the fatal exception returns. Do not combine tab creation, multiple Browser Trees, callback changes, and selection changes in one patch.
+- Stage 0, ver-01 and ver-02 remain unchanged. Current Stage 1 single-browser source is a user-confirmed runtime baseline.
