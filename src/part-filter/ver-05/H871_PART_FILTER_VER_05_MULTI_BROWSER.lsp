@@ -1,29 +1,24 @@
 ;; ============================================================================
-;; H871 PART FILTER - VER-05
+;; H871 PART FILTER - VER-05: VER-03 FILTER + NATIVE MULTI-BROWSER MANAGER
 ;; Target: PTC Creo Elements/Direct Modeling 18.1
 ;;
 ;; Architecture:
-;; - ONE standalone UICT Results window with INTERNAL tabs.
-;; - One multi-column Display Table per Density pair page.
-;; - Each unique Density Instance + Density Base pair owns one page.
-;; - Repeating a pair refreshes that page; a no-match search leaves pages intact.
+;; - The Search dialog and numeric Density filter are preserved from VER-03.
+;; - One lightweight Manager window lists each filtered Density pair.
+;; - Each Density Instance + Density Base pair owns an independent native
+;;   Graphical Browser and Browser Tree.
+;; - Each Browser uses its own callback closure and result snapshot; no shared
+;;   active-pair global is used to build BrowserNodes.
+;; - Re-filtering the same pair creates the replacement Browser first, then
+;;   removes only the previous Browser for that same pair.
+;; - A no-match result leaves all existing Browsers and Manager rows intact.
+;; - Native Graphical Browser Apply is used directly; there is no Apply Bridge.
+;; - No UICT Display Table or logical-table API is used.
 ;;
-;; ver-05.1 changes:
-;; - Replaced concatenated List Control rows with real table columns:
-;;   Part Name | Density Instance | Density Base | Assembly Path.
-;; - Each table stores the actual Part object in a hidden logical-table column.
-;; - Row multi-selection is provided by Display Table :multiple-rows.
-;; - Select All / Clear Selection operate only on the page's table.
-;; - Added explicit Apply button; Apply uses the native Graphical Browser
-;;   selection-and-execute hand-off pattern already used by ver-02.
-;;
-;; Compatibility boundary:
-;; UICT Display Table APIs below are documented in PTC 20.7 manuals.
-;; Exact availability/signatures in Modeling 18.1 remain unverified.
-;; The Apply bridge deliberately reuses ver-02 Graphical Browser APIs which
-;; are part of the user's known-good 18.1 workflow. The hidden bridge itself
-;; still requires a runtime test in the user's 18.1 installation.
-;; Do not modify ver-01/ver-02; they remain regression baselines.
+;; Density matching remains exact on BOTH Density Instance and Density Base.
+;; Example: numeric 1-304 means CNC-SUS304.
+;; VER-01/VER-02/VER-03 source files and main branch are not modified.
+;; Runtime validation in Modeling 18.1 is still required.
 ;; ============================================================================
 
 (in-package :oli)
@@ -58,6 +53,80 @@
     (format stream "~A | ~S~%" stage detail)
     (force-output stream))
   t)
+
+;; ---------------------------------------------------------------------------
+;; VER-03 filter engine and numeric Density mapping, preserved as the base.
+;; ---------------------------------------------------------------------------
+
+(defun h871-pf-v05-name (obj)
+  (or (sd-inq-obj-basename obj) "<NO NAME>"))
+
+(defun h871-pf-v05-path (obj)
+  (or (sd-inq-obj-pathname obj) "<NO PATH>"))
+
+(defun h871-pf-v05-as-number (value)
+  (if (numberp value) value nil))
+
+(defun h871-pf-v05-density-display-value (api-value)
+  (when (numberp api-value)
+    (/ api-value 1000.0)))
+
+(defun h871-pf-v05-numeric-equal-p (actual requested)
+  (let ((a (h871-pf-v05-as-number actual))
+        (b (h871-pf-v05-as-number requested)))
+    (and a b
+         (<= (abs (- a b)) 0.0000001))))
+
+(defun h871-pf-v05-collect (obj matches requested-instance requested-base)
+  ;; Preserve the VER-03 Assembly traversal and exact two-property predicate.
+  (incf *h871-pf-v05-collect-visited-count*)
+  (when (= (mod *h871-pf-v05-collect-visited-count* 100) 0)
+    (h871-pf-v05-trace "COLLECT/PROGRESS"
+      *h871-pf-v05-collect-visited-count*))
+  (when (sd-inq-part-p obj)
+    (let ((actual-instance (sd-inq-part-density obj :instance))
+          (actual-base (sd-inq-part-density obj :contents)))
+      (when (< (length *h871-pf-v05-diagnostic-samples*) 30)
+        (push
+          (list (h871-pf-v05-name obj)
+                (h871-pf-v05-path obj)
+                actual-instance (type-of actual-instance)
+                actual-base (type-of actual-base))
+          *h871-pf-v05-diagnostic-samples*))
+      (when (and
+              (not (null actual-instance))
+              (not (null actual-base))
+              (h871-pf-v05-numeric-equal-p
+                (h871-pf-v05-density-display-value actual-instance)
+                requested-instance)
+              (h871-pf-v05-numeric-equal-p
+                (h871-pf-v05-density-display-value actual-base)
+                requested-base))
+        (push obj matches))))
+  (dolist (child (sd-inq-obj-children obj))
+    (setf matches
+      (h871-pf-v05-collect child matches requested-instance requested-base)))
+  matches)
+
+(defun h871-pf-v05-choice-label (value mapping fallback)
+  (or (cadr (assoc value mapping)) fallback))
+
+(defun h871-pf-v05-process-label (process)
+  (h871-pf-v05-choice-label process
+    '((1 "CNC") (2 "KH") (3 "CG") (4 "COVER"))
+    (format nil "P~A" process)))
+
+(defun h871-pf-v05-material-label (material)
+  (h871-pf-v05-choice-label material
+    '((6061 "A6061") (201 "SUS201") (304 "SUS304")
+      (400 "SS400") (10 "POM") (20 "Bakelit")
+      (30 "MC") (40 "MIKA") (50 "PU"))
+    (format nil "M~A" material)))
+
+(defun h871-pf-v05-pair-label (instance base)
+  (format nil "~A-~A"
+    (h871-pf-v05-process-label instance)
+    (h871-pf-v05-material-label base)))
 
 ;; ---------------------------------------------------------------------------
 ;; Pair registry and manager window
@@ -472,17 +541,17 @@
 ;; H871_PART_FILTER_VER_05
 ;;
 ;; RUNTIME TEST:
-;; 1. Search CNC + SUS304; expect a multi-column table in SUS304-CNC tab.
-;; 2. Search KH + A6061; expect a second tab in the same Results window.
-;; 3. Repeat CNC + SUS304; expect that page to refresh without duplication.
-;; 4. Click individual rows and Ctrl/Shift-select multiple rows.
-;; 5. Select All selects every row in the active tab only.
-;; 6. Clear Selection clears only the active tab.
-;; 7. Apply transfers only selected real Parts from the active tab.
-;; 8. Switch tabs and verify each page's selection remains independent.
-;; 9. Refresh a pair; selection is intentionally cleared to avoid stale Parts.
+;; 1. Filter CNC + SUS304 (1-304): manager row and native Graphical Browser appear.
+;; 2. Filter KH + A6061 (2-6061): second independent Browser appears.
+;; 3. Keep both Browsers open and verify their Part lists are independent.
+;; 4. Re-filter CNC + SUS304 from another Assembly: only the old 1-304 Browser
+;;    is replaced; the KH-A6061 Browser remains unchanged.
+;; 5. Use native Select All/Clear Selection and Apply in each Browser.
+;; 6. Verify the intended Parts are selected in the 3D viewport.
+;; 7. Use each Manager row's Open Browser button to reopen that pair.
+;; 8. Try a no-match pair; existing Browser windows/data and Manager rows remain.
 ;;
 ;; COMPATIBILITY NOTE:
-;; The Display Table and logical-table APIs are documented in PTC 20.7.
-;; Modeling 18.1 runtime compatibility and the hidden Apply bridge must be
-;; tested before treating this revision as production-ready.
+;; Browser Tree and Graphical Browser use the VER-02 native API pattern.
+;; Multiple simultaneous independent Browser instances and manager UI controls
+;; still require a runtime test in Modeling 18.1.
