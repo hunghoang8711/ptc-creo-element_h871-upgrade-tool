@@ -416,7 +416,7 @@
 ;; Modeling User Actions, so they must queue this command through the
 ;; Modeling command line using sd-put-buffer. The :ok-action then provides
 ;; the real User Action context required by sd-call-cmds.
-(sd-defdialog 'h871_pf_v03_apply_action
+(sd-defdialog 'h871_pf_v05_apply_action
   :dialog-title "H871 Apply Selection"
   :dialog-control :sequential
   :variables '()
