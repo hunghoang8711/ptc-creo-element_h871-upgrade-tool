@@ -177,3 +177,6 @@ This is a static source correction based on the PTC 20.6 documented command sequ
 
 
 ver-05 follow-up: page activation now fails closed if :clear-table-roots or :change-table-root does not return success. The :number-of-table-roots inquiry is wrapped as diagnostic-only so an unavailable query cannot interrupt the Browser. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4. Runtime confirmation remains pending.
+
+
+ver-05 caption correction: page labels now use PROCESS-MATERIAL order (CNC-SUS304, CG-SS400), matching the established ver-03 convention. The numeric Density mapping and search values are unchanged. Source commit: 8a189bb6ec8e44234b5b6607deb8600af3541c0a.
