@@ -183,3 +183,17 @@ Added `src/diagnostics/H871_TRACE_WRITE_TEST.lsp` on this branch.
 - Static inspection only; user runtime validation is pending.
 
 After this test passes, integrate the same proven writer into ver-03 and add a few stage checkpoints. Then use those checkpoints to isolate Search. Only after Search is stable should Apply be changed.
+
+
+## 11. Trace writer validated and integrated — 2026-11-16
+
+The user ran `H871_PF_V03_TRACE_WRITE_TEST` in Creo Modeling 18.1 and confirmed the visible success text: `H871 TRACE WRITE TEST OK - Modeling 18.1`.
+
+Consequences:
+- The home-directory file output mechanism using `with-open-file`, `format`, and `force-output` is now user-validated in the target runtime.
+- The ver-03 trace helper now uses that same mechanism, appends each checkpoint, flushes after each line, and no longer suppresses errors with `ignore-errors`.
+- Each Search run resets the trace file before writing its first checkpoint.
+- Added a traversal counter and a progress checkpoint every 100 visited assembly objects. This is diagnostic-only; recursive traversal, matching predicate, numeric normalization, and UI architecture remain unchanged.
+- Runtime status: trace writer test = **user-tested success**; integrated ver-03 trace and traversal checkpoints = **not yet tested** in Modeling 18.1.
+
+Next test: load this updated ver-03 source, run one known-positive search (CNC / SUS304), and if it fails or terminates, send the generated `H871_PART_FILTER_VER_03_TRACE.txt`. The last checkpoint will show whether failure occurs before collection, during traversal (including last 100-object progress count), report writing, or UICT creation. Do not change the Apply bridge until Search behavior is isolated.
