@@ -98,3 +98,7 @@ Active decisions that constrain implementation. Superseded experiments are recor
 
 **Validation:** ver-05 is static-checked only. No runtime success is claimed. User must test in Modeling 18.1 on a disposable model copy.
 
+### TD-013 implementation refinement – Graphical Browser modeMenu
+
+ver-05 now constructs one dynamic `:modeMenu` entry per stored Density-pair page. The mode menu is intended to appear as a horizontal page-button strip within the one Results Browser, with the current page set via `:modeMenuInitialButton`. This is not Browser Bar docking. Detailed PTC documentation for these parameters is later-release evidence only; Modeling 18.1 compatibility is pending runtime testing. The same Browser Tree/table and native Apply architecture remain unchanged.
+
