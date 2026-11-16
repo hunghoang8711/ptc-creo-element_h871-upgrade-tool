@@ -135,3 +135,12 @@ PTC Graphical Browser :modeMenu is mapped to right-click popup entries for compa
 ### Correction to LL-017 – modeMenu is a visible horizontal row
 
 PTC's reference says modeMenu provides a row of toggle buttons directly above buttonMenu; both are additionally mapped to right-click popup entries for compatibility. Do not state that modeMenu is popup-only. It is a valid page-selector row in principle. When it fails to appear, inspect the actual evaluated menu specification, initial button name, Browser creation result and runtime trace instead of switching parameters based on an incomplete reading.
+
+
+## LL-018 – Keep the accepted ver-03 Results UI; isolate Apply repair (2026-11-16)
+
+The user explicitly reaffirmed that ver-03 already provides the desired one-window, multi-tab Results interface. Repeatedly rebuilding the UI around ver-02's Graphical Browser moved away from the accepted design and created unnecessary detours. Continue from ver-03: retain its internal tabs, Display Table columns, multi-row selection and per-page controls. Treat ver-04/ver-05 as diagnostics, not the product direction.
+
+A source/doc consistency audit also found that an earlier note said the ver-03 Apply node-ID conversion had been fixed, but the checked-in source still passed raw `sd-create-browsernode` IDs to `:set-object-selection`. The correction now resolves each returned ID with `sd-get-browsernode-struct` and records resolution traces. Always verify the actual committed source, not only a prior development-log statement.
+
+The hidden Browser Apply bridge remains unproven. Never equate a resolved BrowserNode, a true return value, or a `:SUCCESS` status with actual Modeling viewport selection. The user's viewport observation is the acceptance test.
