@@ -191,3 +191,15 @@ Resolved:
 - The diagnostic reuses existing ver-03 page data and hides the ver-03 UICT Results shell while the native Browser is displayed. It does not change ver-03 production source, search logic, mappings, normalization, or ver-02.
 - Static validation: 471 lines; balanced parentheses (depth 0, minimum 0); no unterminated strings; all local h871-pf-v04-* calls resolve; native :okButtonLabel "Apply" is present and no :okButtonAction override is supplied.
 - Runtime status: not loaded or functionally tested in Modeling 18.1. Horizontal tab UI is not yet implemented in this candidate. Native Apply must be verified by selecting actual Parts in the viewport.
+
+
+## 2026-11-16 – ver-04 first Modeling 18.1 test and lifecycle recovery
+
+- User confirmed the diagnostic hides the old UICT shell and opens exactly one native Graphical Browser Results window.
+- The active ver-03 page's rows appeared in the Browser. The trace copied two page records: CNC-SS400 (8 Parts) and CG-SS400 (2 Parts).
+- The user could select rows in the new Browser, but page navigation back to the old UICT window was not available through the attempted interaction.
+- A second invocation failed with Browser Tree H871-PF-V04-SINGLE-RESULTS-TREE already exists. The trace stopped after DIAG/PAGES-COPIED, so page switching, selection restoration and native Apply have not yet been tested.
+- Root cause: the diagnostic had no successful-run cleanup path for its named Browser/Tree objects. Hiding the Browser and preserving the old UICT shell were not enough to make the diagnostic re-entrant.
+- Patched ver-04 to destroy the old Browser before its Tree before rebuilding; Close Results now invokes the same cleanup and restores ver-03 UICT. Added H871_PF_V04_RESTORE_UICT_RESULTS as a recovery command.
+- Static check passed: balanced parentheses, no negative nesting, no unterminated strings.
+- **Runtime status:** lifecycle patch committed but not yet retested in Creo 18.1. Native Apply and page switching remain unverified. ver-01/ver-02/ver-03 production sources and filter logic were not changed.
