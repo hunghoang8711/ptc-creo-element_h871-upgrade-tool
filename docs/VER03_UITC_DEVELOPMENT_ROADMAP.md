@@ -687,3 +687,17 @@ The following references were inspected after the failed section 23 runtime test
 - Hidden Graphical Browser hand-off: **user-tested failed**.
 - One-window Apply/double-click to global 3D selection: **not solved**.
 - All cited API documentation reviewed here is for Modeling 20.x; it does not prove Modeling 18.1 compatibility.
+
+
+### Additional Dialog Generator lead: assign a selection variable
+
+PTC's Dialog Generator reference documents `sd-set-variable-status` with a `:value` option. For a selection variable, the assigned value is validated against that variable's selection options; for multiple-item selection, a list of feasible SEL_ITEM values is accepted. If valid, the value is assigned and the variable's `:after-input` code runs:
+https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
+
+This provides a documented way to feed the UICT's stored Part SEL_ITEM list into a Dialog Generator selection variable without asking the user to pick the Parts again. It is a possible way to build a no-extra-window command-input pipeline, but it is **not** documented as setting Modeling's global viewport selection by itself. The variable assignment may update the dialog state/feedback; it must not be confused with the native Graphical Browser Apply hand-off.
+
+Before a source experiment:
+- Verify the exact `sd-set-variable-status` syntax and selection-variable behavior in Modeling 18.1.
+- Determine whether a zero-input / non-visible Dialog Generator command can receive the stored list, validate it, and pass it to an existing Modeling action routine.
+- Identify that downstream action routine and prove that its result is the required viewport selection state. Merely consuming the list as an input to another operation does not satisfy Apply.
+- Do not add a speculative variable or command to the production source until the downstream behavior is established.
