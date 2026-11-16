@@ -280,6 +280,12 @@
                   :base (h871-pf-v05-density-display-value base-api)))))
     root))
 
+(defun h871-pf-v05-release-callback (callback-symbol)
+  (when (and (symbolp callback-symbol)
+             (fboundp callback-symbol))
+    (ignore-errors (fmakunbound callback-symbol)))
+  t)
+
 (defun h871-pf-v05-select-all (browser-name)
   (sd-browser-exec-cmd browser-name :select-all))
 
@@ -321,6 +327,7 @@
         :update-func callback-symbol)
       (sd-display-error
         (format nil "H871 VER-05: Cannot create Browser Tree ~A." tree))
+      (h871-pf-v05-release-callback callback-symbol)
       (return-from h871-pf-v05-create-browser nil))
     (unless
       (sd-create-graphical-browser
@@ -354,6 +361,7 @@
       (sd-display-error
         (format nil "H871 VER-05: Cannot create Graphical Browser ~A." browser))
       (ignore-errors (sd-destroy-browser-tree tree))
+      (h871-pf-v05-release-callback callback-symbol)
       (return-from h871-pf-v05-create-browser nil))
     (unless
       (sd-browser-define-table
@@ -372,6 +380,7 @@
         (format nil "H871 VER-05: Cannot define Browser table ~A." browser))
       (ignore-errors (sd-destroy-graphical-browser browser))
       (ignore-errors (sd-destroy-browser-tree tree))
+      (h871-pf-v05-release-callback callback-symbol)
       (return-from h871-pf-v05-create-browser nil))
     (sd-browser-set-active-table browser :table-name "h871-pf-v05-bom")
     (sd-browser-exec-cmd browser :set-table-mode)
@@ -382,6 +391,7 @@
           (format nil "H871 VER-05: Browser Tree ~A has no root node." tree))
         (ignore-errors (sd-destroy-graphical-browser browser))
         (ignore-errors (sd-destroy-browser-tree tree))
+        (h871-pf-v05-release-callback callback-symbol)
         (return-from h871-pf-v05-create-browser nil))
       (sd-browser-exec-cmd browser :change-table-root root t))
     (list :browser browser :tree tree :callback callback-symbol)))
@@ -431,6 +441,7 @@
          (entry (h871-pf-v05-find-pair requested-instance requested-base))
          (old-browser (and entry (getf entry :browser)))
          (old-tree (and entry (getf entry :tree)))
+         (old-callback (and entry (getf entry :callback)))
          (new-browser-info nil))
     (h871-pf-v05-trace "COLLECT/COMPLETE"
       (list (length matches) *h871-pf-v05-collect-visited-count*))
@@ -482,6 +493,9 @@
       (ignore-errors (sd-destroy-graphical-browser old-browser)))
     (when (and old-tree (not (equal old-tree (getf entry :tree))))
       (ignore-errors (sd-destroy-browser-tree old-tree)))
+    (when (and old-callback
+               (not (eq old-callback (getf entry :callback))))
+      (h871-pf-v05-release-callback old-callback))
     (h871-pf-v05-trace "RUN/RESULT-BROWSER-READY"
       (list (getf entry :label) (getf entry :browser) (length matches)))
     (values (length matches) report)))
