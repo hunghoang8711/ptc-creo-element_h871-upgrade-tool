@@ -60,24 +60,24 @@ The following symbols were found in uploaded Annotation macro source. Their appe
 - `CREATE_LTAB`, `READ_LTAB`, `WRITE_LTAB`, `LTAB_ROWS`, `DELETE_LTAB_ROW`, `DELETE_LTAB`, `SORT_LTAB`
 - `INQ_ENV 6/7`, `Move_sheet`
 
-## D. UICT APIs used by ver-03 prototype – later-release evidence only
+## D. UICT APIs used by ver-03 – later-release evidence only
 
-The following signatures/patterns were inspected in official PTC Integration Kit documentation for releases 20.7/20.8 and used in the ver-03 prototype:
-- `sd-create-dialog-shell`, `sd-dialog-shell-p`, `sd-dialog-shell-visible-p`
-- `sd-append-grid-area`
-- `sd-create-tab-control`, `sd-insert-tab-control-page`, `sd-set-current-tab-control-page`
-- `sd-create-text-control`, `sd-set-text-control-value`
-- `sd-create-list-control`, `sd-set-list-control-items`, `sd-set-list-control-selected-items`, `sd-get-list-control-selected-items`
-- `sd-create-pushbutton-control`
+The following signatures/patterns were inspected in official PTC Integration Kit documentation for releases 20.7/20.8. They are used by the current ver-03 implementation, but exact Modeling 18.1 availability/signatures remain unverified:
 
-**Evidence:** Later-release documentation only. Modeling 18.1 function availability, exact signatures and callback execution have not been runtime-verified. The current ver-03 source is a prototype, not proof of compatibility.
+- Dialog shell and layout: `sd-create-dialog-shell`, `sd-dialog-shell-p`, `sd-dialog-shell-visible-p`, `sd-append-grid-area`
+- Internal tabs: `sd-create-tab-control`, `sd-insert-tab-control-page`, `sd-set-current-tab-control-page`
+- Display Table: `sd-create-logical-table`, `sd-change-logical-table-contents`, `sd-create-display-table-control`
+- Multi-row selection: `sd-get-display-table-selection`, `sd-set-display-table-selection`, `sd-reset-display-table-selection`
+- Page status/buttons: `sd-create-text-control`, `sd-set-text-control-value`, `sd-create-pushbutton-control`
+
+**Display Table evidence:** PTC 20.7 documents a logical table as a typed/untyped data store, and Display Table as its multi-column presentation. The documented `:multiple-rows` selection mode returns selected logical row indices plus selected column values. An untyped hidden `:part-object` column is used to retain the real Part object while visible columns show Part Name, Density Instance, Density Base and Assembly Path.
+
+**Native Apply bridge:** The current source builds temporary BrowserNodes for only the selected Part objects and calls the same Graphical Browser commands used by ver-02: `:set-object-selection` followed by `:select-and-execute`. The ver-02 native Apply path is user-confirmed in Modeling 18.1. However, this specific hidden bridge from a UICT Display Table into a temporary Graphical Browser has not yet been runtime-tested in 18.1. Treat it as an implementation candidate, not a verified workflow.
 
 PTC references:
 - https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/uict_create.html
-- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/uict_specutil.html
-- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/examples/vertical_tabs_lsp.html
-
-**Apply hand-off gap:** No Modeling 18.1 method has yet been proven to transfer selected Part objects from a UICT list into native Modeling selection. Do not invent or infer this from later-release examples. Preserve native Graphical Browser Apply in ver-01/ver-02.
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/tables.html
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
 
 ## E. Measurement/export
 - No measurement API has been verified in Modeling 18.1 in the recovered project history.
