@@ -177,3 +177,17 @@ Resolved:
 - Rolled active ver-03 source back to the last revision associated with user-confirmed Results UI appearance (`8c0a1cd56f25f125958080b3ab6316e55827b141`). The iterative traversal candidate is retained in Git history, not active.
 - Updated Known Issues with a strict evidence requirement: obtain the trace file and use its last marker to localize the failing stage before making another code change.
 - No runtime success is claimed. ver-01 and ver-02 remain untouched.
+
+
+
+## 2026-11-16 – ver-04 single Graphical Browser multi-page diagnostic
+
+- Re-read the repository's AI handover, project context, skill package, API register, technical decisions, known issues and lessons before changing direction.
+- Reconfirmed from the exact ver-02 source that the user-facing Results Graphical Browser itself owns row selection and native Apply. There is no separate Apply bridge in ver-02.
+- Reconfirmed from ver-03 source that UICT Display Table selection is a different selection context. The hidden Browser bridge and its programmatic :select-and-execute attempts are not a valid replacement.
+- Inspected PTC Graphical Browser API: one Browser Tree can hold multiple page roots; a table displays the children of its active table root; sd-browser-add-popup-entry can add dynamic popup submenus with string client data.
+- Added diagnostic src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp.
+- Candidate architecture: one visible Graphical Browser, one table, one root per Density pair, page switching via Previous/Next and a dynamic Results Pages submenu, page-local selection path save/restore, and the Browser's unmodified native Apply.
+- The diagnostic reuses existing ver-03 page data and hides the ver-03 UICT Results shell while the native Browser is displayed. It does not change ver-03 production source, search logic, mappings, normalization, or ver-02.
+- Static validation: 471 lines; balanced parentheses (depth 0, minimum 0); no unterminated strings; all local h871-pf-v04-* calls resolve; native :okButtonLabel "Apply" is present and no :okButtonAction override is supplied.
+- Runtime status: not loaded or functionally tested in Modeling 18.1. Horizontal tab UI is not yet implemented in this candidate. Native Apply must be verified by selecting actual Parts in the viewport.
