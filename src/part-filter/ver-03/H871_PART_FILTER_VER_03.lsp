@@ -33,6 +33,7 @@
 (defvar *h871-pf-v03-current-page* nil)
 (defvar *h871-pf-v03-assembly* nil)
 (defvar *h871-pf-v03-diagnostic-samples* nil)
+(defvar *h871-pf-v03-collect-visited-count* 0)
 
 (defvar *h871-pf-v03-shell* "h871-pf-v03-results")
 (defvar *h871-pf-v03-grid* "h871-pf-v03-results-grid")
@@ -44,18 +45,27 @@
 (defvar *h871-pf-v03-apply-browser* "h871-pf-v03-apply-bridge")
 (defvar *h871-pf-v03-apply-tree* "h871-pf-v03-apply-tree")
 
-;; Diagnostic trace: records the last UICT/API stage reached before a runtime error.
-;; The trace is written beside the existing result report in the user's home folder.
+;; Diagnostic trace uses the independently user-validated file-write method.
+;; File errors are deliberately visible; never report false success.
+(defun h871-pf-v03-trace-file ()
+  (merge-pathnames
+    "H871_PART_FILTER_VER_03_TRACE.txt"
+    (user-homedir-pathname)))
+
+(defun h871-pf-v03-trace-reset ()
+  (with-open-file
+    (stream (h871-pf-v03-trace-file)
+      :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (format stream "H871 VER-03 TRACE START~%")
+    (force-output stream))
+  t)
+
 (defun h871-pf-v03-trace (stage &optional detail)
-  (ignore-errors
-    (let ((trace-file
-            (merge-pathnames
-              "H871_PART_FILTER_VER_03_TRACE.txt"
-              (user-homedir-pathname))))
-      (with-open-file
-        (stream trace-file
-          :direction :output :if-exists :append :if-does-not-exist :create)
-        (format stream "~%~A | ~A" stage detail))))
+  (with-open-file
+    (stream (h871-pf-v03-trace-file)
+      :direction :output :if-exists :append :if-does-not-exist :create)
+    (format stream "~A | ~S~%" stage detail)
+    (force-output stream))
   t)
 
 ;; Page entry:
@@ -82,6 +92,14 @@
          (<= (abs (- a b)) 0.0000001))))
 
 (defun h871-pf-v03-collect (obj matches requested-instance requested-base)
+  ;; Progress checkpoints expose the last completed traversal depth/volume if
+  ;; Modeling terminates during recursive assembly traversal. Filter semantics
+  ;; and traversal order are unchanged.
+  (incf *h871-pf-v03-collect-visited-count*)
+  (when (= (mod *h871-pf-v03-collect-visited-count* 100) 0)
+    (h871-pf-v03-trace
+      "COLLECT/PROGRESS"
+      *h871-pf-v03-collect-visited-count*))
   ;; Keep the ver-02 search semantics: compare numeric Density Instance and
   ;; Density Base values after /1000 normalization; labels are never inputs.
   (when (sd-inq-part-p obj)
@@ -587,6 +605,7 @@
     report))
 
 (defun h871-pf-v03-run (assembly requested-instance requested-base)
+  (h871-pf-v03-trace-reset)
   (h871-pf-v03-trace "RUN/BEGIN" (list (type-of assembly) requested-instance requested-base))
   ;; Never use display labels as search criteria. Reject missing/non-numeric
   ;; dialog values before touching the assembly or creating any UI.
@@ -601,7 +620,9 @@
         (entry nil)
         (report nil))
     (setf *h871-pf-v03-diagnostic-samples* nil)
+    (setf *h871-pf-v03-collect-visited-count* 0)
     (setf *h871-pf-v03-assembly* assembly)
+    (h871-pf-v03-trace "COLLECT/BEGIN" (h871-pf-v03-path assembly))
     (setf matches
       (h871-pf-v03-collect assembly nil requested-instance requested-base))
     (h871-pf-v03-trace "RUN/COLLECT-DONE" (length matches))
