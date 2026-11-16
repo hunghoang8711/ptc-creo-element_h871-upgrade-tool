@@ -944,3 +944,28 @@ Interpretation:
 - No Creo 18.1 runtime test has yet been performed.
 - Production ver-03 source, Results UI, collector, Density mappings, predicate, table schema and Apply callback remain unchanged.
 - This is a diagnostic candidate only, not a completed Apply fix.
+
+
+## 29. Diagnostic feedback improvement after silent run report — 2026-11-16
+
+The user reported that running `H871_PF_V03_OFFSCREEN_APPLY_DIAG` produced no visible window or other feedback.
+
+Clarification: the diagnostic intentionally attempts to place its temporary Graphical Browser outside the visible desktop, so no browser window is expected when that positioning succeeds. However, the first diagnostic revision only displayed messages on early failure; a successful run could appear completely silent.
+
+The diagnostic file was therefore updated to display explicit progress messages:
+- Start: active page name and selected Part count.
+- After `sd-show-graphical-browser`: the returned show status.
+- End: hand-off status.
+
+Updated file:
+`src/part-filter/ver-03/diagnostics/H871_PF_V03_OFFSCREEN_APPLY_DIAG.lsp`
+
+Static validation after re-fetch:
+- Parenthesis depth: 0.
+- Minimum depth: 0.
+- No unclosed string.
+- Start/show/end message markers present.
+
+The user must reload this updated diagnostic file before testing again. If the start message does not appear after invoking the command, the command did not enter the diagnostic function (or the updated file was not loaded); investigate load/command registration rather than the Browser positioning. If start appears but later messages do not, use the last trace stage to isolate the failing call. If the end message appears, its status still does not prove viewport selection; inspect the trace and verify the actual selected Parts in the viewport.
+
+No production ver-03 source was modified. Runtime validation remains pending.
