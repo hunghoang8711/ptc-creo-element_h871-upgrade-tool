@@ -375,13 +375,27 @@
   (let ((handoff
           (sd-call-cmds
             (sd-browser-exec-cmd
-              *h871-pf-v03-apply-browser* :select-and-execute))))
-    (h871-pf-v03-trace "APPLY/SELECT-AND-EXECUTE-RETURN" handoff)
-    ;; Graphical Browser command return values are not a reliable success
-    ;; indicator (the known-good native Apply also returns NIL in direct
-    ;; programmatic tests). Keep the trace; runtime viewport selection is
-    ;; the authoritative acceptance test.
-    (h871-pf-v03-trace "APPLY/HANDOFF-COMMAND-ISSUED" (not (null handoff))))
+              *h871-pf-v03-apply-browser* :select-and-execute)
+            :success
+              (progn
+                (h871-pf-v03-trace
+                  "APPLY/SELECT-AND-EXECUTE-SUCCESS-CONTEXT"
+                  *sd-action-result*)
+                :success)
+            :failure
+              (progn
+                (h871-pf-v03-trace
+                  "APPLY/SELECT-AND-EXECUTE-ACTION-ERROR"
+                  (sd-inq-error-obj :all))
+                :error))))
+    ;; A NIL browser-command result is not itself an error. The explicit
+    ;; sd-call-cmds success/failure branch distinguishes execution failure
+    ;; from a command that completed without a meaningful return value.
+    (h871-pf-v03-trace "APPLY/SELECT-AND-EXECUTE-STATUS" handoff)
+    (when (eq handoff :error)
+      (sd-display-message
+        "H871 Apply: Modeling rejected the native hand-off. See the trace file.")
+      (return-from h871-pf-v03-native-apply nil)))
   t)
 
 ;; A zero-input sequential Dialog Generator command runs its :ok-action
