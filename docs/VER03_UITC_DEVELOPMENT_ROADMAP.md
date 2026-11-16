@@ -300,3 +300,28 @@ Next test:
 4. Send the appended trace section beginning at `APPLY/UICT-SELECTION`.
 5. Double-click one row and send whether `APPLY/DOUBLE-CLICK-CALLBACK` appears in the trace.
 Do not change the Results UICT architecture or replace it with the Stage 0/1 browser.
+
+
+## 15. Double-click reproduces the same native hand-off failure — 2026-11-16
+
+The user has now tested both interaction paths:
+- Select a result row and press Apply.
+- Double-click a result row.
+
+Both paths fail with the same message:
+`H871 Apply: No objects were handed to Modeling. Check the active command.`
+
+Updated interpretation:
+- The double-click action is now reaching the shared Apply path far enough to produce the same native hand-off message, but the trace must confirm callback entry and page resolution.
+- This is not evidence of two independent UI event bugs. Both paths converge on `h871-pf-v03-apply` -> `h871-pf-v03-native-apply` -> `:select-and-execute`.
+- The current candidate already contains instrumentation to distinguish row payload, BrowserNode resolution, visibility, per-node selection result, selected count, and hand-off return. Use those exact trace values before changing implementation.
+- A likely area to inspect is the temporary Graphical Browser bridge: it is created hidden, and its nodes may not be registered as displayed/selectable. This remains a hypothesis until the trace confirms the intermediate states.
+- Do not make the hidden bridge visible as a speculative fix: that could introduce an extra Results window and violate the one-standalone-UICT-window requirement.
+- Do not change the UICT Results window, page architecture, table schema, filter mappings, collector, or known-good ver-02 / Stage 0/1 baselines.
+
+Next evidence:
+1. Confirm the loaded file is the latest `feature/ver03-uict-apply` source containing the `APPLY/NODE-STATE` and `APPLY/SELECT-AND-EXECUTE-RETURN` checkpoints.
+2. Run Apply once after selecting exactly one row.
+3. Send the trace block beginning at `APPLY/UICT-SELECTION` through `APPLY/SELECT-AND-EXECUTE-RETURN`.
+4. Double-click once and confirm whether `APPLY/DOUBLE-CLICK-CALLBACK` and `APPLY/DOUBLE-CLICK-PAGE` are present.
+5. Runtime status: Apply and double-click hand-off = **failed** in Modeling 18.1; root cause = **not yet isolated**.
