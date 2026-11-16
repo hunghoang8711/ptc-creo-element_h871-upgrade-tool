@@ -129,3 +129,13 @@ The runtime error identifies the supplied value as an uninterned symbol (`#:NODE
 - Keep the ver-02 native selection-and-execute flow as the reference behavior. Do not alter numeric Density matching or the now-working Results UI while repairing Apply.
 
 Status: Results UI runtime-confirmed by user. Apply remains failed and unverified. This is a high-confidence localization from the exact runtime type error and source call path; the exact 18.1 node-resolution API still needs authoritative verification.
+
+## 2026-11-16 – Apply BrowserNode identifier resolution fix
+
+The user-reported Apply error was `#:NODE241 is not of type "BROWSERNODE"`. The source review and PTC Graphical Browser reference identify the cause: `sd-create-browsernode` returns a symbolic node ID, while `:set-object-selection` requires a BrowserNode structure.
+
+The Apply bridge now captures the symbolic ID returned by `sd-create-browsernode`, resolves it with `sd-get-browsernode-struct` using the Apply tree name, stores only the resolved BrowserNode structure in `*h871-pf-v03-apply-nodes*`, and passes the structure to `:set-object-selection`.
+
+The lookup function is also already used by the preserved ver-02 source to obtain the tree root. PTC's official 20.7 reference explicitly documents the symbolic return value and this exact resolution pattern. This is strong API-contract evidence, but it does not prove all Apply bridge behavior in Modeling 18.1. Runtime test is still required.
+
+`CNC-SUS304` is the current caption convention; numeric search remains Density Instance=1 and Density Base=304.
