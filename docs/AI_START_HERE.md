@@ -85,3 +85,7 @@ A new self-contained candidate has been added:
 
 **Status:** source added and static-checked only. Not loaded or functionally tested in Modeling 18.1. Native Apply must be proven by selecting one/multiple rows and confirming the actual 3D viewport selection. Test only on a disposable model copy. Preserve ver-01/ver-02/ver-03 and the Density mapping. Do not treat ver-05 as user-confirmed until runtime testing.
 
+### ver-05 horizontal page-button strip revision
+
+The ver-05 Browser now builds a dynamic Graphical Browser `:modeMenu` row with one page button per Density pair and sets `:modeMenuInitialButton` to the active page. This is intended to provide horizontal, in-window page switching while preserving one Browser's native Apply. Previous/Next helper functions remain in source as diagnostic fallbacks; the current toolbar button row is Select All/Clear Selection. PTC's detailed modeMenu reference is from a later release, so Modeling 18.1 compatibility and mutual-exclusion behavior must be tested before confirmation.
+
