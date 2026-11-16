@@ -139,3 +139,26 @@ The error says the actual value is an uninterned symbol such as `#:NODE241`, not
 Verify the exact Modeling 18.1 Integration Kit contract for `sd-create-browsernode` and the corresponding node lookup function. Then resolve each returned node token into a true BrowserNode structure before calling `:set-object-selection`. Compare against ver-02, which queries selected objects from the Graphical Browser and does not treat creation tokens as BrowserNode structures.
 
 Do not modify the Density Instance/Base filter, tab lifecycle, logical-table population, or ver-02 baseline while fixing this. Results UI is user-confirmed working; Apply is still failing. Exact node-resolution API is not yet verified, so no replacement function should be guessed.
+
+## 2026-11-16 – Apply BrowserNode ID resolution fix
+
+**Reported runtime error:** `#:NODE241 is not of type "BROWSERNODE"` when pressing Apply.
+
+### Verified API contract
+
+PTC's official Graphical Browser reference documents that `sd-create-browsernode` returns a **Symbol** (the symbolic BrowserNode name), not a BrowserNode structure. `sd-get-browsernode-struct` accepts the tree name and symbolic node name, and returns the corresponding BrowserNode structure. The documentation's example follows the exact two-step create-then-resolve pattern.
+
+The ver-02 source also already calls `sd-get-browsernode-struct` for the root node, so this lookup function is part of the preserved project implementation. This does not independently certify every call in the new Apply bridge under Modeling 18.1.
+
+### Focused source change
+
+`h871-pf-v03-build-apply-tree` now captures each `sd-create-browsernode` return value as `node-id`, resolves it with `sd-get-browsernode-struct`, and stores only the resolved structure in `*h871-pf-v03-apply-nodes*`. `h871-pf-v03-native-apply` therefore supplies a BrowserNode structure to `:set-object-selection`, rather than the `#:NODE...` symbol.
+
+No changes were made to Density filtering, result-table construction, tabs, logical-table population, or ver-01/ver-02.
+
+### Validation boundary
+
+- Source change committed to `main`.
+- API contract cross-checked against PTC official Integration Kit 20.7 Graphical Browser reference.
+- Existing ver-02 source provides project-level evidence that `sd-get-browsernode-struct` is used.
+- Modeling 18.1 runtime Apply test remains mandatory. Test one selected Part and multiple selected Parts; verify only those Parts are selected.
