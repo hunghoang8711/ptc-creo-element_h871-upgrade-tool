@@ -44,6 +44,20 @@
 (defvar *h871-pf-v03-apply-browser* "h871-pf-v03-apply-bridge")
 (defvar *h871-pf-v03-apply-tree* "h871-pf-v03-apply-tree")
 
+;; Diagnostic trace: records the last UICT/API stage reached before a runtime error.
+;; The trace is written beside the existing result report in the user's home folder.
+(defun h871-pf-v03-trace (stage &optional detail)
+  (ignore-errors
+    (let ((trace-file
+            (merge-pathnames
+              "H871_PART_FILTER_VER_03_TRACE.txt"
+              (user-homedir-pathname))))
+      (with-open-file
+        (stream trace-file
+          :direction :output :if-exists :append :if-does-not-exist :create)
+        (format stream "~%~A | ~A" stage detail))))
+  t)
+
 ;; Page entry:
 ;; (:instance n :base n :label string :page string :table string
 ;;  :logical-table string :status string :results (Part ...))
@@ -331,10 +345,12 @@
 ;; ---------------------------------------------------------------------------
 
 (defun h871-pf-v03-create-shell ()
+  (h871-pf-v03-trace "CREATE-SHELL/BEGIN" nil)
   ;; Recover each UICT layer independently. A previous failed attempt can
   ;; leave the dialog shell alive while its grid or tab control was never
   ;; created. Checking only sd-dialog-shell-p would then skip the missing
   ;; child controls and the next search would fail during page insertion.
+  (h871-pf-v03-trace "CREATE-SHELL/CHECK-DIALOG" *h871-pf-v03-shell*)
   (unless (sd-dialog-shell-p *h871-pf-v03-shell*)
     (unless
       (sd-create-dialog-shell
@@ -344,9 +360,11 @@
         :closeAction
           (list 'sd-hide-dialog-shell *h871-pf-v03-shell* :ignorePin t)
         :margin 4)
+      (h871-pf-v03-trace "CREATE-SHELL/DIALOG-CREATE-FAILED" *h871-pf-v03-shell*)
       (sd-display-error "H871 ver-03: Could not create the Results window.")
       (return-from h871-pf-v03-create-shell nil)))
 
+  (h871-pf-v03-trace "CREATE-SHELL/CHECK-GRID" *h871-pf-v03-grid*)
   ;; sd-control-p accepts UICT control/area handles and lets us recover
   ;; partially-created shells without destroying a valid Results window.
   (unless (sd-control-p *h871-pf-v03-grid*)
@@ -354,9 +372,11 @@
       (sd-append-grid-area
         *h871-pf-v03-grid* (concatenate 'string *h871-pf-v03-shell* "-AA")
         :width 920 :height 560 :cellSize 10,10 :margin 4 :spacing 2)
+      (h871-pf-v03-trace "CREATE-SHELL/GRID-CREATE-FAILED" *h871-pf-v03-grid*)
       (sd-display-error "H871 ver-03: Could not create the Results layout.")
       (return-from h871-pf-v03-create-shell nil)))
 
+  (h871-pf-v03-trace "CREATE-SHELL/CHECK-TABS" *h871-pf-v03-tabs*)
   (unless (sd-control-p *h871-pf-v03-tabs*)
     (unless
       (sd-create-tab-control
@@ -364,8 +384,10 @@
         :x 0 :y 0 :width 90 :height 53
         ;; Match PTC's UICT tab examples: pass a function object.
         :tabChangedAction #'h871-pf-v03-tab-changed)
+      (h871-pf-v03-trace "CREATE-SHELL/TAB-CREATE-FAILED" *h871-pf-v03-tabs*)
       (sd-display-error "H871 ver-03: Could not create the internal tab control.")
       (return-from h871-pf-v03-create-shell nil)))
+  (h871-pf-v03-trace "CREATE-SHELL/OK" nil)
   t)
 
 (defun h871-pf-v03-create-logical-table (logical-table)
@@ -381,6 +403,7 @@
     :contents nil))
 
 (defun h871-pf-v03-create-page (instance base)
+  (h871-pf-v03-trace "CREATE-PAGE/BEGIN" (list instance base))
   (let* ((label (h871-pf-v03-pair-label instance base))
          (page-name
            (format nil "H871-PF-V03-PAGE-~A"
@@ -390,6 +413,7 @@
          (status-name (h871-pf-v03-status-name page-name))
          (tab-grid (concatenate 'string page-name "-TAB-GA")))
 
+    (h871-pf-v03-trace "CREATE-PAGE/INSERT-TAB/BEGIN" (list page-name *h871-pf-v03-tabs*))
     (unless
       (sd-insert-tab-control-page
         page-name *h871-pf-v03-tabs*
@@ -397,15 +421,18 @@
       (sd-display-error "H871 ver-03: Could not add an internal results tab.")
       (return-from h871-pf-v03-create-page nil))
 
+    (h871-pf-v03-trace "CREATE-PAGE/LOGICAL-TABLE/BEGIN" logical-table)
     (unless (h871-pf-v03-create-logical-table logical-table)
       (sd-display-error "H871 ver-03: Could not create the page's logical table.")
       (return-from h871-pf-v03-create-page nil))
 
+    (h871-pf-v03-trace "CREATE-PAGE/TEXT-CONTROL/BEGIN" (list status-name tab-grid))
     (sd-create-text-control
       status-name tab-grid
       :x 0 :y 0 :width 86 :height 2
       :editable nil :showModified nil)
 
+    (h871-pf-v03-trace "CREATE-PAGE/DISPLAY-TABLE/BEGIN" (list table-name tab-grid logical-table))
     (unless
       (sd-create-display-table-control
         table-name tab-grid
@@ -418,6 +445,7 @@
       (sd-display-error "H871 ver-03: Could not create the multi-column results table.")
       (return-from h871-pf-v03-create-page nil))
 
+    (h871-pf-v03-trace "CREATE-PAGE/SELECT-ALL-BUTTON/BEGIN" page-name)
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-SELECT-ALL-PB")
       tab-grid
@@ -425,6 +453,7 @@
       :title "Select All"
       :pushAction (list 'h871-pf-v03-select-all page-name))
 
+    (h871-pf-v03-trace "CREATE-PAGE/CLEAR-BUTTON/BEGIN" page-name)
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-CLEAR-PB")
       tab-grid
@@ -432,6 +461,7 @@
       :title "Clear Selection"
       :pushAction (list 'h871-pf-v03-clear-selection page-name))
 
+    (h871-pf-v03-trace "CREATE-PAGE/APPLY-BUTTON/BEGIN" page-name)
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-APPLY-PB")
       tab-grid
@@ -446,12 +476,14 @@
             :results nil)
       *h871-pf-v03-pages*)
 
+    (h871-pf-v03-trace "CREATE-PAGE/SET-CURRENT-TAB/BEGIN" (list *h871-pf-v03-tabs* page-name))
     (setf *h871-pf-v03-current-page* page-name)
     (sd-set-current-tab-control-page *h871-pf-v03-tabs* :page page-name)
     (h871-pf-v03-update-status page-name)
     (h871-pf-v03-page-by-name page-name)))
 
 (defun h871-pf-v03-refresh-page (entry parts)
+  (h871-pf-v03-trace "REFRESH/BEGIN" (list (getf entry :page) (getf entry :table) (getf entry :logical-table)))
   (let* ((page-name (getf entry :page))
          ;; Pages can survive a LISP reload because these globals are not reset.
          ;; Older in-memory page records may therefore lack :logical-table.
@@ -476,6 +508,7 @@
 
     ;; Recover a missing logical table instead of passing NIL/"" to the API.
     ;; This specifically handles stale page metadata retained across LISP reloads.
+    (h871-pf-v03-trace "REFRESH/CHECK-LOGICAL-TABLE/BEGIN" logical-table)
     (unless (sd-logical-table-p logical-table)
       (unless (h871-pf-v03-create-logical-table logical-table)
         (sd-display-error
@@ -495,6 +528,7 @@
 
     ;; Verify that the Display Table is still bound to this page's logical table.
     ;; A stale control bound to an empty/different name must be recreated.
+    (h871-pf-v03-trace "REFRESH/CHECK-DISPLAY-TABLE/BEGIN" table-name)
     (when (and (sd-display-table-p table-name)
                (not (equal
                       (sd-get-display-table-logical-table table-name)
@@ -517,6 +551,7 @@
 
     ;; Replacing logical-table contents refreshes its Display Table in place.
     ;; Selection is cleared so stale object references are never applied.
+    (h871-pf-v03-trace "REFRESH/CHANGE-CONTENTS/BEGIN" (list logical-table (length contents)))
     (unless
       (sd-change-logical-table-contents
         logical-table :contents contents)
@@ -552,6 +587,7 @@
     report))
 
 (defun h871-pf-v03-run (assembly requested-instance requested-base)
+  (h871-pf-v03-trace "RUN/BEGIN" (list (type-of assembly) requested-instance requested-base))
   ;; Never use display labels as search criteria. Reject missing/non-numeric
   ;; dialog values before touching the assembly or creating any UI.
   (unless (and (numberp requested-instance)
@@ -568,8 +604,10 @@
     (setf *h871-pf-v03-assembly* assembly)
     (setf matches
       (h871-pf-v03-collect assembly nil requested-instance requested-base))
+    (h871-pf-v03-trace "RUN/COLLECT-DONE" (length matches))
     (setf report
       (h871-pf-v03-write-report assembly matches requested-instance requested-base))
+    (h871-pf-v03-trace "RUN/REPORT-DONE" report)
 
     ;; No-match must not modify or replace any existing tab.
     (when (null matches)
@@ -579,10 +617,13 @@
           requested-instance requested-base (namestring report)))
       (return-from h871-pf-v03-run (values 0 report)))
 
+    (h871-pf-v03-trace "RUN/CREATE-SHELL/BEGIN" nil)
     (unless (h871-pf-v03-create-shell)
       (return-from h871-pf-v03-run nil))
 
+    (h871-pf-v03-trace "RUN/FIND-PAGE/BEGIN" (list requested-instance requested-base))
     (setf entry (h871-pf-v03-find-page requested-instance requested-base))
+    (h871-pf-v03-trace "RUN/FIND-PAGE/DONE" (list (getf entry :page) (getf entry :table) (getf entry :logical-table)))
     (unless entry
       (setf entry (h871-pf-v03-create-page requested-instance requested-base)))
     (unless entry
