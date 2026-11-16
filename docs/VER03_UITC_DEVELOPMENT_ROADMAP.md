@@ -583,3 +583,64 @@ If the test fails, capture the trace stages:
 - `APPLY/SELECT-AND-EXECUTE-STATUS`
 
 Do not mark one-window Apply as fixed until the user confirms the 3D selection in Modeling 18.1.
+
+
+## 23. Runtime result: queued User Action executes, hidden browser hand-off does not select Parts — 2026-11-16
+
+### User test result
+
+The user tested the latest section 22 source in Creo Elements/Direct Modeling 18.1. Search and Results UICT still work:
+- Assembly traversal visited 500 objects.
+- Six Parts matched the active Density pair (3 400).
+- Existing page H871-PF-V03-PAGE-2 was found and refreshed.
+- UICT callback returned the selected Part payload as six ELAN::SEL_ITEM values for Select All, and one ELAN::SEL_ITEM for row double-click.
+- Both Apply and double-click paths queued H871_PF_V03_APPLY_ACTION.
+- APPLY/USER-ACTION-ENTER was reached for every attempt. This confirms the command-buffer trampoline and zero-input Dialog Generator action execute in 18.1 without a visible second dialog.
+
+### Observed native bridge state
+
+For both six-Part and one-Part tests:
+- APPLY/NODES-BUILT created the expected count of BrowserNode IDs.
+- Every ID resolved to a G-BROWSER::BROWSERNODE structure.
+- :set-table-mode and :change-table-root returned T.
+- :set-object-selection returned T.
+- Browser query :number-of-selected-objects returned the expected count (6 or 1).
+- However, :is-object-displayed returned NIL for every BrowserNode.
+- APPLY/SELECT-AND-EXECUTE-SUCCESS-CONTEXT recorded NIL.
+- The wrapper then recorded :SUCCESS because no Lisp action error was raised; this is not proof that any Part was handed to Modeling.
+- User confirms that neither Apply nor double-click visibly selects anything in the 3D viewport.
+
+### Root-cause interpretation
+
+PTC's Graphical Browser reference states:
+- :set-object-selection only selects objects that are visible in the browser; objects not shown are automatically unselected.
+- :select-and-execute extracts the browser's selected items and enters them into the SD input buffer for a running Modeling command; if no items are selected, it returns NIL.
+
+References:
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+- https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+
+This strongly indicates the hidden Graphical Browser is not providing a valid visible selection list, even though programmatic browser queries report the attempted selection count. The NIL success-context value is consistent with the browser command not returning a useful selection result. It is not independently sufficient to identify every internal reason for the failed hand-off.
+
+### New direction under investigation
+
+PTC's User Defined Command reference confirms that Modeling Action Routines accept lists of SEL_ITEM values wherever a selection parameter is expected:
+- https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/concepts/user_cmd.html
+
+The UICT callback already provides the real Part values as ELAN::SEL_ITEM, so a direct selection-consumer path may avoid BrowserNode visibility entirely. However, no documented generic API has yet been confirmed that simply sets the global viewport selection from an arbitrary list of Part SEL_ITEMs. Do not invent a function such as sd-set-selection or treat GET_SELECTION as a setter; PTC documents GET_SELECTION as an interactive selector/inquiry action.
+
+The following must be investigated before changing source:
+1. Find a documented 18.1-compatible action or command that consumes a supplied Part SEL_ITEM list and produces the same Modeling selection result as the native Graphical Browser OK button.
+2. Determine whether the native Graphical Browser's :select-and-execute can be invoked without a visible browser while still producing a valid selected list. Current 18.1 evidence says no.
+3. Do not expose a second bridge window, even temporarily, as the final solution unless the user explicitly changes the one-window requirement.
+4. Do not alter the working UICT Results shell, tabs, collector, Density mappings, normalization, predicate, or table data.
+
+### Runtime status
+
+- Section 22 command-buffer trampoline: confirmed working in Creo 18.1.
+- Zero-input Dialog Generator User Action: confirmed entered and executed in Creo 18.1.
+- UICT selected payload extraction: confirmed working (1 and 6 Parts).
+- Hidden Graphical Browser node creation and browser selection bookkeeping: confirmed at API return/query level only.
+- Hidden browser native selection hand-off to viewport: failed in user test.
+- One-window Apply/double-click: not solved.
+- No source code changed in this diagnostic step; this section records the exact trace result and next investigation.
