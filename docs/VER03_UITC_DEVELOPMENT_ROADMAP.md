@@ -1029,3 +1029,79 @@ This is a **new diagnostic lead only**. Persistent highlight is not documented a
 - Do not mark Apply solved based on wrapper return values.
 - Next experiment, if implemented, must be a separate diagnostic that initializes a Dialog Generator selection variable from the already captured `SEL_ITEM` list and tests whether the 18.1 viewport visibly highlights the Parts without creating a second visible window. Record separately whether highlight appears, whether it persists, whether a command remains active, and whether the global selection state is actually usable by a subsequent Modeling command.
 - Runtime target remains Creo Elements/Direct Modeling 18.1; references above are 20.6 documentation and must be treated as API guidance, not proof of 18.1 compatibility.
+
+
+## 31. Dialog Generator initialized-Part selection diagnostic — 2026-11-16
+
+### Diagnostic implementation
+
+Added a separate file:
+
+`src/part-filter/ver-03/diagnostics/H871_PF_V03_DG_SELECTION_DIAG.lsp`
+
+Command:
+
+`H871_PF_V03_DG_SELECTION_DIAG`
+
+The diagnostic reads the selected Part rows from the active UICT Results page and initializes a Dialog Generator selection variable from the actual `SEL_ITEM` list.
+
+Dialog definition:
+- `:dialog-control :parallel`
+- `:without-show t` — suppresses the parallel dialog's visible UI.
+- Variable `parts` uses `:value-type :part`.
+- `:multiple-items t` accepts the selected Part list.
+- `:initial-value` calls `h871-pf-v03-dg-selection-initial-parts`.
+- `:persistent-highlight t` explicitly enables persistent highlighting for Part values.
+- `:modifies nil` prevents the diagnostic variable from declaring a model modification.
+- The command remains available for inspection until accepted/cancelled; the top prompt instructs the user to inspect the viewport before pressing Enter.
+
+Trace markers:
+- `DG-SELECTION-DIAG/INITIAL-VALUE`
+- `DG-SELECTION-DIAG/AFTER-INITIALIZATION`
+- `DG-SELECTION-DIAG/OK-ACTION`
+- `DG-SELECTION-DIAG/PART-CHECKS`
+- `DG-SELECTION-DIAG/CANCEL`
+
+The OK action reports the number and types of items received by the Dialog Generator variable and checks each item with `sd-inq-part-p`. It does not modify model geometry and does not claim that persistent highlight equals the global Modeling selection list.
+
+### PTC documentation basis
+
+The Dialog Generator reference documents:
+- `:value-type :part` as a supported selection variable type.
+- `:multiple-items t` as the option for assigning a list of `SEL_ITEM` values.
+- `:initial-value` as the initialization mechanism for dialog variables, with selection values validated against the variable's selection options.
+- `:persistent-highlight t` as the option that enables highlighting for Part values, which otherwise default to no persistent highlight.
+- `:without-show t` as suppressing the UI of a parallel dialog when activated.
+
+Reference:
+https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
+
+This is 20.6 documentation used as API guidance; the runtime target is still Creo Elements/Direct Modeling 18.1. Compatibility and behavior must be confirmed by the user's 18.1 test.
+
+### User test procedure
+
+1. Load the current production `H871_PART_FILTER_VER_03.lsp`.
+2. Load `H871_PF_V03_DG_SELECTION_DIAG.lsp`.
+3. Select one or more rows in the active UICT Results tab.
+4. Run `H871_PF_V03_DG_SELECTION_DIAG` from the Modeling command line.
+5. Before pressing Enter, inspect the 3D viewport:
+   - Do the corresponding Parts become highlighted?
+   - Does the diagnostic remain active while the highlight is visible?
+   - Does any second dialog/browser window appear?
+6. Press Enter to finish, or cancel if no usable command state is available.
+7. Send the trace entries beginning with `DG-SELECTION-DIAG/` and report the viewport result.
+
+Interpretation:
+- If the Parts highlight while the no-show dialog is active, the Dialog Generator can provide the requested visual feedback without a second visible dialog. This still does not prove that the global selection list is populated.
+- If no highlight appears but the trace confirms the initial Part list, the 18.1 runtime does not provide the expected persistent highlight through this route.
+- If the command terminates immediately, record that separately; the no-show lifecycle did not provide an inspection interval.
+- If any second visible dialog appears, the no-show requirement has failed and this candidate must not be integrated.
+
+### Static validation and scope
+
+- File fetched back from GitHub after creation.
+- Parenthesis balance: depth 0; minimum depth 0; no unclosed string.
+- Required options and trace markers are present.
+- Production ver-03 source remains unchanged.
+- Results shell/tabs, collector, numeric Density mappings, predicate, UICT payload and Apply implementation remain unchanged.
+- No Creo 18.1 runtime result is claimed yet.
