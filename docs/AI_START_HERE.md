@@ -121,3 +121,10 @@ Corrected source commit: ca85cf158cdb345381f989f46f3e6cadbfe9bdc4. Density page 
 ### Correction – Graphical Browser modeMenu is also a visible horizontal row
 
 The preceding diagnosis that modeMenu is only a context popup was incorrect. PTC's reference explicitly says modeMenu provides a row of toggle buttons directly above buttonMenu; both menus are also mapped to right-click popup entries for compatibility. The original modeMenu approach was therefore valid in principle. The temporary buttonMenu page-selector change was reverted. Source commit 7763d35 restores the page selectors to modeMenu and adds UI/MODE-MENU-SPEC, UI/INITIAL-MODE-BUTTON and UI/BROWSER-CREATED trace markers. The actual reason the page buttons were not visible is still unresolved until the trace and runtime UI are inspected.
+
+
+## Current Part Filter direction – 2026-11-16
+
+Continue from **ver-03**, not ver-05. The user reaffirmed that ver-03's single Results window with internal Density-pair tabs is already the accepted UI. Keep its Display Tables, direct multi-row selection, Select All/Clear Selection and page isolation. Do not redesign the UI around a single Graphical Browser, add an intermediate window, or revive the UICT-to-native-window navigation flow.
+
+Latest source commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` corrects a real Apply defect: `sd-create-browsernode` IDs are resolved to BrowserNode structures using `sd-get-browsernode-struct` before `:set-object-selection`. Static parentheses check passed; runtime Apply remains unverified. Test on a disposable Assembly and require actual Part selection in the 3D viewport. A successful trace or command return is insufficient.
