@@ -340,6 +340,12 @@
         (sd-browser-exec-cmd
           *h871-pf-v03-apply-browser* :change-table-root root t))))
 
+  ;; Show the temporary native bridge after its table root is ready.
+  ;; This diagnostic experiment checks whether Modeling requires displayed
+  ;; BrowserNodes before :select-and-execute can hand them to the active command.
+  (let ((shown (sd-show-graphical-browser *h871-pf-v03-apply-browser*)))
+    (h871-pf-v03-trace "APPLY/SHOW-BRIDGE-RETURN" shown))
+
   ;; Resolve each symbolic ID to a BrowserNode structure, then record whether
   ;; Modeling considers it displayed and whether it enters the browser selection.
   (dolist (node-id *h871-pf-v03-apply-nodes*)
