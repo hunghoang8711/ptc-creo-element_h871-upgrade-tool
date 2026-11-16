@@ -85,3 +85,12 @@ References:
 ## ver-03.2 follow-up – explicitly reject empty-string metadata
 
 A retest showed the empty logical-table error persisted. Root cause in the first recovery patch: Common Lisp treats the empty string as truthy, so `(or stored-name fallback-name)` incorrectly retained an explicitly empty `:logical-table` value. The refresh code now accepts the stored name only when it is a string with length greater than zero; otherwise it derives the name from the non-empty page ID. This directly addresses the reported `name ""` case. Modeling 18.1 runtime retest is still required.
+
+
+## 2026-11-16 – preserve numeric filter codes and tab label convention
+
+- Reconfirmed against the known-good ver-02 implementation: CNC + SUS304 is searched as numeric Density Instance `1` and Density Base `304`; the raw API values are normalized by `/1000.0` before comparison.
+- `CNC-SUS304` is only the human-readable tab caption. It is never used as a search value.
+- Corrected ver-03 tab caption order from `SUS304-CNC` to `CNC-SUS304`.
+- Added an early numeric-input guard in the search entry point. Missing/non-numeric dialog values now produce a clear diagnostic before scanning or creating the Results UI.
+- This does not yet identify the reported `NIL is not of type STRING` source. The numeric mapping is now explicit and guarded; Modeling 18.1 runtime retest is required to identify the failing UI/API call if that error persists.
