@@ -781,3 +781,70 @@ Consequently, there is not yet a justified production patch. Before any isolated
 References:
 - https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/dg_manual.html
 - https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/whatsnew.html
+
+
+## 26. Apply bridge visibility and native selection semantics — 2026-11-16
+
+### New finding from comparing the exact ver-02 and ver-03 source
+
+The ver-02 known-good browser sequence is:
+
+1. Create the Graphical Browser and its BrowserNode tree.
+2. Set table mode.
+3. Call `sd-show-graphical-browser`.
+4. Set the table root and let the browser display its rows.
+5. The user selects rows and presses the browser's native Apply/OK button.
+6. PTC's default `:okButtonAction` invokes `:select-and-execute`.
+
+The current ver-03 hidden bridge differs at the critical point: it never calls `sd-show-graphical-browser`. It creates the browser, changes table root, then immediately calls `:set-object-selection` on BrowserNodes while the browser is hidden. The latest runtime trace reports `:is-object-displayed = NIL` for every node.
+
+PTC documents two relevant constraints:
+- Graphical Browser tree updates are delayed while the browser is hidden and are performed when it is displayed.
+- `:set-object-selection` only selects items that are visible in the browser; `:select-all` likewise selects only visible items.
+
+References:
+- Graphical Browser API, including `:select-all`, `:select-and-execute`, `:set-object-selection`, and `:is-object-displayed`: https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+- Graphical Browser creation guide, including delayed updates while hidden and `sd-show-graphical-browser`: https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/concepts/gbrowser_guide.html
+
+This makes the hidden bridge's current failure understandable: the code is trying to select BrowserNodes that the browser itself reports as not displayed. The BrowserNode structure and selected-count traces are not sufficient proof that the nodes are eligible for native Apply.
+
+### Important distinction: browser selection is a command hand-off
+
+PTC's documented `:select-and-execute` behavior is not a general setter for Modeling's persistent global selection set. It:
+1. starts the supplied command string (if any),
+2. puts the selected browser items into the SD input buffer for a running Modeling command,
+3. hides the browser if it is not pinned,
+4. clears the browser selection list.
+
+The native Apply behavior therefore hands a selection list to a Modeling command context. It is not documented as a standalone API that writes an arbitrary persistent viewport selection set.
+
+Reference:
+https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+
+### What this changes in the investigation
+
+- The current hidden bridge's `:is-object-displayed = NIL` is now a concrete likely cause, not merely a cosmetic trace.
+- A potential diagnostic is to display the temporary browser, verify that each node becomes displayed, then select and hand off. However, doing so risks showing the second native browser window, which the user explicitly rejects. It must not be shipped as the final UI behavior.
+- No official visibility-free API was found in the reviewed PTC function index that sets an arbitrary list of Part SEL_ITEMs as the global viewport selection. `GET_SELECTION` is an interactive selection interrupt / inquiry route, not a setter.
+- The hidden Parallel Dialog + selection-variable initial-value route remains only a command-input experiment; it is not evidence of a global selection setter.
+- Do not interpret the browser's `:select-and-execute` success branch or its NIL return as proof that the viewport selection was committed.
+
+### Next bounded experiment
+
+Before editing production source, test only the visibility hypothesis in a disposable diagnostic file or a temporary isolated function:
+1. Create a one-Part bridge browser from a known valid Part SEL_ITEM.
+2. Show the browser only if the user explicitly accepts a temporary diagnostic window for one test.
+3. Confirm `:is-object-displayed` changes from NIL to T.
+4. Call `:set-object-selection` and confirm `:is-object-selected` is T.
+5. Invoke native `:select-and-execute` in a valid Modeling User Action and independently verify whether the active Modeling command receives the Part selection.
+6. Close/hide the diagnostic browser and do not merge this experiment into the Results UI unless the one-window requirement can still be met.
+
+If the user does not accept a temporary diagnostic window, do not show it. Continue looking for a documented 18.1 command/API that can accept a list of SEL_ITEMs without a Graphical Browser.
+
+### Scope and status
+
+- Production ver-03 source unchanged.
+- The Results UI, tabs, collector, numeric Density mapping, predicate, table schema and UICT selection payload remain protected.
+- Current hidden bridge is now suspected to fail because it selects BrowserNodes while the browser reports them as not displayed.
+- The no-second-window Apply requirement remains **not solved**.
+- PTC API references are later 20.x documentation unless otherwise noted; no unverified API is being presented as 18.1-proven.
