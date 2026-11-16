@@ -147,3 +147,24 @@ Runtime status must always be recorded as **user-tested**, **not yet tested**, o
 Before another Search-pipeline edit, obtain the `H871_PART_FILTER_VER_03_TRACE.txt` produced by the exact Modeling 18.1 session where Search failed. If the trace was not produced or is empty, instrument a minimal isolated test with a method proven to write a file in the user's 18.1 environment; do not swallow all trace errors silently.
 
 The first code experiment after Search is stable must be limited to the BrowserNode ID-to-structure conversion in the Apply bridge. Record the exact source diff and test outcome separately from Search stability.
+
+
+## 9. Diagnostic trace writer is not validated — 2026-11-16
+
+User reports that every generated `H871_PART_FILTER_VER_03_TRACE.txt` is 0 KB.
+
+Consequences:
+- The existing trace writer is **not a usable diagnostic source** in the user's Modeling 18.1 environment.
+- The trace helper wraps all file operations in `ignore-errors` and returns true even if opening/writing fails. Its success return is therefore meaningless.
+- Do not ask the user to resend the same empty trace file.
+- Do not infer the Search failure stage from an empty trace.
+- Do not continue changing the Search collector or UICT creation sequence based on guesses.
+
+Next diagnostic experiment must first validate the output mechanism independently:
+1. Use a minimal standalone LISP command that writes a short fixed line to a new uniquely named file in a known writable directory.
+2. Explicitly call `force-output` and close the stream; do not swallow file errors.
+3. Report the exact target pathname and surface any open/write/close error to the user.
+4. Confirm the file contains the test line before integrating diagnostics into ver-03.
+5. If file output cannot be validated, use an alternative visible diagnostic channel with a small number of explicit stage checkpoints. Avoid high-volume messages and avoid changing filtering or UICT behavior.
+
+This is a diagnostic-infrastructure failure, not evidence that the filter or Apply logic has changed. Search root cause remains unknown.
