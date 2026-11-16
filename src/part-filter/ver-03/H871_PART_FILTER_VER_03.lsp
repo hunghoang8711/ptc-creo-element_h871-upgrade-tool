@@ -331,6 +331,10 @@
 ;; ---------------------------------------------------------------------------
 
 (defun h871-pf-v03-create-shell ()
+  ;; Recover each UICT layer independently. A previous failed attempt can
+  ;; leave the dialog shell alive while its grid or tab control was never
+  ;; created. Checking only sd-dialog-shell-p would then skip the missing
+  ;; child controls and the next search would fail during page insertion.
   (unless (sd-dialog-shell-p *h871-pf-v03-shell*)
     (unless
       (sd-create-dialog-shell
@@ -341,20 +345,25 @@
           (list 'sd-hide-dialog-shell *h871-pf-v03-shell* :ignorePin t)
         :margin 4)
       (sd-display-error "H871 ver-03: Could not create the Results window.")
-      (return-from h871-pf-v03-create-shell nil))
+      (return-from h871-pf-v03-create-shell nil)))
 
+  ;; sd-control-p accepts UICT control/area handles and lets us recover
+  ;; partially-created shells without destroying a valid Results window.
+  (unless (sd-control-p *h871-pf-v03-grid*)
     (unless
       (sd-append-grid-area
         *h871-pf-v03-grid* (concatenate 'string *h871-pf-v03-shell* "-AA")
         :width 920 :height 560 :cellSize 10,10 :margin 4 :spacing 2)
       (sd-display-error "H871 ver-03: Could not create the Results layout.")
-      (return-from h871-pf-v03-create-shell nil))
+      (return-from h871-pf-v03-create-shell nil)))
 
+  (unless (sd-control-p *h871-pf-v03-tabs*)
     (unless
       (sd-create-tab-control
         *h871-pf-v03-tabs* *h871-pf-v03-grid*
         :x 0 :y 0 :width 90 :height 53
-        :tabChangedAction 'h871-pf-v03-tab-changed)
+        ;; Match PTC's UICT tab examples: pass a function object.
+        :tabChangedAction #'h871-pf-v03-tab-changed)
       (sd-display-error "H871 ver-03: Could not create the internal tab control.")
       (return-from h871-pf-v03-create-shell nil)))
   t)
