@@ -100,7 +100,7 @@ It copies the existing ver-03 page data into one native Graphical Browser Tree, 
 
 This is a page-navigation proof-of-concept, not the final horizontal-tab UI. It deliberately avoids the previously failed Browser reparenting/host-shell approach and does not modify ver-03 production source or ver-01/ver-02.
 
-**Status:** static-checked only. Must be loaded and functionally tested in Modeling 18.1. The acceptance test is actual Part selection in the 3D viewport after pressing native Apply.
+**Status:** First user test in Modeling 18.1 confirms one native Graphical Browser opens and displays the active ver-03 page; the old UICT shell is hidden. A second invocation exposed a stale named Browser Tree. A lifecycle patch now attempts Browser-then-Tree teardown before rerun and restores ver-03 UICT from Close Results / H871_PF_V04_RESTORE_UICT_RESULTS. This patch is static-checked but not yet retested. Page switching, selection restoration and native Apply remain unverified. The acceptance test is actual Part selection in the 3D viewport after pressing native Apply.
 
 ## 8. Repository workflow
 
