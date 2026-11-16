@@ -177,3 +177,16 @@ Resolved:
 - Rolled active ver-03 source back to the last revision associated with user-confirmed Results UI appearance (`8c0a1cd56f25f125958080b3ab6316e55827b141`). The iterative traversal candidate is retained in Git history, not active.
 - Updated Known Issues with a strict evidence requirement: obtain the trace file and use its last marker to localize the failing stage before making another code change.
 - No runtime success is claimed. ver-01 and ver-02 remain untouched.
+
+
+
+## 2026-11-16 – ver-03 Apply diagnostic: expose the native Browser bridge
+
+- User confirmed that the UICT Results window and its result tables now appear, and Select All/Apply callbacks execute, but Apply does not select Parts in the 3D viewport.
+- Latest trace proves UICT row selection is read as actual `ELAN::SEL_ITEM` objects and the Modeling User Action is queued. The bridge BrowserNodes are resolved to `G-BROWSER::BROWSERNODE`, but `:is-object-displayed` returned NIL for each node. Browser selection count increased and `:select-and-execute` reported `:SUCCESS`, but this is not proof of viewport selection.
+- Created isolated branch `debug/ver03-visible-apply-bridge` from `feature/ver03-uict-apply`.
+- Diagnostic-only source change: call `sd-show-graphical-browser` on the temporary Apply bridge immediately after setting its table root and before checking displayed-state / selecting nodes / executing native hand-off. Added trace marker `APPLY/SHOW-BRIDGE-RETURN`.
+- The bridge is intentionally left visible during this diagnostic so the user can observe whether it contains the expected Part rows and whether Modeling accepts the selection. This is a temporary second window for diagnosis, not the intended final UX.
+- No changes to UICT Results tables, page tabs, selection extraction, Density matching, or ver-01/ver-02.
+- Commit: `db0c48de331e565b955728d33a9d2b7ec4608bbc`.
+- Runtime status: NOT TESTED yet in Modeling 18.1. Do not mark Apply fixed until the actual matching Parts are visibly selected in the 3D viewport. Test only on a disposable Assembly copy.
