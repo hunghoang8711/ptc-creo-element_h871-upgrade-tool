@@ -262,3 +262,13 @@ Resolved:
 - Corrected both new-page and same-pair-refresh caption generation to PROCESS-MATERIAL (e.g. CNC-SUS304, CG-SS400).
 - Search values and Density mappings are unchanged.
 - Source commit: 8a189bb6ec8e44234b5b6607deb8600af3541c0a.
+
+
+## 2026-11-16 – ver-05 visible page-selector correction
+
+- User reported ver-05 still looked like ver-02, with no multi-page UI and only Close Results.
+- Re-read PTC Graphical Browser API documentation and found the UI placement mistake: modeMenu was used for page selectors, while buttonMenu is the visible horizontal button row. modeMenu is mapped to right-click popup entries for compatibility.
+- Replaced the page-mode menu builder with a dynamic page-button builder and passed it through :buttonMenu. Each page button calls h871-pf-v05-activate-page. Select All and Clear Selection are appended to the same row.
+- Removed the incorrect modeMenu page configuration and the redundant Results Pages popup installer call.
+- Source commit: ca85cf158cdb345381f989f46f3e6cadbfe9bdc4.
+- Static checks: balanced Lisp, page callback forms present, Select All/Clear Selection retained, native Apply default retained. Modeling 18.1 runtime test pending.
