@@ -87,3 +87,13 @@ User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select
 - Navigation limitation: this diagnostic uses Previous/Next buttons and a right-click Results Pages submenu. It does not yet reproduce the requested horizontal tabs.
 - Next test: Load ver-03, create at least two result pages, load the diagnostic, run H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG, switch pages, select one Part and press native Apply. Verify the Part is actually selected in the 3D viewport. Then test multi-select, Select All/Clear Selection and page-local selection restoration.
 - Safety: Run only on a disposable model copy. Do not claim success from tree creation, row display, Browser selected count or a SUCCESS trace; viewport selection is the acceptance test.
+
+
+## KI-013 – ver-04 Browser/Tree lifecycle and UICT recovery
+
+- **Status:** User-confirmed lifecycle defect; source recovery patch committed, Modeling 18.1 retest pending.
+- **Observed:** First run opened one Graphical Browser and displayed the active ver-03 page. On a second invocation, sd-create-browser-tree reported that H871-PF-V04-SINGLE-RESULTS-TREE already exists. The supplied trace ends immediately after DIAG/PAGES-COPIED, listing CNC-SS400 (8 Parts) and CG-SS400 (2 Parts); no page-switch or Apply stage was recorded.
+- **Cause established:** The diagnostic created named Browser/Tree objects but had no normal teardown/reinitialization path. Closing/hiding the window did not guarantee that the named Tree was destroyed before the next create call.
+- **Patch:** Added a single reset routine that attempts to hide/destroy the Graphical Browser first and then destroy its Browser Tree. It runs before each new tree creation and from Close Results. Close Results then restores the existing ver-03 UICT shell. Added command H871_PF_V04_RESTORE_UICT_RESULTS.
+- **Not yet verified:** The destroy calls and restore command must be tested in Modeling 18.1. This patch does not establish that page switching, selection restoration or native Apply works.
+- **Next test:** Load the updated diagnostic; use Close Results / H871_PF_V04_RESTORE_UICT_RESULTS to return to ver-03; run the diagnostic twice in succession; verify no duplicate-tree error; then test Previous/Next and native Apply on a disposable model.
