@@ -90,3 +90,10 @@ For diagnostic tools that create named Browser/Tree objects:
 5. Keep a dedicated recovery action that restores the original UI shell.
 
 Treat sd-destroy-graphical-browser and sd-destroy-browser-tree behavior as requiring target-version runtime confirmation; a static call or a cleanup attempt is not proof that the objects were released.
+
+
+## LL-015 – Provide a persistent return path when swapping Results windows
+
+When a diagnostic temporarily replaces a working UICT Results window with a native Graphical Browser, a Close action that restores UICT is only half of the navigation. The user also needs a persistent entry point in the restored UICT shell to reopen the native Browser without typing the diagnostic command again.
+
+For this pattern, install one uniquely named pushbutton in the existing UICT grid, guard creation with `sd-control-p`, and route its push action to the Browser rebuild entry point. Rebuild from the latest UICT page registry so new searches are reflected. Verify placement and callback in the target Modeling release; do not infer runtime success from static code checks.
