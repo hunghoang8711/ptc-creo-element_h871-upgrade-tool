@@ -261,3 +261,15 @@ Resolved:
 - The user has not yet explicitly confirmed a visible tab presentation; same functionality as Stage 0 may mean the Browser still appears as a normal separate window. Keep this distinction unresolved rather than assuming the tab UI was created.
 - No multi-browser sessions, second Browser Tree, `:tabname`, callback changes, search changes, or selection/Apply changes have been added.
 - Next step: ask whether the Results Browser is visibly displayed as a tab or as a separate window. Only after confirming the presentation should the next isolated API experiment be selected.
+
+## 2026-11-16 – Stage 1 explicit Browser docking experiment
+
+- User clarified that the revision containing only `:createAsTab t` still opens a separate floating Results window; searching a different Density pair refreshes/replaces the displayed window.
+- Reviewed PTC's Graphical Browser API reference. It states that `:createAsTab t` controls initial docking but can be overridden by a PDS preference saved from the previous Modeling session.
+- PTC also documents `sd-dock-graphical-browser`, which explicitly docks a floating Graphical Browser into the Browser Bar and can activate its tab using `:show t`.
+- Fetched the current Stage 1 source from the active branch and verified the existing browser lifecycle. The browser is shown with `sd-show-graphical-browser`.
+- Added one isolated call immediately after that show operation: `(sd-dock-graphical-browser *h871-pf-mt-browser-name* :show t)`.
+- Wrapped only the new call in `ignore-errors` to preserve the known-good floating Results behavior if the docking API is unavailable or rejected by this Modeling 18.1 build.
+- No other browser/tree, filter, report, row-selection, Select All, Clear Selection, double-click, or Apply logic was changed.
+- Source commit: `5294cdd9468963503c5c0d976588892882f2445e`.
+- **Runtime status:** Pending user test in Creo Elements/Direct Modeling 18.1. Do not claim docking or tab presentation works until confirmed.
