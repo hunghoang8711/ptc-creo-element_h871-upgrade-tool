@@ -134,3 +134,10 @@ A reusable skill package has been added at `skills/creo-elements-direct-modeling
 Top-level indexes: `docs/API_VERIFICATION_REGISTER.md` and `docs/USER_REFERENCE_INVENTORY.md`. The skill package distinguishes Modeling Lisp from legacy Annotation/ME10 command macros. User-provided Annotation sources contain CoCreate confidential/copyright headers; only technical summaries and provenance metadata are mirrored to this public repository, not full source dumps.
 
 The accessible Library search did not identify a standalone official Modeling 18.1 Integration Kit PDF/manual. Do not claim such a manual has been reviewed until it is retrievable and its release is verified.
+
+
+### ver-04 persistent UICT reopen control (2026-11-16)
+
+The user confirmed Close Results returns from the native ver-04 Graphical Browser to the old ver-03 UICT Results shell. To avoid requiring a manual `H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG` command each time, ver-04 now installs a persistent `Open Native Results` pushbutton in the existing ver-03 shell grid. The button calls the ver-04 rebuild entry point, which snapshots the latest ver-03 pages/selections, cleans up any previous named Browser/Tree, and recreates the native Browser. Previous/Next now emit `PAGE/NAVIGATION-REQUEST` and `PAGE/NAVIGATION-TARGET` trace markers. Source commit: `21ddfb945a40f2361cb09439522387f90f6fac54`.
+
+This is static-checked only. Modeling 18.1 must confirm button placement/callback, repeated close/reopen, user-operated Previous/Next and context-menu navigation, and actual viewport Apply. The trace's `SELECT-AND-EXECUTE-SUCCESS-CONTEXT` is not itself proof of viewport selection.
