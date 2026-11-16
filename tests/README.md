@@ -92,3 +92,24 @@ Regression test: load the latest source after a prior ver-03 session where old p
 3. Expected: the code independently detects/recreates a missing Results grid area or tab control even when the dialog shell already exists; first results page is inserted successfully.
 4. Repeat the search in the same session; expected: existing shell/grid/tab are reused and the matching page refreshes.
 5. If the same NIL-is-not-of-type-STRING error remains, record the last visible message and whether the Results shell/grid/tab were already present. Do not change the numeric Density filter path as part of this diagnosis.
+
+
+## 2026-11-16 – ver-03 Apply BrowserNode type regression
+
+**User-confirmed runtime state**
+- Results window: PASS.
+- Multiple filter tabs: PASS.
+- Multi-column result table and Density columns: PASS.
+- Apply button visible: PASS.
+- Apply selection hand-off: FAIL.
+
+Exact error on Apply:
+`LISP error: #:NODE241 is not of type "BROWSERNODE".`
+
+Diagnostic interpretation:
+- The failing value is a generated symbol/token (`#:NODE...`), not a BrowserNode structure.
+- Current ver-03 source stores the direct return value from `sd-create-browsernode` and later supplies it to `:set-object-selection`.
+- Investigate the Modeling 18.1 API's supported BrowserNode lookup/resolution method. Do not assume the creation token is a BrowserNode object.
+- Compare with ver-02's `sd-query-browser :get-selected-objects` pattern.
+- Regression boundary: do not change Density filtering, logical table data, Results window, or ver-02 while repairing Apply.
+- Retest: select one row and Apply; select multiple rows and Apply; verify only selected real Parts become the Modeling selection.
