@@ -113,3 +113,8 @@ Reason: Graphical Browser table roots are additive unless cleared. A page switch
 Implementation: ver-05 page activation now buffers display, clears selected objects and all table roots, sets the new page root, resumes display, and logs :number-of-table-roots. This preserves the same visible Browser as the native selection/Apply context.
 
 Evidence boundary: PTC 20.6 documentation supports the command sequence; Modeling 18.1 runtime confirmation is pending. This correction does not establish that the horizontal :modeMenu renders or that native Apply works in the new multi-page tree.
+
+
+### TD-013 clarification – page caption order
+
+All Part Filter multi-page captions use PROCESS-MATERIAL order, e.g. CNC-SUS304 and CG-SS400. This is presentation only; search continues to use numeric Density Instance + Density Base. ver-05 has been corrected to match ver-03.
