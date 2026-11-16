@@ -94,3 +94,12 @@ A retest showed the empty logical-table error persisted. Root cause in the first
 - Corrected ver-03 tab caption order from `SUS304-CNC` to `CNC-SUS304`.
 - Added an early numeric-input guard in the search entry point. Missing/non-numeric dialog values now produce a clear diagnostic before scanning or creating the Results UI.
 - This does not yet identify the reported `NIL is not of type STRING` source. The numeric mapping is now explicit and guarded; Modeling 18.1 runtime retest is required to identify the failing UI/API call if that error persists.
+
+
+## 2026-11-16 – NIL UI handle during first tab creation
+
+- Symptom: `LISP error: NIL is not of type STRING` immediately after OK; Results window never appears.
+- Root cause candidate identified by control-flow review: first-page insertion can trigger `h871-pf-v03-tab-changed` before `h871-pf-v03-create-page` pushes its page record. The callback previously called `h871-pf-v03-update-status`, which passed the missing `:table` value (NIL) into `sd-get-display-table-selection`.
+- Fix: make tab callback and status updater tolerate the pre-registration callback; validate page/table/status handles as non-empty strings before calling UICT functions.
+- Filter alignment: ver-03 collector now explicitly rejects NIL Density Instance/Base before numeric comparison, as ver-02 does. Numeric filter values remain Instance=process code and Base=material code; `/1000.0` normalization is unchanged.
+- This is a code-path diagnosis, not a confirmed runtime fix. Test on Modeling 18.1 before marking resolved.
