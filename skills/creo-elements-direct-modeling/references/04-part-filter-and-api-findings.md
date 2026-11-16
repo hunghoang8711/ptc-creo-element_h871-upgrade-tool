@@ -107,3 +107,8 @@ Fail-safe refinement: ver-05 checks both :clear-table-roots and :change-table-ro
 ## 2026-11-16 – modeMenu/buttonMenu UI placement lesson
 
 Do not treat Graphical Browser :modeMenu as the visible horizontal page strip. PTC documentation states modeMenu is mapped to right-click popup entries for compatibility; :buttonMenu is the visible horizontal row. ver-05 originally used the wrong parameter, which explains why the user saw no multi-page selector. The corrected source builds page selectors through :buttonMenu. Modeling 18.1 runtime validation is pending.
+
+
+### Correction – modeMenu visibility
+
+PTC Graphical Browser reference explicitly documents modeMenu as a horizontal row of toggle buttons directly above buttonMenu. The menus are additionally mapped to right-click popup entries for compatibility. Do not classify modeMenu as popup-only. ver-05 restores modeMenu page buttons and adds diagnostic trace entries to inspect the actual definitions passed into Browser creation.
