@@ -2,23 +2,28 @@
 ;; H871 PART FILTER - VER-03
 ;; Target: PTC Creo Elements/Direct Modeling 18.1
 ;;
-;; Architecture: ONE standalone UICT Results window with INTERNAL tabs.
-;; Each unique Density Instance + Density Base pair owns one page.
-;; Repeating a pair refreshes that page; a no-match search leaves pages intact.
+;; Architecture:
+;; - ONE standalone UICT Results window with INTERNAL tabs.
+;; - One multi-column Display Table per Density pair page.
+;; - Each unique Density Instance + Density Base pair owns one page.
+;; - Repeating a pair refreshes that page; a no-match search leaves pages intact.
 ;;
-;; Stage delivered in this file:
-;; - Integrated ver-02 Density pair scan and user mapping.
-;; - UICT dialog-shell/tab-control/list-control prototype.
-;; - Per-page result data and multi-selection; Select All / Clear Selection.
-;; - Pair-key refresh and no-match protection.
+;; ver-03.1 changes:
+;; - Replaced concatenated List Control rows with real table columns:
+;;   Part Name | Density Instance | Density Base | Assembly Path.
+;; - Each table stores the actual Part object in a hidden logical-table column.
+;; - Row multi-selection is provided by Display Table :multiple-rows.
+;; - Select All / Clear Selection operate only on the page's table.
+;; - Added explicit Apply button; Apply uses the native Graphical Browser
+;;   selection-and-execute hand-off pattern already used by ver-02.
 ;;
-;; IMPORTANT VERIFICATION LIMIT:
-;; UICT references available to development are PTC 20.7/20.8 manuals.
-;; Their availability/signatures in Modeling 18.1 have NOT been confirmed.
-;; This file is a controlled 18.1 compatibility prototype, not runtime-tested.
-;; Applying selected real Part objects from a UICT list is intentionally not
-;; wired until the Modeling 18.1 selection hand-off is proven. The working
-;; native Graphical Browser Apply implementation remains preserved in ver-02.
+;; Compatibility boundary:
+;; UICT Display Table APIs below are documented in PTC 20.7 manuals.
+;; Exact availability/signatures in Modeling 18.1 remain unverified.
+;; The Apply bridge deliberately reuses ver-02 Graphical Browser APIs which
+;; are part of the user's known-good 18.1 workflow. The hidden bridge itself
+;; still requires a runtime test in the user's 18.1 installation.
+;; Do not modify ver-01/ver-02; they remain regression baselines.
 ;; ============================================================================
 
 (in-package :oli)
@@ -33,9 +38,15 @@
 (defvar *h871-pf-v03-grid* "h871-pf-v03-results-grid")
 (defvar *h871-pf-v03-tabs* "h871-pf-v03-tabs")
 
+;; Native Apply bridge: temporary Graphical Browser objects are not shown.
+(defvar *h871-pf-v03-apply-parts* nil)
+(defvar *h871-pf-v03-apply-nodes* nil)
+(defvar *h871-pf-v03-apply-browser* "h871-pf-v03-apply-bridge")
+(defvar *h871-pf-v03-apply-tree* "h871-pf-v03-apply-tree")
+
 ;; Page entry:
-;; (:instance n :base n :label string :page string :list string
-;;  :status string :results (Part ...) :rows ((display-string . Part) ...))
+;; (:instance n :base n :label string :page string :table string
+;;  :logical-table string :status string :results (Part ...))
 
 (defun h871-pf-v03-name (obj)
   (or (sd-inq-obj-basename obj) "<NO NAME>"))
@@ -112,70 +123,174 @@
     (lambda (entry) (equal (getf entry :page) page-name))
     *h871-pf-v03-pages*))
 
-(defun h871-pf-v03-list-name (page-name)
-  (concatenate 'string page-name "-RESULTS-LI"))
+(defun h871-pf-v03-page-by-table (table-name)
+  (find-if
+    (lambda (entry) (equal (getf entry :table) table-name))
+    *h871-pf-v03-pages*))
+
+(defun h871-pf-v03-table-name (page-name)
+  (concatenate 'string page-name "-DISPLAY-TABLE"))
+
+(defun h871-pf-v03-logical-table-name (page-name)
+  (concatenate 'string page-name "-LOGICAL-TABLE"))
 
 (defun h871-pf-v03-status-name (page-name)
   (concatenate 'string page-name "-STATUS-TX"))
 
-(defun h871-pf-v03-make-row-label (part instance base)
-  (format nil "~A | I=~A | B=~A | ~A"
-    (h871-pf-v03-name part)
-    (h871-pf-v03-density-display-value
-      (sd-inq-part-density part :instance))
-    (h871-pf-v03-density-display-value
-      (sd-inq-part-density part :contents))
-    (h871-pf-v03-path part)))
-
-(defun h871-pf-v03-build-rows (parts instance base)
+(defun h871-pf-v03-table-contents (parts)
   (let ((rows nil))
     (dolist (part parts)
-      (push (cons (h871-pf-v03-make-row-label part instance base) part) rows))
+      (push
+        (list
+          (h871-pf-v03-name part)
+          (h871-pf-v03-density-display-value
+            (sd-inq-part-density part :instance))
+          (h871-pf-v03-density-display-value
+            (sd-inq-part-density part :contents))
+          (h871-pf-v03-path part)
+          part)
+        rows))
     (nreverse rows)))
-
-(defun h871-pf-v03-row-labels (rows)
-  (mapcar #'car rows))
 
 (defun h871-pf-v03-update-status (page-name)
   (let* ((entry (h871-pf-v03-page-by-name page-name))
-         (list-name (getf entry :list))
-         (status-name (getf entry :status))
-         (selection (sd-get-list-control-selected-items list-name))
-         (selected (if selection (length (car selection)) 0))
+         (table-name (getf entry :table))
+         (selection (sd-get-display-table-selection table-name))
+         (selected-rows (if selection (car selection) nil))
+         (selected-count (if selected-rows (length selected-rows) 0))
          (total (length (getf entry :results))))
-    (sd-set-text-control-value status-name
-      :text (format nil "~A Part(s) | ~A selected | Density ~A / ~A"
-                    total selected
-                    (getf entry :instance) (getf entry :base)))))
+    (sd-set-text-control-value (getf entry :status)
+      :text
+        (format nil "~A Part(s) | ~A selected | Density Instance ~A / Base ~A"
+          total selected-count
+          (getf entry :instance) (getf entry :base)))))
 
-(defun h871-pf-v03-selection-changed (page-name)
-  (h871-pf-v03-update-status page-name))
+(defun h871-pf-v03-table-selection-changed (table-name)
+  (let ((entry (h871-pf-v03-page-by-table table-name)))
+    (when entry
+      (h871-pf-v03-update-status (getf entry :page)))))
 
 (defun h871-pf-v03-tab-changed (page-name)
   (setf *h871-pf-v03-current-page* page-name)
   (h871-pf-v03-update-status page-name))
 
-(defun h871-pf-v03-position-list (count)
-  (let ((positions nil))
-    (do ((n 1 (+ n 1)))
-        ((> n count) (nreverse positions))
-      (push n positions))))
-
 (defun h871-pf-v03-select-all (page-name)
-  (let ((entry (h871-pf-v03-page-by-name page-name)))
+  (let* ((entry (h871-pf-v03-page-by-name page-name))
+         (table-name (getf entry :table))
+         (count (length (getf entry :results))))
     (when entry
-      (sd-set-list-control-selected-items
-        (getf entry :list)
-        :positions
-        (h871-pf-v03-position-list (length (getf entry :results))))
+      (when (> count 0)
+        (do ((row 0 (+ row 1)))
+            ((>= row count))
+          (sd-set-display-table-selection
+            table-name
+            :mode (if (= row 0) :replace :add)
+            :row row
+            :callAction nil)))
       (h871-pf-v03-update-status page-name))))
 
 (defun h871-pf-v03-clear-selection (page-name)
   (let ((entry (h871-pf-v03-page-by-name page-name)))
     (when entry
-      (sd-set-list-control-selected-items
-        (getf entry :list) :items nil)
+      (sd-reset-display-table-selection
+        (getf entry :table) :row t)
       (h871-pf-v03-update-status page-name))))
+
+;; ---------------------------------------------------------------------------
+;; Apply bridge
+;;
+;; The selected Display Table rows return the hidden :part-object column.
+;; Those real Part objects are represented as BrowserNodes using their actual
+;; Modeling object path. The same native :set-object-selection and
+;; :select-and-execute commands used by ver-02 then hand the selected objects
+;; to the active Modeling command/selection context.
+;; ---------------------------------------------------------------------------
+
+(defun h871-pf-v03-build-apply-tree ()
+  (let ((root
+          (sd-create-browsernode
+            :tree *h871-pf-v03-apply-tree*
+            :parent nil
+            :objPath "/H871_V03_APPLY"
+            :objPname "H871 Apply Selection"
+            :objClientData (list :kind :root))))
+    (setf *h871-pf-v03-apply-nodes* nil)
+    (dolist (part *h871-pf-v03-apply-parts*)
+      (push
+        (sd-create-browsernode
+          :tree *h871-pf-v03-apply-tree*
+          :parent root
+          :objPath (h871-pf-v03-path part)
+          :objPname (h871-pf-v03-name part)
+          :objClientData (list :kind :part :part part))
+        *h871-pf-v03-apply-nodes*))
+    root))
+
+(defun h871-pf-v03-native-apply (parts)
+  (when (null parts)
+    (sd-display-message "H871: Select one or more Part rows before Apply.")
+    (return-from h871-pf-v03-native-apply nil))
+
+  (setf *h871-pf-v03-apply-parts* parts)
+  (setf *h871-pf-v03-apply-nodes* nil)
+
+  ;; Rebuild the temporary bridge from the active page's selected Parts only.
+  (ignore-errors
+    (sd-hide-graphical-browser *h871-pf-v03-apply-browser*))
+  (ignore-errors
+    (sd-destroy-graphical-browser *h871-pf-v03-apply-browser*))
+  (ignore-errors
+    (sd-destroy-browser-tree *h871-pf-v03-apply-tree*))
+
+  (unless
+    (sd-create-browser-tree
+      *h871-pf-v03-apply-tree*
+      :update-events oli:*SD-CHANGE-OBJECT-TREE-EVENT*
+      :update-func 'h871-pf-v03-build-apply-tree)
+    (sd-display-error "H871 Apply: Could not create the native selection bridge tree.")
+    (return-from h871-pf-v03-native-apply nil))
+
+  (unless
+    (sd-create-graphical-browser
+      *h871-pf-v03-apply-browser*
+      :tree *h871-pf-v03-apply-tree*
+      :topLabel "H871 - Native Apply Bridge"
+      :minHeight 160
+      :maxWidth 480
+      :maxHeight 240
+      :okButtonLabel "Apply")
+    (sd-display-error "H871 Apply: Could not create the native selection bridge.")
+    (return-from h871-pf-v03-native-apply nil))
+
+  ;; Programmatically select each real Part-backed BrowserNode.
+  (dolist (node *h871-pf-v03-apply-nodes*)
+    (sd-browser-exec-cmd
+      *h871-pf-v03-apply-browser* :set-object-selection node t))
+
+  ;; Native ver-02 hand-off: selected objects enter Modeling's select list.
+  (unless
+    (sd-browser-exec-cmd
+      *h871-pf-v03-apply-browser* :select-and-execute)
+    (sd-display-message
+      "H871 Apply: No objects were handed to Modeling. Check the active command.")
+    (return-from h871-pf-v03-native-apply nil))
+  t)
+
+(defun h871-pf-v03-apply (page-name)
+  (let* ((entry (h871-pf-v03-page-by-name page-name))
+         (selection (sd-get-display-table-selection (getf entry :table)))
+         (columns (if selection (cadr selection) nil))
+         (parts (if columns (getf columns :part-object) nil)))
+    (if (null parts)
+        (sd-display-message
+          "H871: No Part rows selected. Select rows or use Select All, then press Apply.")
+      (progn
+        (h871-pf-v03-native-apply parts)
+        (h871-pf-v03-update-status page-name)))))
+
+;; ---------------------------------------------------------------------------
+;; Results window and internal tabs
+;; ---------------------------------------------------------------------------
 
 (defun h871-pf-v03-create-shell ()
   (unless (sd-dialog-shell-p *h871-pf-v03-shell*)
@@ -206,12 +321,28 @@
       (return-from h871-pf-v03-create-shell nil)))
   t)
 
+(defun h871-pf-v03-create-logical-table (logical-table)
+  (sd-create-logical-table
+    logical-table
+    :secured nil
+    :columns '(:part-name :density-instance :density-base
+               :assembly-path :part-object)
+    :columnNames '("Part Name" "Density Instance" "Density Base"
+                   "Assembly Path" "Part Object")
+    :keyColumns '(:part-object)
+    :types '(:string :number :number :string nil)
+    :contents nil))
+
 (defun h871-pf-v03-create-page (instance base)
   (let* ((label (h871-pf-v03-pair-label instance base))
-         (page-name (format nil "H871-PF-V03-PAGE-~A"
-                            (incf *h871-pf-v03-page-counter*)))
-         (list-name (h871-pf-v03-list-name page-name))
-         (status-name (h871-pf-v03-status-name page-name)))
+         (page-name
+           (format nil "H871-PF-V03-PAGE-~A"
+             (incf *h871-pf-v03-page-counter*)))
+         (table-name (h871-pf-v03-table-name page-name))
+         (logical-table (h871-pf-v03-logical-table-name page-name))
+         (status-name (h871-pf-v03-status-name page-name))
+         (tab-grid (concatenate 'string page-name "-TAB-GA")))
+
     (unless
       (sd-insert-tab-control-page
         page-name *h871-pf-v03-tabs*
@@ -219,37 +350,55 @@
       (sd-display-error "H871 ver-03: Could not add an internal results tab.")
       (return-from h871-pf-v03-create-page nil))
 
+    (unless (h871-pf-v03-create-logical-table logical-table)
+      (sd-display-error "H871 ver-03: Could not create the page's logical table.")
+      (return-from h871-pf-v03-create-page nil))
+
     (sd-create-text-control
-      status-name (concatenate 'string page-name "-TAB-GA")
+      status-name tab-grid
       :x 0 :y 0 :width 86 :height 2
       :editable nil :showModified nil)
 
-    (sd-create-list-control
-      list-name (concatenate 'string page-name "-TAB-GA")
-      :x 0 :y 2 :width 86 :height 43
-      :selectionMode :multiple
-      :selectionAction (list 'h871-pf-v03-selection-changed page-name)
-      :items nil)
+    (unless
+      (sd-create-display-table-control
+        table-name tab-grid
+        :x 0 :y 2 :width 86 :height 42
+        :logicalTable logical-table
+        :columns '(:part-name :density-instance :density-base :assembly-path)
+        :entryAlignment '(:left :right :right :left)
+        :selectionMode :multiple-rows
+        :selectionAction 'h871-pf-v03-table-selection-changed)
+      (sd-display-error "H871 ver-03: Could not create the multi-column results table.")
+      (return-from h871-pf-v03-create-page nil))
 
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-SELECT-ALL-PB")
-      (concatenate 'string page-name "-TAB-GA")
-      :x 0 :y 46 :width 14 :height 3
+      tab-grid
+      :x 0 :y 45 :width 14 :height 3
       :title "Select All"
       :pushAction (list 'h871-pf-v03-select-all page-name))
 
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-CLEAR-PB")
-      (concatenate 'string page-name "-TAB-GA")
-      :x 15 :y 46 :width 16 :height 3
+      tab-grid
+      :x 15 :y 45 :width 16 :height 3
       :title "Clear Selection"
       :pushAction (list 'h871-pf-v03-clear-selection page-name))
 
+    (sd-create-pushbutton-control
+      (concatenate 'string page-name "-APPLY-PB")
+      tab-grid
+      :x 32 :y 45 :width 12 :height 3
+      :title "Apply"
+      :pushAction (list 'h871-pf-v03-apply page-name))
+
     (push
       (list :instance instance :base base :label label
-            :page page-name :list list-name :status status-name
-            :results nil :rows nil)
+            :page page-name :table table-name
+            :logical-table logical-table :status status-name
+            :results nil)
       *h871-pf-v03-pages*)
+
     (setf *h871-pf-v03-current-page* page-name)
     (sd-set-current-tab-control-page *h871-pf-v03-tabs* :page page-name)
     (h871-pf-v03-update-status page-name)
@@ -257,23 +406,17 @@
 
 (defun h871-pf-v03-refresh-page (entry parts)
   (let* ((page-name (getf entry :page))
-         (list-name (getf entry :list))
-         (old-selection (sd-get-list-control-selected-items list-name))
-         (old-selected (if old-selection (car old-selection) nil))
-         (rows (h871-pf-v03-build-rows
-                 parts (getf entry :instance) (getf entry :base)))
-         (labels (h871-pf-v03-row-labels rows))
-         (preserved nil))
-    ;; Keep only selection labels which still exist after refresh.
-    (dolist (label old-selected)
-      (when (member label labels :test #'equal)
-        (push label preserved)))
+         (logical-table (getf entry :logical-table))
+         (contents (h871-pf-v03-table-contents parts)))
+    ;; Replacing logical-table contents refreshes its Display Table in place.
+    ;; Selection is cleared so stale object references are never applied.
+    (unless
+      (sd-change-logical-table-contents
+        logical-table :contents contents)
+      (sd-display-error "H871 ver-03: Could not refresh the result table.")
+      (return-from h871-pf-v03-refresh-page nil))
+    (sd-reset-display-table-selection (getf entry :table) :row t)
     (setf (getf entry :results) parts)
-    (setf (getf entry :rows) rows)
-    (sd-set-list-control-items list-name :items labels)
-    (when preserved
-      (sd-set-list-control-selected-items
-        list-name :items (nreverse preserved)))
     (setf *h871-pf-v03-current-page* page-name)
     (sd-set-current-tab-control-page *h871-pf-v03-tabs* :page page-name)
     (h871-pf-v03-update-status page-name)
@@ -326,7 +469,9 @@
     (unless entry
       (return-from h871-pf-v03-run nil))
 
-    (h871-pf-v03-refresh-page entry matches)
+    (unless (h871-pf-v03-refresh-page entry matches)
+      (return-from h871-pf-v03-run nil))
+
     (unless (sd-dialog-shell-visible-p *h871-pf-v03-shell*)
       (sd-show-dialog-shell *h871-pf-v03-shell*))
 
@@ -334,7 +479,6 @@
 
 ;; ---------------------------------------------------------------------------
 ;; Search dialog - mappings are identical to ver-02.
-;; Density Instance + Density Base remain the actual filter properties.
 ;; ---------------------------------------------------------------------------
 
 (sd-defdialog 'h871_part_filter_ver_03
@@ -394,13 +538,18 @@
 ;; COMMAND:
 ;; H871_PART_FILTER_VER_03
 ;;
-;; FIRST RUNTIME TEST:
-;; 1. Load this file in Creo Elements/Direct Modeling 18.1.
-;; 2. Run H871_PART_FILTER_VER_03 and choose an Assembly.
-;; 3. Search CNC + SUS304; expect one Results window with SUS304-CNC tab.
-;; 4. Search KH + A6061; expect a second tab in the SAME window.
-;; 5. Search CNC + SUS304 again; expect first tab to refresh, not duplicate.
-;; 6. Test row multi-selection, Select All, Clear Selection and tab switching.
+;; RUNTIME TEST:
+;; 1. Search CNC + SUS304; expect a multi-column table in SUS304-CNC tab.
+;; 2. Search KH + A6061; expect a second tab in the same Results window.
+;; 3. Repeat CNC + SUS304; expect that page to refresh without duplication.
+;; 4. Click individual rows and Ctrl/Shift-select multiple rows.
+;; 5. Select All selects every row in the active tab only.
+;; 6. Clear Selection clears only the active tab.
+;; 7. Apply transfers only selected real Parts from the active tab.
+;; 8. Switch tabs and verify each page's selection remains independent.
+;; 9. Refresh a pair; selection is intentionally cleared to avoid stale Parts.
 ;;
-;; Apply is intentionally not connected in this prototype. Do not use this
-;; version for production selection hand-off until that stage is verified.
+;; COMPATIBILITY NOTE:
+;; The Display Table and logical-table APIs are documented in PTC 20.7.
+;; Modeling 18.1 runtime compatibility and the hidden Apply bridge must be
+;; tested before treating this revision as production-ready.
