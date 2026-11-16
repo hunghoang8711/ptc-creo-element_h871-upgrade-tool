@@ -176,3 +176,13 @@ A cross-chat skill package now records prior user-provided legacy sources and th
 ## 12. API evidence and language separation
 
 The canonical API status is maintained in `docs/API_VERIFICATION_REGISTER.md`. In particular, the user reported on 2026-11-14 that one-argument `sd-inq-part-density` returned `1000.0` (`LONG-FLOAT`) for Part `010-plate_2.1.1.2.1`; this does not alone establish the semantic mode. The explicit `:instance` and `:contents` calls remain the production filter's tested pattern.
+
+
+## 13. Part Filter: same-Browser Apply ownership and ver-04 page prototype (2026-11-16)
+
+- ver-02's visible Results Graphical Browser is itself the selection context. The visible result rows, selected BrowserNodes and native Apply/OK button all belong to the same Browser instance.
+- ver-03 UICT Display Table can identify real Part SEL_ITEM values, but transferring those values into a second hidden Browser does not reproduce ver-02's native Apply behavior. BrowserNode counts, :SUCCESS trace markers and Dialog Generator persistent highlight are not proof of Modeling selection.
+- The current diagnostic candidate uses one Graphical Browser Tree with a page root per Density pair. The children of the active table root are the visible Part rows. Switching the table root keeps row selection and native Apply within the same Browser instance.
+- Page selection is stored as Part path strings and restored only after the corresponding page root is active. The diagnostic offers Previous/Next toolbar buttons and a dynamic Results Pages popup submenu. This is not yet the final horizontal-tab UI.
+- Diagnostic file: `src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp`.
+- Modeling 18.1 runtime validation is pending. Only actual 3D viewport selection after native Apply counts as success.
