@@ -26,16 +26,17 @@ Only unresolved or unverified items belong here. Move resolved root causes into 
 - **Details:** Mapped choice dialog uses `:range`, `:label`, `:after-input` and `:display-only`. Standard dialog positions code fields on separate rows. A same-row custom layout is not implemented.
 - **Next step:** Preserve current mappings and dialog behavior. Re-test only if changing this area.
 
-## KI-006 – One-window internal tabs (ver-03)
-- **Status:** Specified; implementation pending.
-- **Details:** The requested UI requires one separate Results Browser window with multiple internal pages. The previous ver-03 source creates one Graphical Browser per search and is the wrong architecture.
-- **Technical blocker:** UICT Tab Control / Dialog Shell appears promising from later-release documentation, but exact 18.1 function availability/signatures and real-Part selection/Apply hand-off are unverified.
-- **Next step:** Build a minimal 18.1-compatible prototype with synthetic data; validate tab shell, then real Part row selection and Modeling selection hand-off before integrating the filter engine.
+## KI-006 – ver-03 internal tabs and native selection hand-off
+- **Status:** UICT prototype implemented and static-checked; Creo 18.1 runtime unverified; Apply not implemented.
+- **Details:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp` now contains the ver-02 Density filter engine integrated with one UICT Dialog Shell, one horizontal internal Tab Control, per-page multi-select lists, Select All/Clear Selection, pair-key refresh and no-match protection.
+- **Compatibility gap:** UICT API patterns were found in PTC 20.7/20.8 Integration Kit references. Their availability/signatures in Modeling 18.1 are not proven.
+- **Selection gap:** The prototype keeps actual Part objects mapped to result rows, but no verified Modeling 18.1 operation has been established to transfer UICT-selected rows into Modeling selection. Apply is intentionally not wired.
+- **Next step:** User loads the exact file in Modeling 18.1 and tests shell creation, tab creation/switching, repeated-pair refresh, page-specific selection, Select All/Clear Selection and no-match preservation. Then verify the Part selection hand-off before adding Apply.
+- **Production boundary:** ver-01/ver-02 remain the working baseline for actual selection and native Apply.
 
 ## Resolved baseline behavior
 
 User-confirmed in Modeling 18.1: Results Browser opens and displays rows; Select All is present; clicking a row selects that Part; native Apply transfers selected Parts to Modeling selection.
-
 
 ## KI-007 – Annotation frame catalogue registration
 - **Status:** Unresolved / not verified.
