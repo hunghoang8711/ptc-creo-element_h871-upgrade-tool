@@ -103,3 +103,8 @@ Do not call ver-05 complete: page strip rendering/callbacks, page isolation, pag
 ### ver-05 fail-safe page activation refinement
 
 The page-root correction now checks the return from :clear-table-roots before attempting :change-table-root. If the old roots cannot be cleared or the requested root cannot be set, page activation stops rather than risking mixed-page selection. The :number-of-table-roots trace query is diagnostic-only and wrapped with ignore-errors so an unavailable query cannot interrupt page activation. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4. Runtime testing in Modeling 18.1 is still required.
+
+
+### ver-05 page-caption convention correction
+
+ver-05 page captions now follow the established PROCESS-MATERIAL order (for example CNC-SUS304 and CG-SS400), matching the corrected ver-03 convention and the user's numeric mapping. Do not reverse this to MATERIAL-PROCESS.
