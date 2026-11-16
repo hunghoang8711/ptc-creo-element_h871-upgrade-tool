@@ -14,7 +14,7 @@
 ;;   1. Select exactly one row in the active H871 Results page.
 ;;   2. Load this file.
 ;;   3. Run H871_PF_V03_GET_SELECTION_DIAG.
-;;   4. Observe the viewport after the diagnostic finishes.
+;;   4. Observe the viewport while the command is active and after it finishes.
 ;;   5. Inspect H871_PART_FILTER_VER_03_TRACE.txt for GET-SELECTION-DIAG/.
 ;;
 ;; Important:
@@ -68,8 +68,14 @@
     (h871-pf-v03-trace "GET-SELECTION-DIAG/STATUS" status)
     (h871-pf-v03-trace "GET-SELECTION-DIAG/RESULT"
       (list (type-of result)
-            (and result (sd-inq-part-p result))
-            (and result (ignore-errors (sd-inq-obj-pathname result)))))
+            (and result (listp result) (length result))
+            (and result
+                 (mapcar #'sd-inq-part-p
+                   (if (listp result) result (list result))))
+            (and result
+                 (mapcar (lambda (item)
+                           (ignore-errors (sd-inq-obj-pathname item)))
+                   (if (listp result) result (list result))))))
     (sd-display-message
       (format nil
         "H871 GET_SELECTION diagnostic finished. Status: ~A. Result type: ~A. Check viewport and trace."
@@ -91,7 +97,8 @@
 
 (sd-defdialog 'h871_pf_v03_get_selection_diag
   :dialog-title "H871 GET_SELECTION Diagnostic"
-  :dialog-control :sequential
+  :dialog-control :parallel
+  :without-show t
   :variables
     '((parts
         :value-type :part
