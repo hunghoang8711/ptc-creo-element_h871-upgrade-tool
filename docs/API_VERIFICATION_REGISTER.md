@@ -135,3 +135,16 @@ The previously attempted sd-set-graphical-browser-parent host-shell integration 
 | sd-destroy-browser-tree | Already used in ver-04 diagnostic failure cleanup; now used after Browser destruction | Modeling 18.1 teardown behavior still needs runtime confirmation |
 
 User's first ver-04 test confirmed the Browser Tree name remains registered after the first diagnostic run: a second sd-create-browser-tree call returned the “already exists” failure. The revised source attempts teardown in the required order (hide/destroy Browser, then destroy Tree) before creating the same names again. This is a targeted recovery candidate, not yet a verified 18.1 API contract. Close Results invokes the same teardown and then shows the existing ver-03 UICT shell. The recovery command H871_PF_V04_RESTORE_UICT_RESULTS invokes that action explicitly.
+
+
+## H. Graphical Browser page-root switching – clear prior roots before changing page
+
+PTC's official Graphical Browser 20.6 reference documents:
+- :BUFFER-DISPLAY with t to suspend redraw and nil to resume.
+- :CLEAR-TABLE-ROOTS to remove all active table roots.
+- :CHANGE-TABLE-ROOT with a BrowserNode structure and t to make it a table root.
+- :NUMBER-OF-TABLE-ROOTS query to inspect how many roots are active.
+
+The PTC reference's own example uses the sequence :buffer-display t → :clear-table-roots → :change-table-root → :buffer-display nil. A Browser can retain more than one table root; therefore a page-switch implementation must clear the previous root before setting the next page root. Otherwise the table may contain multiple pages' children and Select All/native Apply can target unintended rows.
+
+ver-05 now uses this sequence and traces the table-root count after switching. Evidence is later-release documentation (20.6), not proof of Modeling 18.1 compatibility. Runtime must confirm the query/commands and verify the root count is exactly 1 after every page switch.
