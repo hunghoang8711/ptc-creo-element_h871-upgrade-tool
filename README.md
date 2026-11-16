@@ -4,9 +4,11 @@ Version-controlled engineering workspace for custom tools targeting **PTC Creo E
 
 ## Current focus
 
-**H871 Part Filter – ver-02 baseline preserved; ver-03 single-window multi-tab design specified, implementation pending.**
+**H871 Part Filter ver-03 – internal-tab UI prototype implemented; Modeling 18.1 runtime validation and native Apply hand-off remain pending.**
 
 The confirmed filter behavior is based on an exact Density Instance + Density Base pair. The mapped UI uses Machining Process and Material convention labels, which map to those existing Density values; it does not read the model's actual Material property.
+
+See [ver-03 Implementation Record](docs/VER03_IMPLEMENTATION_NOTES.md) before loading the prototype.
 
 ## Start here (AI / new development session)
 
@@ -23,8 +25,8 @@ The confirmed filter behavior is based on an exact Density Instance + Density Ba
 - `docs/ENGINEERING_KNOWLEDGE_BASE.md` – consolidated technical memory and reusable engineering skills.
 - `src/part-filter/ver-01/` – preserved ver-01 source.
 - `src/part-filter/ver-02/` – mapped-choice ver-02 source.
-- `src/part-filter/ver-03/` – target specification and future implementation; not yet implemented.
-- `src/part-filter/` root – legacy source paths retained for compatibility.
+- `src/part-filter/ver-03/` – ver-03 source, specification and implementation notes.
+- `docs/VER03_IMPLEMENTATION_NOTES.md` – implemented scope, limitations and first runtime test.
 - `docs/TECHNICAL_DECISIONS.md` – active decisions.
 - `docs/KNOWN_ISSUES.md` – unresolved or unverified items only.
 - `docs/LESSONS_LEARNED.md` – confirmed root causes and prevention rules.
@@ -58,7 +60,6 @@ The confirmed filter behavior is based on an exact Density Instance + Density Ba
 - **Functionally tested** – behavior exercised in Creo.
 - **User-confirmed** – user reported the behavior working in their target environment.
 - **Regression-tested** – existing confirmed behavior retested after a change.
-
 
 ## Reusable Creo skill package
 
