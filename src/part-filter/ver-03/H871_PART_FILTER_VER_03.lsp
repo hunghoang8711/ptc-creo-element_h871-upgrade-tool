@@ -264,7 +264,8 @@
 
   ;; Force construction of the bridge nodes even when its browser is not shown.
   ;; The browser update callback may also rebuild them when the browser opens.
-  (h871-pf-v03-build-apply-tree)
+  (unless (sd-get-browsernode-struct *h871-pf-v03-apply-tree* :root)
+    (h871-pf-v03-build-apply-tree))
 
   ;; Programmatically select each real Part-backed BrowserNode.
   (dolist (node *h871-pf-v03-apply-nodes*)
