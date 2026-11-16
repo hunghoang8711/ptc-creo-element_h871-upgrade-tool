@@ -374,47 +374,22 @@
             *h871-pf-v03-apply-browser* :get-selected-objects)
           nil)))
 
-  ;; This function is now called by the dedicated no-input Modeling
-  ;; User Action below. Its sd-call-cmds call therefore runs in a valid
-  ;; action context, unlike a direct UICT :pushAction callback.
-  (let ((handoff
-          (sd-call-cmds
-            (sd-browser-exec-cmd
-              *h871-pf-v03-apply-browser* :select-and-execute)
-            :success
-              (progn
-                (h871-pf-v03-trace
-                  "APPLY/SELECT-AND-EXECUTE-SUCCESS-CONTEXT"
-                  *sd-action-result*)
-                :success)
-            :failure
-              (progn
-                (h871-pf-v03-trace
-                  "APPLY/SELECT-AND-EXECUTE-ACTION-ERROR"
-                  (sd-inq-error-obj :all))
-                :error))))
-    ;; A NIL browser-command result is not itself an error. The explicit
-    ;; sd-call-cmds success/failure branch distinguishes execution failure
-    ;; from a command that completed without a meaningful return value.
-    (h871-pf-v03-trace "APPLY/SELECT-AND-EXECUTE-STATUS" handoff)
-    (when (eq handoff :error)
-      (sd-display-message
-        "H871 Apply: Modeling rejected the native hand-off. See the trace file.")
-      (return-from h871-pf-v03-native-apply nil))
-    ;; The bridge must remain visible until Modeling completes the native
-    ;; selection hand-off. The previous hide call returned without removing
-    ;; the visible window in the user's Modeling 18.1 test. Destroy the
-    ;; temporary browser after hand-off instead; the 3D selection has already
-    ;; been transferred and must remain untouched.
-    (let ((destroyed
-            (ignore-errors
-              (sd-destroy-graphical-browser *h871-pf-v03-apply-browser*))))
-      (h871-pf-v03-trace "APPLY/DESTROY-BRIDGE-AFTER-HANDOFF" destroyed))
-    (let ((tree-destroyed
-            (ignore-errors
-              (sd-destroy-browser-tree *h871-pf-v03-apply-tree*))))
-      (h871-pf-v03-trace "APPLY/DESTROY-BRIDGE-TREE-AFTER-HANDOFF"
-        tree-destroyed)))
+  ;; IMPORTANT: Do not invoke :select-and-execute programmatically here.
+  ;; The ver-02 baseline relies on the Graphical Browser's native OK button
+  ;; to perform the selection hand-off. A previous visible-bridge test proved
+  ;; that pressing this native Apply button selects the intended Part(s).
+  ;; Programmatic :select-and-execute returned :SUCCESS but did not provide
+  ;; evidence of viewport selection; destroying the browser immediately after
+  ;; that call could discard the user's opportunity to perform the native OK.
+  ;; Leave the selected bridge visible and let its built-in Apply button run
+  ;; the same native action as ver-02.
+  (h871-pf-v03-trace "APPLY/READY-FOR-NATIVE-OK"
+    (list (length *h871-pf-v03-apply-parts*)
+          (sd-query-browser
+            *h871-pf-v03-apply-browser* :number-of-selected-objects)))
+  (sd-display-message
+    "H871: Select the highlighted Parts using Apply in the H871 Native Apply Bridge window.")
+
   t)
 
 ;; A zero-input sequential Dialog Generator command runs its :ok-action
