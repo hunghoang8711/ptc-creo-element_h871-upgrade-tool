@@ -82,32 +82,41 @@
          (<= (abs (- a b)) 0.0000001))))
 
 (defun h871-pf-v03-collect (obj matches requested-instance requested-base)
-  ;; Keep the ver-02 search semantics: compare numeric Density Instance and
-  ;; Density Base values after /1000 normalization; labels are never inputs.
-  (when (sd-inq-part-p obj)
-    (let ((actual-instance (sd-inq-part-density obj :instance))
-          (actual-base (sd-inq-part-density obj :contents)))
-      (when (< (length *h871-pf-v03-diagnostic-samples*) 30)
-        (push
-          (list (h871-pf-v03-name obj)
-                (h871-pf-v03-path obj)
-                actual-instance (type-of actual-instance)
-                actual-base (type-of actual-base))
-          *h871-pf-v03-diagnostic-samples*))
-      (when (and
-              (not (null actual-instance))
-              (not (null actual-base))
-              (h871-pf-v03-numeric-equal-p
-                (h871-pf-v03-density-display-value actual-instance)
-                requested-instance)
-              (h871-pf-v03-numeric-equal-p
-                (h871-pf-v03-density-display-value actual-base)
-                requested-base))
-        (push obj matches))))
-  (dolist (child (sd-inq-obj-children obj))
-    (setf matches
-      (h871-pf-v03-collect child matches requested-instance requested-base)))
-  matches)
+  ;; Iterative depth-first Assembly traversal.
+  ;; The former recursive implementation could exhaust the native/Lisp call
+  ;; stack on deep or cyclic object hierarchies (Windows 0xC00000FD).
+  ;; EQ-based visitation ensures each live Modeling object is processed once.
+  (let ((pending (list obj))
+        (visited (make-hash-table :test #'eq)))
+    (loop while pending do
+      (let ((current (pop pending)))
+        (when (and current (not (gethash current visited)))
+          (setf (gethash current visited) t)
+          (when (sd-inq-part-p current)
+            (let ((actual-instance (sd-inq-part-density current :instance))
+                  (actual-base (sd-inq-part-density current :contents)))
+              (when (< (length *h871-pf-v03-diagnostic-samples*) 30)
+                (push
+                  (list (h871-pf-v03-name current)
+                        (h871-pf-v03-path current)
+                        actual-instance (type-of actual-instance)
+                        actual-base (type-of actual-base))
+                  *h871-pf-v03-diagnostic-samples*))
+              (when (and
+                      (not (null actual-instance))
+                      (not (null actual-base))
+                      (h871-pf-v03-numeric-equal-p
+                        (h871-pf-v03-density-display-value actual-instance)
+                        requested-instance)
+                      (h871-pf-v03-numeric-equal-p
+                        (h871-pf-v03-density-display-value actual-base)
+                        requested-base))
+                (push current matches))))
+          ;; Push children in reverse so the traversal preserves the previous
+          ;; recursive depth-first sibling order.
+          (dolist (child (reverse (sd-inq-obj-children current)))
+            (push child pending)))))
+  matches))
 
 (defun h871-pf-v03-choice-label (value mapping fallback)
   (or (cadr (assoc value mapping)) fallback))
