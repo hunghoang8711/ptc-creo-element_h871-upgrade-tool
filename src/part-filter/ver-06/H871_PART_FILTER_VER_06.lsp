@@ -24,6 +24,7 @@
 (defvar *h871-pf-v06-page-root-map* nil)
 (defvar *h871-pf-v06-part-node-map* nil)
 (defvar *h871-pf-v06-page-counter* 0)
+(defvar *h871-pf-v06-page-menu-name* "H871-PF-V06-RESULT-PAGES-MENU")
 
 (defvar *h871-pf-v06-browser-name* "h871-pf-v06-results")
 (defvar *h871-pf-v06-tree-name* "h871-pf-v06-results-tree")
@@ -271,6 +272,37 @@
       (h871-pf-v06-update-page-status page-name)
       t)))
 
+(defun h871-pf-v06-menu-visible (node browser-name page-name)
+  (declare (ignore node browser-name page-name))
+  t)
+
+(defun h871-pf-v06-menu-applicable (node browser-name page-name)
+  (declare (ignore node browser-name))
+  (not (null (h871-pf-v06-page-by-name page-name))))
+
+(defun h871-pf-v06-menu-action (node browser-name page-name)
+  (declare (ignore node browser-name))
+  (h871-pf-v06-activate-page page-name)
+  t)
+
+(defun h871-pf-v06-add-page-menu ()
+  ;; Keep the V04-tested direct page picker in the Browser context menu.
+  (sd-browser-add-popup-entry
+    *h871-pf-v06-browser-name*
+    :label "Results Pages"
+    :entry-type :sub-menu
+    :sub-menu-name *h871-pf-v06-page-menu-name*
+    :new-group t)
+  (dolist (entry (reverse *h871-pf-v06-pages*))
+    (sd-browser-add-popup-entry
+      *h871-pf-v06-browser-name*
+      :label (getf entry :label)
+      :parent-menu-name *h871-pf-v06-page-menu-name*
+      :string-client-data (getf entry :page)
+      :is-entry-visible 'h871-pf-v06-menu-visible
+      :is-entry-applicable 'h871-pf-v06-menu-applicable
+      :menu-action 'h871-pf-v06-menu-action)))
+
 (defun h871-pf-v06-switch-offset (offset)
   (let* ((pages (reverse *h871-pf-v06-pages*))
          (count (length pages))
@@ -353,6 +385,7 @@
   (unless (sd-show-graphical-browser *h871-pf-v06-browser-name*)
     (sd-display-error "H871: Could not show the Results Browser.")
     (return-from h871-pf-v06-open-results-browser nil))
+  (h871-pf-v06-add-page-menu)
   (unless (h871-pf-v06-activate-page *h871-pf-v06-current-page* t)
     (sd-display-error "H871: Could not activate the current Results page.")
     (return-from h871-pf-v06-open-results-browser nil))
