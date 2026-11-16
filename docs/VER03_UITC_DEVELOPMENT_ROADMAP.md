@@ -1105,3 +1105,85 @@ Interpretation:
 - Production ver-03 source remains unchanged.
 - Results shell/tabs, collector, numeric Density mappings, predicate, UICT payload and Apply implementation remain unchanged.
 - No Creo 18.1 runtime result is claimed yet.
+
+
+## 32. Native GET_SELECTION named-Part diagnostic — 2026-11-16
+
+### User-confirmed Dialog Generator result
+
+The user ran `H871_PF_V03_DG_SELECTION_DIAG` with one selected Results row.
+
+Observed:
+- The corresponding Part visibly highlighted in the 3D viewport.
+- The Dialog Generator command displayed the standard green check and red X controls.
+- Pressing the green check displayed: `Dialog received 1 Part selection item(s)`.
+- Trace confirmed:
+  - `DG-SELECTION-DIAG/INITIAL-VALUE | (... 1 (ELAN::SEL_ITEM))`
+  - `DG-SELECTION-DIAG/AFTER-INITIALIZATION | (... 1 (ELAN::SEL_ITEM))`
+  - `DG-SELECTION-DIAG/OK-ACTION | (... 1 (ELAN::SEL_ITEM))`
+  - `DG-SELECTION-DIAG/PART-CHECKS | (T)`
+
+This confirms a valid Part `SEL_ITEM` reaches a Dialog Generator `:part` variable and `:persistent-highlight t` produces viewport highlight in Creo 18.1. It still does not establish that the Part becomes the global Modeling selection after the dialog completes.
+
+### Research result and next API candidate
+
+PTC's Integration Kit documentation states that:
+- `GET_SELECTION` invokes the standard SELECT subaction and accepts SELECT options through its `:select` option.
+- The SELECT subaction supports `:PART` as a selection focus and accepts an object name as a direct selection input.
+- Modeling action routines accept lists of `SEL_ITEM` values wherever a selection parameter is expected.
+
+References:
+- GET_SELECTION: https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/reference/get_selection.html
+- SELECT subaction: https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/comref/com-sd-sub21.html
+- SEL_ITEM action-routine parameters: https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/concepts/user_cmd.html
+
+The next isolated experiment tests whether a Part's full Modeling pathname can be supplied to the documented selector route:
+```lisp
+(sd-call-cmds
+  (get_selection
+    :focus-type *sd-part-seltype*
+    :select :part part-path))
+```
+
+This is an experimental invocation assembled from the documented GET_SELECTION and SELECT syntax. It is not yet confirmed as a supported 18.1 selection setter, and a returned `SEL_ITEM` alone is not proof of global viewport selection.
+
+### Diagnostic added
+
+File:
+`src/part-filter/ver-03/diagnostics/H871_PF_V03_GET_SELECTION_DIAG.lsp`
+
+Command:
+`H871_PF_V03_GET_SELECTION_DIAG`
+
+Behavior:
+- Reads the selected Part row from the active Results page.
+- Initializes a hidden Parallel Dialog Generator Part variable from the actual `SEL_ITEM`.
+- On OK, calls `GET_SELECTION` with `:focus-type *sd-part-seltype*` and `:select :part <Part pathname>`.
+- Logs the command result, returned item types, Part checks and resolved paths.
+- Does not call Graphical Browser APIs and does not modify model geometry or production Apply.
+- Uses `:without-show t`; no second standalone dialog panel is intended.
+
+Trace markers:
+- `GET-SELECTION-DIAG/INITIAL-PARTS`
+- `GET-SELECTION-DIAG/BEGIN`
+- `GET-SELECTION-DIAG/SUCCESS-CONTEXT`
+- `GET-SELECTION-DIAG/FAILURE`
+- `GET-SELECTION-DIAG/STATUS`
+- `GET-SELECTION-DIAG/RESULT`
+
+### User test procedure
+
+1. Keep the production ver-03 source loaded.
+2. Load `H871_PF_V03_GET_SELECTION_DIAG.lsp`.
+3. Select exactly one Part row in the active Results tab.
+4. Run `H871_PF_V03_GET_SELECTION_DIAG`.
+5. Observe whether a second window appears, whether the Part highlights while active, and whether it remains selected/highlighted after the completion message is dismissed.
+6. Send the trace lines beginning with `GET-SELECTION-DIAG/` and report the viewport result.
+
+### Scope and validation
+
+- Production source is unchanged.
+- Results shell/tabs, collector, numeric Density mappings, matching predicate, table schema and existing Apply path are unchanged.
+- Diagnostic file was fetched back from GitHub.
+- Static Lisp delimiter validation: depth 0, minimum depth 0, no unclosed string.
+- This diagnostic has not yet been executed in Creo 18.1; no runtime result is claimed.
