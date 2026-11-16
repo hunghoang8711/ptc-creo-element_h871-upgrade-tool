@@ -135,3 +135,6 @@ Required runtime test: after every page switch, confirm only the active page's r
 
 
 KI-016 follow-up: ver-05 now checks that :clear-table-roots and :change-table-root both succeed before considering the page active. If either fails, it stops page activation (fail-closed) instead of risking mixed results. The table-root count inquiry is diagnostic-only and guarded with ignore-errors. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4.
+
+
+ver-05 caption follow-up: the page label order was corrected from MATERIAL-PROCESS to PROCESS-MATERIAL (CNC-SUS304). This is a presentation correction only; Density search logic is unchanged. Source commit: 8a189bb6ec8e44234b5b6607deb8600af3541c0a.
