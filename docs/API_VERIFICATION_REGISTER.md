@@ -102,3 +102,18 @@ Documented resolution pattern:
 ```
 
 The ver-03 Apply bridge now follows this pattern. The PTC reference establishes the return/lookup contract for the documented release; ver-02's existing root lookup provides additional project evidence. Do not label the full ver-03 Apply workflow as 18.1 runtime-confirmed until the user tests it.
+
+
+## VER-05 native multi-Browser manager – verification status
+
+| API / pattern | Source precedent | VER-05 status |
+|---|---|---|
+| `sd-create-browser-tree` with `:update-events oli:*SD-CHANGE-OBJECT-TREE-EVENT*` and `:update-func` | Known-good VER-02 result Browser and existing VER-04 experiment | Reused; unique callback symbol per Browser. Modeling 18.1 callback timing still requires runtime verification. |
+| `sd-create-browsernode` and `sd-get-browsernode-struct` | VER-02 creates BrowserNodes and resolves the root structure | Reused for each pair-specific Browser Tree. Runtime verification pending. |
+| `sd-create-graphical-browser` with `:okButtonLabel "Apply"` | VER-02 native Graphical Browser; user-confirmed native Apply selects Parts in the viewport | Reused directly as each pair's result window. Multiple simultaneous Browser instances are not yet runtime-confirmed. |
+| `sd-browser-define-table` / `sd-browser-set-active-table` / `:set-table-mode` / `:change-table-root` | VER-02 | Reused for each independent Browser. Runtime verification pending. |
+| `sd-browser-exec-cmd :select-all` / `:clear-select-list` | VER-02 and VER-04 | Reused with each Browser's own name. Runtime verification pending. |
+| `sd-create-text-control` / `sd-create-pushbutton-control` / `sd-set-text-control-value` | Existing VER-03 UICT control usage | Used only for Manager rows; no UICT Display Table or logical-table API is used. Layout/runtime behavior pending. |
+| Dynamic per-Browser callback closure installed with `symbol-function` | Common Lisp function binding; new VER-05 design | Static code review only. Verify that Modeling 18.1 invokes each callback independently and retains the captured result snapshot. |
+
+Do not infer full VER-05 runtime compatibility from the individual VER-02 API precedent. The multi-window lifecycle, callback closure behavior and Manager control layout are new integration behavior and require a real Modeling 18.1 test.
