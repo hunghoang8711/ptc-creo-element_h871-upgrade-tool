@@ -194,8 +194,6 @@
     (sd-create-graphical-browser
       *h871-pf-mt-browser-name*
       :tree *h871-pf-mt-tree-name*
-      ;; Isolated compatibility experiment: request tab presentation for this one browser.
-      :createAsTab t
       :topLabel "H871 - PART FILTER RESULTS"
       :treeStatusBar
         (format nil "Matched ~A Part(s). Select rows; Ctrl-click adds/removes."
@@ -265,11 +263,6 @@
     *h871-pf-mt-browser-name* :table-name "h871-pf-mt-bom")
   (sd-browser-exec-cmd *h871-pf-mt-browser-name* :set-table-mode)
   (sd-show-graphical-browser *h871-pf-mt-browser-name*)
-  ;; Isolated docking experiment: explicitly dock the visible browser.
-  ;; IGNORE-ERRORS preserves the known-good floating-window behavior
-  ;; if this API is unavailable or rejected by the installed 18.1 build.
-  (ignore-errors
-    (sd-dock-graphical-browser *h871-pf-mt-browser-name* :show t))
 
   ;; Root node is the table root; the table displays all matching Parts.
   (let ((root (sd-get-browsernode-struct *h871-pf-mt-tree-name* :root)))
