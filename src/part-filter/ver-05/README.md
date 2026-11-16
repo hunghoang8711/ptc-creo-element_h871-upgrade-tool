@@ -106,3 +106,12 @@ Important markers:
 - `LIFECYCLE/RESET-BROWSER-AND-TREE`
 
 When a runtime test fails, preserve the exact error and the final trace lines. Do not make another speculative API/UI rewrite before locating the failing stage.
+
+
+## 2026-11-16 – critical page-selector UI correction
+
+The first ver-05 implementation incorrectly used Graphical Browser :modeMenu for the page strip. PTC's Graphical Browser reference explicitly says modeMenu and buttonMenu are mapped to right-click popup entries for compatibility; the visible horizontal row is buttonMenu. This explains why the user saw a ver-02-like Results table without visible page selectors.
+
+The source now builds the Density-pair page selectors dynamically through :buttonMenu. Each page gets a horizontal push button whose callback activates that page root. Select All and Clear Selection are appended to the same horizontal row. The incorrect modeMenu page selector configuration and duplicate right-click Results Pages popup installation have been removed.
+
+These are horizontal page-navigation buttons, not proven native UICT-style tab controls with mutually-exclusive selected styling. The active page is identified in the Browser status line. Runtime visibility and callback behavior in Modeling 18.1 remain unverified.
