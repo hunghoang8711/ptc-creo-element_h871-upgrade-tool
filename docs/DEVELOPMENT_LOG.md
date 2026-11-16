@@ -203,3 +203,14 @@ Resolved:
 - Patched ver-04 to destroy the old Browser before its Tree before rebuilding; Close Results now invokes the same cleanup and restores ver-03 UICT. Added H871_PF_V04_RESTORE_UICT_RESULTS as a recovery command.
 - Static check passed: balanced parentheses, no negative nesting, no unterminated strings.
 - **Runtime status:** lifecycle patch committed but not yet retested in Creo 18.1. Native Apply and page switching remain unverified. ver-01/ver-02/ver-03 production sources and filter logic were not changed.
+
+
+## 2026-11-16 – ver-04 persistent return path from UICT Results
+
+- User confirmed the lifecycle patch: ver-04 opens the native Results Browser; Close Results returns to the existing ver-03 UICT Results window. The named Browser/Tree can now be reset and recreated.
+- The new trace confirms the Browser Tree contains two page roots and ten Part nodes; the Results Pages popup entries are added; the active root is changed to page 2; one selected row is restored; and the page is marked active. This is evidence for page-root switching during initialization, not yet proof that the user-operated Previous/Next or popup navigation works.
+- The trace's separate ver-03 Apply log includes one non-NIL `SELECT-AND-EXECUTE-SUCCESS-CONTEXT` containing an `ELAN::SEL_ITEM`. It is a stronger diagnostic signal but does not prove the user's 3D viewport selection changed.
+- Implemented a persistent `Open Native Results` pushbutton in the ver-03 UICT shell. It is installed once in the existing shell grid and calls the ver-04 diagnostic entry point. After Close Results returns to UICT, the user can reopen the native Browser by clicking the button rather than typing the LISP command again.
+- Added page navigation request/target trace markers to distinguish button callback execution from initial page activation.
+- Static checks passed: balanced parentheses, no negative nesting and no unterminated strings. Source commit: 21ddfb945a40f2361cb09439522387f90f6fac54.
+- Runtime verification pending: button creation/placement and callback, repeat close/reopen, Previous/Next and popup switching, and actual viewport Apply. No ver-03 production source, ver-02 baseline or Density filtering logic was changed.
