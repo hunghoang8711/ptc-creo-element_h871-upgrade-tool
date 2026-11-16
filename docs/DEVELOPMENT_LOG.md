@@ -273,3 +273,15 @@ Resolved:
 - No other browser/tree, filter, report, row-selection, Select All, Clear Selection, double-click, or Apply logic was changed.
 - Source commit: `5294cdd9468963503c5c0d976588892882f2445e`.
 - **Runtime status:** Pending user test in Creo Elements/Direct Modeling 18.1. Do not claim docking or tab presentation works until confirmed.
+
+
+## 2026-11-16 – User reasserted ver-03 standalone internal-tab requirement
+
+- User corrected the direction after an incorrect docking experiment.
+- Exact required architecture: one independent standalone Results window, with multiple clearly named internal pages/tabs inside it. Not Structure Browser tabs, not Browser Bar tabs, and not one Graphical Browser per filter pair.
+- The existing UICT ver-03 prototype is the correct architectural direction because it already created the standalone shell and internal pages. The reported remaining issue is Apply: #:NODE241 is not of type BROWSERNODE.
+- Stage 0 is only the known-good single Graphical Browser/table/selection/Apply baseline; it is not a multi-page implementation and must not be described as a feature-complete ver-03 base.
+- :createAsTab t and sd-dock-graphical-browser were an incorrect interpretation of tabs. Removed both from the active Stage 1 diagnostic source in commit 3518446f579ed6bd496f14fa533f9986cd98e980; Stage 1 is again a standalone single-browser baseline.
+- Reviewed existing main-branch knowledge: docs/LESSONS_LEARNED.md LL-007 and docs/ENGINEERING_KNOWLEDGE_BASE.md Section 6 already state the correct internal-tab requirement and prohibit docking/multiple Graphical Browsers. The failure was not preserving/following this recorded requirement before the last change.
+- Next step: inspect the original UICT ver-03 Apply bridge and API return/object types; isolate the NODE... versus BROWSERNODE mismatch. Do not alter the standalone UICT shell, page tabs, labels, per-page tables, or filter logic during this investigation.
+- Runtime state remains as last reported by user: earlier UICT ver-03 showed standalone window/internal named pages but Apply failed; no claim that the Apply issue is fixed.
