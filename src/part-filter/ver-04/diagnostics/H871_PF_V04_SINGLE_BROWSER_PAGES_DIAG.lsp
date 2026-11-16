@@ -282,13 +282,29 @@
   (h871-pf-v04-update-status *h871-pf-v04-current-page*)
   t)
 
-(defun h871-pf-v04-close-results ()
+(defun h871-pf-v04-reset-browser-objects ()
+  ;; Destroy the Browser before its Tree. This makes reruns safe after
+  ;; native Apply has closed the window or after Close Results was pressed.
   (ignore-errors
     (sd-hide-graphical-browser *h871-pf-v04-browser* :ignore-pin t))
+  (ignore-errors
+    (sd-destroy-graphical-browser *h871-pf-v04-browser*))
+  (ignore-errors
+    (sd-destroy-browser-tree *h871-pf-v04-tree*))
+  (setf *h871-pf-v04-page-root-map* nil)
+  (setf *h871-pf-v04-part-node-map* nil)
+  (h871-pf-v04-trace "LIFECYCLE/RESET-BROWSER-AND-TREE" :attempted)
+  t)
+
+(defun h871-pf-v04-close-results ()
+  ;; Restore the original UICT Results shell and release the diagnostic
+  ;; Browser/Tree names so the diagnostic can be started again.
+  (h871-pf-v04-reset-browser-objects)
   (when (and (boundp '*h871-pf-v03-shell*)
              (stringp *h871-pf-v03-shell*)
              (sd-dialog-shell-p *h871-pf-v03-shell*))
     (sd-show-dialog-shell *h871-pf-v03-shell*))
+  (h871-pf-v04-trace "LIFECYCLE/UICT-RESTORED" t)
   t)
 
 (defun h871-pf-v04-capture-ui-selection (entry)
@@ -334,6 +350,10 @@
               (length (getf entry :results))
               (length (getf entry :selected-paths))))
       (reverse *h871-pf-v04-pages*)))
+
+  ;; Remove stale objects from a previous diagnostic run. Page data
+  ;; has already been copied from ver-03, so it is safe to release old UI.
+  (h871-pf-v04-reset-browser-objects)
 
   (unless
     (sd-create-browser-tree
@@ -452,8 +472,16 @@
   :variables '()
   :ok-action '(h871-pf-v04-run-diagnostic))
 
-;; COMMAND:
+;; Recovery command: close the diagnostic Browser and restore ver-03 UICT.
+(sd-defdialog 'h871_pf_v04_restore_uict_results
+  :dialog-title "H871 V04 Restore UICT Results"
+  :dialog-control :sequential
+  :variables '()
+  :ok-action '(h871-pf-v04-close-results))
+
+;; COMMANDS:
 ;; H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG
+;; H871_PF_V04_RESTORE_UICT_RESULTS
 ;;
 ;; TEST:
 ;; 1. Load ver-03 source and create at least two Density result pages.
