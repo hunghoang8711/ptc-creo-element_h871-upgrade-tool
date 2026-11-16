@@ -449,6 +449,10 @@
         (list (getf entry :page) (getf entry :label)))))
 
   (setf *h871-pf-v04-browser-ready* t)
+  (when (stringp *h871-pf-v04-current-page*)
+    (h871-pf-v04-trace "DIAG/SET-CURRENT-TAB"
+      (sd-set-current-tab-control-page
+        *h871-pf-v04-tabs* :page *h871-pf-v04-current-page*)))
   (unless (h871-pf-v04-activate-page *h871-pf-v04-current-page* t)
     (h871-pf-v04-trace "DIAG/INITIAL-PAGE-ACTIVATE-FAILED"
       *h871-pf-v04-current-page*))
