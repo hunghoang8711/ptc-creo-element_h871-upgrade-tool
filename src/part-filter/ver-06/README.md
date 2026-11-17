@@ -71,7 +71,7 @@ User tested Stage 1 in Creo Elements/Direct Modeling 18.1 and confirmed:
 | Modeling 18.1 Stage 1 overall | Accepted / user-confirmed |
 
 
-## Stage 2 — Per-Part Notes (feasibility first)
+## Stage 2 — Per-Part Notes (UDA feasibility — passed)
 
 ### Goal
 Allow a user to store a text note against an individual Part and read it again after saving and reopening the model. Keep this independent from the native Results Browser selection/Apply pipeline.
@@ -83,7 +83,7 @@ PTC Integration Kit references document User-Defined Attributes (UDA):
 - `sd-inq-item-attributes`
 - `sd-inq-item-attribute`
 
-The documented filing option `:sd-file` includes the attribute in standard Modeling output files. An instance-level attachment (`:attachment :instance`) is the initial candidate so notes can belong to a specific Part instance rather than being unintentionally shared through contents. This is a design candidate, not yet proven in this Modeling 18.1 session.
+The documented filing option `:sd-file` includes the attribute in standard Modeling output files. An instance-level attachment (`:attachment :instance`) is the initial candidate so notes can belong to a specific Part instance rather than being unintentionally shared through contents. User tested WRITE and READ successfully in Modeling 18.1, including the intended save/reopen persistence workflow. UDA storage is now accepted for the project.
 
 PTC references consulted (20.x documentation; exact 18.1 behavior still requires runtime verification):
 - https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/reference/user_atts.html
@@ -105,4 +105,43 @@ Commands:
 5. A second Part can hold a different note without changing the first Part's note.
 6. No change to native Apply, Select All, Clear Selection, filter predicates, or the protected VER-03 source.
 
-Do not integrate UDA calls into the VER-06 production source until these checks pass. Runtime status: **pending user test**.
+UDA feasibility checks have passed according to user runtime feedback. The original VER-06 source remains preserved; integration is implemented in a separate VER-06.1 candidate.
+
+
+## Stage 3 — VER-06.1 Part Notes UI candidate
+
+Source:
+`src/part-filter/ver-06/H871_PART_FILTER_VER_06_1_WITH_NOTES.lsp`
+
+### UI behavior
+- Adds a `Part Note` column to the native Results Browser table.
+- Adds an `Edit Note` toolbar button.
+- The user selects exactly one Part row and clicks `Edit Note`.
+- The note editor is prefilled from the selected Part's instance-level UDA.
+- Saving updates/attaches `H871_PART_FILTER_NOTE` with key `:note`, using the already user-tested attribute pattern and `:filing :sd-file`.
+- After save, the Browser requests a tree refresh so the Note column can redraw from the Part object.
+
+### Protected behavior
+- Native Apply remains the default `:select-and-execute` behavior; no custom `:okButtonAction` is added.
+- Select All and Clear Selection callbacks are unchanged.
+- Density filter predicates and Assembly traversal are unchanged.
+- Original VER-06 source and protected VER-03 source are not overwritten.
+
+### Static checks performed
+- Parenthesis balance: zero final depth, no negative depth, no unterminated string.
+- Source inspection confirms Note column, Edit Note button, instance UDA and `:sd-file`.
+- This is not a Modeling runtime test. The `:refresh-tree` command and launching the note dialog from a Browser button still require validation on 18.1.
+
+### Modeling 18.1 acceptance test
+1. Load VER-06.1 source (not the original VER-06 file) in a disposable model session.
+2. Run `H871_PART_FILTER_VER_06` and search for a known Density pair.
+3. Widen the Results Browser enough to see the new `Part Note` column.
+4. Select exactly one Part row; click `Edit Note`.
+5. Confirm the editor opens and shows the existing note (or blank for a Part without one).
+6. Enter a note and save. Confirm the `Part Note` cell updates.
+7. Select another Part and save a different note. Confirm the first Part's note remains unchanged.
+8. Save the model, close and reopen it, rerun the filter, and confirm both notes remain.
+9. Select one Part, click `Edit Note`, then press native Apply. Confirm the intended Part is still selected in the 3D viewport.
+10. Retest Select All and Clear Selection.
+
+Stop and report the exact error if the dialog does not open, the Note column does not refresh, or selection changes unexpectedly. Do not modify the native Apply pipeline as a workaround.
