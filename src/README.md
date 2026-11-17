@@ -1,23 +1,15 @@
 # Source Code
 
-Target: PTC Creo Elements/Direct Modeling 18.1.
+All executable Creo Lisp, test scripts and diagnostic utilities belong under `src/`.
 
-## Part Filter version layout
+## Part Filter
 
-- `part-filter/ver-01/H871_PART_FILTER_VER_01.lsp` – preserved user-confirmed numeric Density pair baseline.
-- `part-filter/ver-02/H871_PART_FILTER_VER_02.lsp` – mapped Machining Process + Material convention dialog; user reported very good results.
-- `part-filter/ver-03/README.md` – corrected single-window internal-tabs specification and test plan. No new ver-03 LISP implementation exists yet.
-- `part-filter/H871_PART_FILTER.lsp` – legacy ver-01 path retained for older LOAD instructions.
-- `part-filter/H871_PART_FILTER_VER_02.lsp` – legacy ver-02 path retained for older LOAD instructions.
-- `part-filter/H871_PART_FILTER_DIAG.lsp` – diagnostic/early filter exploration; not the production source.
+- `part-filter/ver-01/` – earlier numeric filter source.
+- `part-filter/ver-02/` – preserved mapped Process/Material baseline.
+- `part-filter/ver-03/` – preserved UICT/internal-tab source reference.
+- `part-filter/ver-03-rebuild/` – preserved native Graphical Browser rebuild reference.
+- `part-filter/H871_DENSITY_API_TEST.lsp`, `H871_DENSITY_DIAG.lsp`, `H871_DENSITY_KIND_TEST.lsp`, `H871_PART_FILTER_DIAG.lsp` – focused API and runtime diagnostics.
 
-## Rules
+Do not place executable LISP test files in the repository-level `tests/` folder. That folder is reserved for written procedures and sanitized test fixtures.
 
-1. Never overwrite a user-confirmed version. Create a new `ver-XX` folder for a new iteration.
-2. Work directly on `main`; no branch per version.
-3. Keep diagnostic utilities separate from production commands.
-4. Include purpose, command entry point, target version and compatibility notes in each source header.
-5. Do not commit customer-sensitive models, proprietary drawings, credentials or personal data.
-6. Inspect source and shared knowledge docs before editing.
-7. Update the AI handover and engineering knowledge base after meaningful discoveries.
-8. Clearly distinguish specified, implemented, static-checked, loaded, functionally tested and user-confirmed states.
+Experimental ver-04 through ver-07 implementations have been removed from the current source tree. Their findings are consolidated in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`.
