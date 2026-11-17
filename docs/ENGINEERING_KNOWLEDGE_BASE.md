@@ -252,3 +252,9 @@ The first ver-05 page strip was invisible because the implementation put Density
 ### Correction – modeMenu is a visible horizontal row
 
 PTC's reference explicitly states modeMenu is a row of toggle buttons directly above buttonMenu; buttonMenu is a separate row above topMenu. Both are also exposed as right-click popup entries for compatibility. The earlier interpretation that modeMenu is popup-only was incorrect. ver-05 retains modeMenu for page selectors and adds trace diagnostics to inspect the generated button definitions and Browser creation.
+
+
+
+## Part Filter experiment consolidation (2026-11-17)
+
+The canonical experiment/failure catalogue is now `docs/PART_FILTER_EXPERIMENT_HISTORY.md`. Read it before further Part Filter work. It consolidates ver-04 through ver-07 architecture attempts, reported errors, Browser lifecycle lessons, page-root isolation, API compatibility cautions and the current unresolved multi-column Results issue. Preserve ver-02 and ver-03 references; do not recreate retired experimental version folders.
