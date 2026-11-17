@@ -1,144 +1,38 @@
 # AI Start Here – H871 Creo Tools
 
-This file is the entry point for any new ChatGPT conversation, assistant, or developer continuing this repository.
+This file is the mandatory entry point for any new ChatGPT conversation or developer continuing this repository.
 
-## Mandatory first steps
+## Mandatory reading order
 
-1. Confirm the repository is `hunghoang8711/ptc-creo-element_h871-upgrade-tool` and work on `main`.
+1. Confirm repository `hunghoang8711/ptc-creo-element_h871-upgrade-tool` and work on `main`.
 2. Read `PROJECT_CONTEXT.md`.
-3. Read `docs/ENGINEERING_KNOWLEDGE_BASE.md`.
-4. Read `docs/TECHNICAL_DECISIONS.md`, `docs/KNOWN_ISSUES.md` and `docs/LESSONS_LEARNED.md`.
-5. Inspect the exact current LISP version and any related source before editing.
-6. Check the latest Git state and file contents; never assume a previous chat's file paths or branch state are still current.
+3. Read `docs/PART_FILTER_EXPERIMENT_HISTORY.md` before touching Part Filter.
+4. Read `docs/ENGINEERING_KNOWLEDGE_BASE.md`, `docs/API_VERIFICATION_REGISTER.md`, `docs/TECHNICAL_DECISIONS.md`, `docs/KNOWN_ISSUES.md` and `docs/LESSONS_LEARNED.md`.
+5. Fetch and inspect the exact current source on `main`; never rely on an old chat's paths or assumptions.
 
-## Shared workflow rules
+## Source preservation
 
-- `main` is the single shared branch for source, decisions and engineering knowledge. Do not create a branch for each version.
-- Store separate LISP versions in `src/<tool>/ver-XX/`. Never overwrite a user-confirmed version.
-- Keep root-level legacy source paths only when needed for backward-compatible LOAD paths; state which file is canonical.
-- Every meaningful discovery must be written to the relevant shared docs on main, not left only in chat history.
-- Preserve working behavior. Make one focused change at a time.
-- Do not invent Creo APIs. Check exact function names, signatures, argument keywords, return values and object types for Modeling 18.1.
-- Documentation from later PTC releases is research guidance only, not proof of 18.1 compatibility.
-- Keep customer CAD, proprietary drawings, credentials and personal information out of this public repository.
+- Preserve `src/part-filter/ver-02/H871_PART_FILTER_VER_02.lsp` unchanged.
+- Preserve `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp` unchanged.
+- Preserve `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp` as a separate native Browser reference; do not confuse it with the UICT ver-03 source.
+- Keep all executable LISP test/diagnostic code under `src/`. Keep written test plans under `tests/`.
+- Rejected ver-04/ver-05/ver-06/ver-07 implementations are not canonical code. Their lessons belong in the experiment history, not in new permanent version folders.
+- Work on `main`; do not create branches for routine experiments.
 
-## Required status labels
+## Critical engineering rules
 
-Use precise labels:
-- Specified
-- Implemented
-- Static-checked
-- Loaded in Creo 18.1
-- Functionally tested in Creo 18.1
-- User-confirmed
-- Regression-tested
+- Target PTC Creo Elements/Direct Modeling 18.1, not Creo Parametric.
+- Preserve the exact Density Instance AND Density Base predicate, numeric mappings and tested /1000 normalization.
+- Do not assume later-release PTC APIs work in 18.1.
+- Preserve native Graphical Browser selection and Apply. Never use a hidden Browser bridge or custom Apply callback as a shortcut.
+- A BrowserNode creation token is not a BrowserNode structure; resolve it, then verify actual viewport selection.
+- A successful trace, status code or non-NIL return is not proof of Modeling selection.
+- Use disposable model copies for risky runtime tests.
+- Separate static checks from loaded, functionally tested and user-confirmed results.
+- Before editing, identify the exact failing stage and change one isolated layer only. Do not repeat a previously failed experiment without new evidence.
 
-Never promote a feature to runtime-tested without an explicit test result from the user or a verified target environment.
+## Current Part Filter state (2026-11-17)
 
-## Before making a change
+The native Browser rebuild opens Results, but the user reports that only Part Name is visible even though four column definitions exist in source. The latest table activation-order change did not fix it. The rebuild is not complete. The next step is targeted runtime diagnostics of Browser mode, active table, table roots and table activation results—not another speculative order change.
 
-1. State the intended behavior and identify the smallest affected source.
-2. Identify the last user-confirmed version that must remain untouched.
-3. Check relevant known issues and lessons to avoid repeating failed approaches.
-4. Make a small change and run available static checks.
-5. Update project context, knowledge base, decisions/issues/lessons, development log and changelog as applicable.
-6. Report exact changed paths, commit(s), static-check result and what remains for the user to test.
-
-## Current Part Filter handover
-
-- ver-01 is the user-confirmed numeric Density-pair baseline.
-- ver-02 is the user-confirmed mapped Machining Process + Material filter; its visible Results Graphical Browser owns row selection and native Apply. Do not alter it.
-- ver-03 UICT Results pages, result tables and page-local selection are user-confirmed in project testing; UICT-to-Modeling Apply is unresolved. The hidden Graphical Browser bridge, GET_SELECTION experiments and direct UICT callback hand-off failed.
-- A Search candidate produced Modeling fatal exception 0xC00000FD; the iterative traversal candidate did not fix it and was reverted. Search root cause is unresolved. Use a disposable model and inspect the trace before changing the collector.
-- ver-04 diagnostic: `src/part-filter/ver-04/diagnostics/H871_PF_V04_SINGLE_BROWSER_PAGES_DIAG.lsp`. User confirmed native Browser opens and Close Results restores ver-03 UICT. The updated source installs a persistent `Open Native Results` button in UICT so the Browser can be reopened without retyping the command; Previous/Next now write navigation trace markers. Static-checked only: button placement/callback, repeat close/reopen, user-operated page switching and actual viewport Apply still require Modeling 18.1 testing. This is not yet a horizontal-tab UI.
-- Keep ver-01/ver-02 untouched. Do not retry Browser reparenting or hidden Browser Apply without a new, proven cause.
-- Read TD-008, TD-010, TD-011, TD-012, KI-012, KI-013 and KI-014 before changing multi-search, Results navigation or Apply architecture.
-
-## New tool development
-
-For a new tool in this repository:
-1. Create a dedicated `src/<tool-name>/` folder and versioned source folders.
-2. Add a short tool specification and a test plan before coding.
-3. Reuse only APIs/lessons that are relevant and verified for Modeling 18.1.
-4. Add newly discovered reusable functions, compatibility notes and failure patterns to the Engineering Knowledge Base.
-5. Keep tool-specific implementation details in its own context/README; keep cross-tool engineering rules in the shared knowledge base.
-
-
-## Required skill package for all Creo work
-
-Before any Creo task (including a new tool), also read [`skills/creo-elements-direct-modeling/SKILL.md`](../skills/creo-elements-direct-modeling/SKILL.md) and its relevant references. This package includes knowledge recovered from prior chats and user-provided Annotation macro files, not only the current Part Filter thread.
-
-Use [API_VERIFICATION_REGISTER](API_VERIFICATION_REGISTER.md) to check symbol evidence and [USER_REFERENCE_INVENTORY](USER_REFERENCE_INVENTORY.md) to identify the historical source material. Do not confuse Lisp with Annotation/ME10 command language. Do not copy full CoCreate confidential legacy sources into this public repository.
-
-## Current direction – Part Filter single-window implementation (2026-11-16)
-
-The user's final product requirement is unchanged: one Results window only, with direct native Part selection/Apply as in ver-02 and multiple Density-pair pages as in ver-03. ver-04 remains a diagnostic experiment only; its UICT launcher/return workflow is not the product architecture.
-
-A new self-contained candidate has been added:
-- Canonical candidate: `src/part-filter/ver-05/H871_PART_FILTER_VER_05.lsp`
-- Required implementation and acceptance handover: `src/part-filter/ver-05/README.md`.
-- It owns the numeric Density search, page registry, one Browser Tree, one visible Graphical Browser, row selection, page navigation and native Apply.
-- It no longer reads ver-03 UICT page globals, opens/restores a UICT Results shell, installs an Open Native Results button, or uses a hidden Browser bridge.
-- Search/mapping behavior follows ver-02; exact Density Instance + Base pair and /1000 normalization are preserved.
-- Each pair has one page; same-pair search refreshes that page; a no-match leaves existing pages unchanged.
-- Page navigation is currently Previous/Next plus a Results Pages popup. A horizontal tab strip is still not implemented.
-- The Browser is rebuilt under the same named Browser/Tree after each successful search so the active Browser contains all current page roots. This is one Results Browser, not multiple simultaneous Results windows.
-
-**Status:** source added and static-checked only. Not loaded or functionally tested in Modeling 18.1. Native Apply must be proven by selecting one/multiple rows and confirming the actual 3D viewport selection. Test only on a disposable model copy. Preserve ver-01/ver-02/ver-03 and the Density mapping. Do not treat ver-05 as user-confirmed until runtime testing.
-
-### ver-05 horizontal page-button strip revision
-
-The ver-05 Browser now builds a dynamic Graphical Browser `:modeMenu` row with one page button per Density pair and sets `:modeMenuInitialButton` to the active page. This is intended to provide horizontal, in-window page switching while preserving one Browser's native Apply. Previous/Next helper functions remain in source as diagnostic fallbacks; the current toolbar button row is Select All/Clear Selection. PTC's detailed modeMenu reference is from a later release, so Modeling 18.1 compatibility and mutual-exclusion behavior must be tested before confirmation.
-
-
-
-### ver-05 page-isolation correction (2026-11-16)
-
-A source review after the first ver-05 handoff found a critical page-switch defect: h871-pf-v05-activate-page changed the table root without first clearing the previous table root. Graphical Browser tables can retain multiple table roots; this risks showing rows from multiple Density pages at once and makes Select All/native Apply page scope unsafe.
-
-The ver-05 activation path now buffers redraw, clears the current selection and all table roots, sets exactly the requested page root, resumes redraw, and traces the resulting table-root count. This is based on the documented Graphical Browser command sequence (:BUFFER-DISPLAY, :CLEAR-TABLE-ROOTS, :CHANGE-TABLE-ROOT) in the PTC 20.6 reference; Modeling 18.1 runtime compatibility still requires testing.
-
-Do not call ver-05 complete: page strip rendering/callbacks, page isolation, page-local selection restore and actual viewport Apply remain unverified in Modeling 18.1. The horizontal modeMenu is a candidate page-button strip, not a confirmed native tab control. Keep one visible Results Browser; no UICT launcher, hidden Browser bridge or second Results window.
-
-
-### ver-05 fail-safe page activation refinement
-
-The page-root correction now checks the return from :clear-table-roots before attempting :change-table-root. If the old roots cannot be cleared or the requested root cannot be set, page activation stops rather than risking mixed-page selection. The :number-of-table-roots trace query is diagnostic-only and wrapped with ignore-errors so an unavailable query cannot interrupt page activation. Latest source commit: 30d679156b879339cdefd1a922649feb4a937bd4. Runtime testing in Modeling 18.1 is still required.
-
-
-### ver-05 page-caption convention correction
-
-ver-05 page captions now follow the established PROCESS-MATERIAL order (for example CNC-SUS304 and CG-SS400), matching the corrected ver-03 convention and the user's numeric mapping. Do not reverse this to MATERIAL-PROCESS.
-
-
-### ver-05 page selector UI root cause and correction (2026-11-16)
-
-Root cause of the missing visible page strip: ver-05 used Graphical Browser :modeMenu for Density pages. PTC's Graphical Browser reference says modeMenu is mapped to right-click popup entries; the visible horizontal button row is :buttonMenu. The user correctly reported that the window looked like ver-02 with only Close Results.
-
-Corrected source commit: ca85cf158cdb345381f989f46f3e6cadbfe9bdc4. Density page buttons are now generated dynamically into :buttonMenu, before Select All and Clear Selection. Each button activates the corresponding page root in the same Browser. The old modeMenu page strip and duplicate popup page menu call were removed. This should create a visible horizontal page-navigation row, but it is not yet confirmed in Modeling 18.1. Do not claim success until the user sees multiple page buttons and confirms switching.
-
-
-### Correction – Graphical Browser modeMenu is also a visible horizontal row
-
-The preceding diagnosis that modeMenu is only a context popup was incorrect. PTC's reference explicitly says modeMenu provides a row of toggle buttons directly above buttonMenu; both menus are also mapped to right-click popup entries for compatibility. The original modeMenu approach was therefore valid in principle. The temporary buttonMenu page-selector change was reverted. Source commit 7763d35 restores the page selectors to modeMenu and adds UI/MODE-MENU-SPEC, UI/INITIAL-MODE-BUTTON and UI/BROWSER-CREATED trace markers. The actual reason the page buttons were not visible is still unresolved until the trace and runtime UI are inspected.
-
-
-## Current Part Filter direction – 2026-11-16
-
-Continue from **ver-03**, not ver-05. The user reaffirmed that ver-03's single Results window with internal Density-pair tabs is already the accepted UI. Keep its Display Tables, direct multi-row selection, Select All/Clear Selection and page isolation. Do not redesign the UI around a single Graphical Browser, add an intermediate window, or revive the UICT-to-native-window navigation flow.
-
-Latest source commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` corrects a real Apply defect: `sd-create-browsernode` IDs are resolved to BrowserNode structures using `sd-get-browsernode-struct` before `:set-object-selection`. Static parentheses check passed; runtime Apply remains unverified. Test on a disposable Assembly and require actual Part selection in the 3D viewport. A successful trace or command return is insufficient.
-
-
-## Critical correction – active Part Filter architecture (2026-11-16)
-
-A prior note in this file incorrectly instructed the next developer to continue from UICT ver-03. That direction is superseded. The UICT ver-03 implementation is the unstable path associated with Modeling fatal exception `0xC00000FD`; do not load it as the active candidate or use its hidden Browser Apply bridge.
-
-Recovered user-confirmed milestones:
-- **Stage 0** at `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`: native Graphical Browser baseline. User confirmed Results, Select All, individual row selection and native Apply select Parts. This is the proven selection baseline.
-- **ver-04 diagnostic**: one Graphical Browser with multiple page roots. User confirmed page switching and restoring selected rows for `CG-SS400`. Its Apply trace showed `:SUCCESS`/selection context, but prior test record did not conclusively confirm actual viewport selection.
-- **ver-05**: intended single-Graphical-Browser multi-page integration candidate. Its page-selector UI has not been confirmed visible/working in Modeling 18.1.
-
-**Required final architecture:** exactly one visible standalone Results window; direct native row selection and native Apply as in Stage 0; multiple Density-pair pages within that same Browser using the page-root approach proven in ver-04. No intermediate-window workflow, no UICT Display Table/hidden Browser bridge, no Browser Bar docking, no one-Browser-per-search, and no reparenting into a host shell. Continue by integrating the ver-04 page-root/page-selection algorithm into the Stage 0 native Browser, then verify the page navigation controls in 18.1. Preserve the Stage 0 baseline unchanged.
-
-The source edit commit `068ee4123b5aadf6cde5bce54321f1ee031ea064` only changes the obsolete UICT Apply bridge and is **not the active implementation**. Do not load it for user testing.
+See `docs/PART_FILTER_EXPERIMENT_HISTORY.md` for the full error catalogue and ver-04 through ver-07 lessons.
