@@ -139,3 +139,31 @@ This conflicts with the user's accepted UI requirement: one `H871 - PART FILTER 
 The current multi-Browser implementation is therefore a proven native Apply experiment, not the accepted final UI architecture. Preserve its native Browser Apply findings as reference material, but do not extend the Manager/Open-per-pair approach as the final solution.
 
 A replacement design must first establish a single top-level Results window and internal pair tabs, then validate a visible Apply workflow without reintroducing a hidden Browser bridge. The old VER-03 source contains the intended single-shell/tab-control structure, but its Display Table/Apply behavior must not be assumed compatible or stable in Modeling 18.1 merely because the tab layout exists. Port only after reviewing the exact known-good native selection behavior and validating each API in the target release.
+
+
+## Runtime feedback – Open/lifecycle and resize requirements (2026-11-17)
+
+The user tested the current VER-05 build and reported the following:
+
+- The Part Results/Manager window lists entries corresponding to the filtered process/material pairs.
+- Pressing a row's Open action closes the Filter page, but does not establish a usable shared Results view. The Part-selection Graphical Browser windows remain separate and independent.
+- After closing the command and starting it again, Modeling displays a warning equivalent to “Model data may have been damaged” before the Graphical Browser appears.
+- The Graphical Browser window must be user-resizable (width and height), rather than constrained to a fixed-size presentation.
+
+These are user-observed runtime symptoms. The exact cause of the Filter page closing, the Open action's failure, and the model-data warning has NOT been isolated. Do not attribute the warning to a specific API or cleanup call without trace/runtime evidence. Treat the warning as a high-priority lifecycle safety defect and suspend repeated testing on the original Assembly.
+
+Source review notes for investigation:
+
+- The Manager Open callback currently calls sd-show-graphical-browser with the stored Browser name.
+- The Search dialog's :ok-action calls h871-pf-v05-run and then sd-return-from-ok-action.
+- Browser creation currently specifies :minHeight 280 :maxWidth 900 :maxHeight 760; the source does not demonstrate a verified resize option or prove that the window is resizable.
+- None of these observations alone proves the root cause. Verify the Modeling 18.1 Browser lifecycle and sizing API before changing the source.
+
+Acceptance criteria for the replacement Results UI:
+
+1. One persistent Results window with internal process/material tabs; no separate top-level Browser per pair.
+2. Open/selecting a result tab must not unexpectedly dismiss the Filter/Results host or orphan the result view.
+3. Repeated command start/close cycles must not produce the model-data warning or leave stale Browser/Tree handles.
+4. The visible Results window must support interactive resizing in both dimensions, with its contents adapting to the new size.
+5. Native Part selection and Apply to the 3D viewport must remain functional.
+6. Test only on a disposable Assembly copy until lifecycle safety is demonstrated.
