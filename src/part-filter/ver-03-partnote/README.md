@@ -139,3 +139,13 @@ The next layout revision must be based on the actual Modeling 18.1 behavior and 
 
 - Additional hardening: tab insertion now runs under IGNORE-ERRORS with both returned value and captured condition written to trace. A thrown UICT error and a normal NIL return are therefore distinguishable.
 - Latest static parenthesis scan after this addition: 930 opening and 930 closing parentheses. Runtime behavior remains unverified until loaded in Modeling 18.1.
+
+
+## 2026-11-17 — Emergency rollback of resizable UICT experiment
+
+- User reported fatal exception 0xC00000FD (stack overflow) while creating a new tab in Modeling 18.1.
+- Trace shows both `sd-set-control-binding` calls for the root grid and tab control returned `NIL` with condition `:ESCAPE`. The second run entered `sd-insert-tab-control-page` and the process terminated before its return trace. The trace does not prove which native call caused the stack overflow, but the resizable UICT path is not safe in this runtime.
+- Rolled back the Results shell to the fixed-size UICT pattern from the known VER-03 baseline: `sd-create-dialog-shell`, `sd-append-grid-area`, and the original tab-control dimensions. Removed the attempted per-page resize bindings. Part Note controls, Note UDA read/write, Edit Note button, Apply Bridge, and append-per-run trace are retained.
+- This deliberately withdraws the resizable-window experiment. Do not load the earlier resizable build again in Modeling 18.1.
+- Static check after rollback: 879 opening and 879 closing parentheses. Runtime validation is pending.
+- Recovery protocol: save the model to a new filename if the application remains open, then exit/restart Modeling before loading this rollback build. Never overwrite the original model after the fatal exception. Test only on a disposable copy first.
