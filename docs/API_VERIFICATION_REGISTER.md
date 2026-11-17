@@ -192,3 +192,19 @@ Evidence status:
 - Production integration: prohibited until probe passes in a disposable model.
 
 Do not use Model Manager database-exchange functions (`sd-define-db-attribute`, etc.) for this local-file note feature; no Model Manager dependency has been established.
+
+### J.1 — Per-Part note UDA runtime confirmation (2026-11-17)
+
+User tested the isolated probe `research/attributes/H871_PF_PART_NOTE_ATTRIBUTE_PROBE.lsp` in Creo Elements/Direct Modeling 18.1 and confirmed both WRITE and READ work as intended. The user explicitly reported the test met the intended behavior, including persistence after saving/reopening the model.
+
+Promote the following exact pattern to **user-confirmed runtime** for this project:
+- Attribute name: `H871_PART_FILTER_NOTE`
+- Key: `:note`
+- Attachment: `:instance`
+- Filing: `:sd-file`
+- Read: `sd-inq-item-attribute`
+- Existing attribute detection: `sd-inq-item-attributes`
+- Update: `sd-mod-item-attribute`
+- First-time attach: `sd-attach-item-attribute`
+
+Use this tested pattern for VER-06.1. Keep notes on the Part instance, not contents, unless a later explicit requirement changes that behavior.
