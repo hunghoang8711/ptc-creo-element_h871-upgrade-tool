@@ -142,3 +142,25 @@ The VER-05 Manager grid dimensions were corrected to 1120 × 820 pixels while re
 - The user confirmed after the 1120 × 820 pixel grid-area correction that the H871 Graphic/Manager window became larger in Modeling 18.1. This confirms the sizing change had a visible effect. It does not yet establish that every Manager row and Open button is fully visible/readable.
 - A later user report described fatal exception `0xc00000fd` after an Open action intended to show another Browser. The current Manager Open handler calls `sd-show-graphical-browser` with the stored Browser name. This is only a source-level candidate path; the precise clicked control and crash cause remain unconfirmed.
 - Keep the crash unresolved. Do not equate a successful collection trace or working native Apply with proof that Browser reopening is safe.
+
+
+## API-VER-018 – Strict one-window Results architecture on Modeling 18.1
+
+**Question:** Can one custom UICT Results shell contain literal pair tabs, embed the native Graphical Browser Apply mechanism, and be interactively resized, with no secondary Browser?
+
+**Finding:** Not with the documented 18.1 API set identified in this audit.
+
+- PTC's Modeling 20.6 release notes mark `sd-create-resizable-dialog-shell`, `sd-create-resizable-grid-area`, `sd-set-control-binding` and `sd-set-graphical-browser-parent` as new in 20.6.
+- `sd-set-graphical-browser-parent` requires the Browser's host to be a resizable grid area under a resizable dialog shell.
+- Modeling 18.1 UICT tab controls and Display Tables exist, but Display Table `applyAction` / selection callbacks do not document direct transfer of selected Part rows into the Modeling viewport's native selection list.
+- Graphical Browser `:select-and-execute` is the documented native selection handoff and the only proven project workflow for Apply.
+- Graphical Browser `maxWidth` / `maxHeight` specify limits; no explicit 18.1 interactive resize switch was verified.
+
+**18.1 alternative:** one native Graphical Browser and one tree for all process/material pairs. Pair nodes become table roots; their child Parts appear in the Browser table. Native Apply remains in the same Results window. This gives a navigation tree rather than literal tabs. Runtime resize behavior still needs direct verification.
+
+**Status:** API documentation review complete; runtime support and user acceptance of the navigation-tree alternative are pending. No code implementation or runtime test has been performed for this alternative.
+
+References:
+- https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/whatsnew.html
+- https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+- https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/uict_create.html
