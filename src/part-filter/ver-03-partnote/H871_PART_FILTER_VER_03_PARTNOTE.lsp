@@ -550,15 +550,6 @@
 
 (defun h871-pf-v03-create-shell ()
   (h871-pf-v03-trace "CREATE-SHELL/BEGIN" nil)
-  ;; Replace the previous fixed-size shell once after upgrading this LISP.
-  ;; Existing result pages are rebuilt by the next filter run.
-  (unless (eq *h871-pf-v03-shell-layout* :resizable)
-    (when (sd-dialog-shell-p *h871-pf-v03-shell*)
-      (sd-destroy-dialog-shell *h871-pf-v03-shell*))
-    (setf *h871-pf-v03-pages* nil)
-    (setf *h871-pf-v03-page-counter* 0)
-    (setf *h871-pf-v03-current-page* nil)
-    (setf *h871-pf-v03-shell-layout* :resizable))
   ;; Recover each UICT layer independently. A previous failed attempt can
   ;; leave the dialog shell alive while its grid or tab control was never
   ;; created. Checking only sd-dialog-shell-p would then skip the missing
@@ -566,13 +557,13 @@
   (h871-pf-v03-trace "CREATE-SHELL/CHECK-DIALOG" *h871-pf-v03-shell*)
   (unless (sd-dialog-shell-p *h871-pf-v03-shell*)
     (unless
-      (sd-create-resizable-dialog-shell
+      (sd-create-dialog-shell
         *h871-pf-v03-shell*
         :title "H871 - PART FILTER RESULTS VER-03-PARTNOTE"
+        :bottomLine :none
         :closeAction
           (list 'sd-hide-dialog-shell *h871-pf-v03-shell* :ignorePin t)
-        :width 920 :height 560
-        :cellSize 10,10 :spacing 2 :margin 4)
+        :margin 4)
       (h871-pf-v03-trace "CREATE-SHELL/DIALOG-CREATE-FAILED" *h871-pf-v03-shell*)
       (sd-display-error "H871 ver-03: Could not create the Results window.")
       (return-from h871-pf-v03-create-shell nil)))
@@ -582,21 +573,12 @@
   ;; partially-created shells without destroying a valid Results window.
   (unless (sd-control-p *h871-pf-v03-grid*)
     (unless
-      (sd-create-resizable-grid-area
-        *h871-pf-v03-grid* (concatenate 'string *h871-pf-v03-shell* "-RG")
-        :x 0 :y 0 :width 92 :height 56
-        :cellSize 10,10 :margin 4 :spacing 2)
-      (h871-pf-v03-trace "CREATE-SHELL/GRID-CREATE-FAILED"
-        (list *h871-pf-v03-grid*
-              (sd-control-p *h871-pf-v03-grid*)))
+      (sd-append-grid-area
+        *h871-pf-v03-grid* (concatenate 'string *h871-pf-v03-shell* "-AA")
+        :width 920 :height 560 :cellSize 10,10 :margin 4 :spacing 2)
+      (h871-pf-v03-trace "CREATE-SHELL/GRID-CREATE-FAILED" *h871-pf-v03-grid*)
       (sd-display-error "H871 ver-03: Could not create the Results layout.")
       (return-from h871-pf-v03-create-shell nil)))
-  ;; Bind the successfully-created (or recovered) root grid to the
-  ;; resizable dialog shell. This must be outside the creation-failure branch.
-  (h871-pf-v03-trace-binding *h871-pf-v03-grid* '(:resize-both))
-  (h871-pf-v03-trace "CREATE-SHELL/GRID-STATE"
-    (list (sd-control-p *h871-pf-v03-grid*)
-          (sd-control-p *h871-pf-v03-tabs*)))
 
   (h871-pf-v03-trace "CREATE-SHELL/CHECK-TABS" *h871-pf-v03-tabs*)
   (unless (sd-control-p *h871-pf-v03-tabs*)
@@ -609,11 +591,7 @@
       (h871-pf-v03-trace "CREATE-SHELL/TAB-CREATE-FAILED" *h871-pf-v03-tabs*)
       (sd-display-error "H871 ver-03: Could not create the internal tab control.")
       (return-from h871-pf-v03-create-shell nil)))
-  ;; Keep the internal tabs fitted to the resizable content grid.
-  (h871-pf-v03-trace-binding *h871-pf-v03-tabs* '(:resize-both))
-  (h871-pf-v03-trace "CREATE-SHELL/OK"
-    (list (sd-control-p *h871-pf-v03-grid*)
-          (sd-control-p *h871-pf-v03-tabs*)))
+  (h871-pf-v03-trace "CREATE-SHELL/OK" nil)
   t)
 
 (defun h871-pf-v03-create-logical-table (logical-table)
@@ -721,26 +699,10 @@
       :title "Edit Note"
       :pushAction (list 'h871-pf-v03-edit-note page-name))
 
-    ;; Resize the results table with the page when the UICT page supports
-    ;; control bindings; keep action buttons anchored to the bottom-left.
-    (h871-pf-v03-trace-binding table-name '(:resize-both))
-    (h871-pf-v03-trace-binding status-name '(:resize-horizontal))
-    (h871-pf-v03-trace-binding
-      (concatenate 'string page-name "-SELECT-ALL-PB") '(:left :bottom))
-    (h871-pf-v03-trace-binding
-      (concatenate 'string page-name "-CLEAR-PB") '(:left :bottom))
-    (h871-pf-v03-trace-binding
-      (concatenate 'string page-name "-APPLY-PB") '(:left :bottom))
-    (h871-pf-v03-trace-binding
-      (concatenate 'string page-name "-EDIT-NOTE-PB") '(:left :bottom))
-    (h871-pf-v03-trace "CREATE-PAGE/CONTROLS-STATE"
-      (list (sd-control-p tab-grid)
-            (sd-display-table-p table-name)
-            (sd-control-p status-name)
-            (sd-control-p (concatenate 'string page-name "-SELECT-ALL-PB"))
-            (sd-control-p (concatenate 'string page-name "-CLEAR-PB"))
-            (sd-control-p (concatenate 'string page-name "-APPLY-PB"))
-            (sd-control-p (concatenate 'string page-name "-EDIT-NOTE-PB"))))
+    ;; Modeling 18.1 does not accept the attempted resizable bindings here.
+    ;; Keep the proven fixed UICT page layout until a compatible layout is verified.
+    (h871-pf-v03-trace "CREATE-PAGE/RESIZE-BINDINGS-SKIPPED"
+      "Disabled after :ESCAPE and fatal stack overflow in resizable UICT path.")
 
     (push
       (list :instance instance :base base :label label
