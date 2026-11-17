@@ -370,3 +370,18 @@ Source review confirms that the Manager Open callback calls sd-show-graphical-br
 SAFETY STATUS: model-data warning is a high-priority unresolved lifecycle defect. Suspend repeated tests on the original Assembly. No LISP source was changed in response to this report; no root cause or fix is claimed.
 
 Next work must replace the per-pair top-level Browser architecture with one persistent Results window and internal tabs, verify the exact Modeling 18.1 lifecycle/resize APIs, preserve visible native selection and Apply, and test repeated close/reopen cycles only on a disposable model copy. The Results window must be interactively resizable in both dimensions and its contents must adapt accordingly.
+
+
+## 2026-11-17 – Strict single-window Apply API audit
+
+User requirement: exactly one Results window; no secondary Graphical Browser at any point, including Apply.
+
+Official PTC release notes for Modeling 20.6 identify `sd-create-resizable-dialog-shell`, `sd-create-resizable-grid-area`, `sd-set-control-binding` and `sd-set-graphical-browser-parent` as new 20.6 features. The browser-parent API requires a resizable grid area below a resizable dialog shell. This is the documented way to embed a native Graphical Browser into a custom Results shell, but it is not a documented Modeling 18.1 capability.
+
+UICT tab controls and Display Tables are older APIs; however their documented selection/apply contract does not expose a direct “selected Display Table rows -> native Modeling viewport selection” operation. The project's known-good native Apply path is Graphical Browser `:select-and-execute`. VER-03 bridged the gap with a separate Browser, which is now prohibited by the user.
+
+**Finding:** Exact custom shell + literal UICT tabs + embedded native Browser Apply + resize is not supported by the documented 18.1 API evidence found. No claim that it is impossible in every undocumented/private API; rather, no supported 18.1 API has been identified to implement it safely.
+
+Alternative proposed for user approval: one native Graphical Browser only, one shared tree, process/material pair nodes as table roots, Parts shown in the Browser table, native Apply in that same window. This has pair navigation instead of literal tabs. Increase `maxWidth` / `maxHeight` to provide more room; drag-resize remains a runtime question because the Browser API documents size limits but no resize flag. No LISP code changed in this audit.
+
+Sources: PTC Modeling 20.6 What's New (https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/whatsnew.html); Graphical Browser reference (https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html); UICT creation reference (https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/uict_create.html).
