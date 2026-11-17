@@ -259,26 +259,28 @@
     (sd-display-error "H871: Could not create the BOM result table.")
     (return-from h871-pf-rb-open-results-browser nil))
 
-  ;; Initialize the table root before switching the Browser into table mode
-  ;; and before showing the window. The table displays the children of this
-  ;; root; doing this after SHOW can leave the initial Results view in tree
-  ;; mode without the custom Density columns.
+  ;; Match the VER-02 lifecycle: activate table mode and show the
+  ;; Browser first. Its update callback builds the Browser Tree root
+  ;; when the Browser is initialized; resolve that root only afterward.
   (sd-browser-set-active-table
     *h871-pf-rb-browser-name* :table-name "h871-pf-rb-bom")
-
-  (let ((root (sd-get-browsernode-struct *h871-pf-rb-tree-name* :root)))
-    (unless root
-      (sd-display-error "H871: Results tree root is unavailable.")
-      (return-from h871-pf-rb-open-results-browser nil))
-    ;; Keep the native Browser commands' return values uninterpreted:
-    ;; Modeling 18.1's success return contract is not assumed here.
-    (sd-browser-exec-cmd
-      *h871-pf-rb-browser-name* :change-table-root root t))
 
   (sd-browser-exec-cmd
     *h871-pf-rb-browser-name* :set-table-mode)
 
   (sd-show-graphical-browser *h871-pf-rb-browser-name*)
+
+  ;; The root is created by h871-pf-rb-build-results-tree during the
+  ;; Browser's initial tree update. Do not query it before SHOW.
+  (let ((root (sd-get-browsernode-struct *h871-pf-rb-tree-name* :root)))
+    (unless root
+      (sd-display-error
+        "H871: Results tree root is still unavailable after Browser initialization.")
+      (return-from h871-pf-rb-open-results-browser nil))
+    ;; Keep the native Browser commands' return values uninterpreted:
+    ;; Modeling 18.1's success return contract is not assumed here.
+    (sd-browser-exec-cmd
+      *h871-pf-rb-browser-name* :change-table-root root t))
   t)
 
 ;; ------------------------------------------------------------
