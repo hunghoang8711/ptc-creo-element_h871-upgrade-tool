@@ -1,68 +1,40 @@
 # PTC Creo Elements/Direct Modeling – H871 Upgrade Tools
 
-Version-controlled engineering workspace for custom tools targeting **PTC Creo Elements/Direct Modeling 18.1**.
+Engineering workspace for custom tools targeting **PTC Creo Elements/Direct Modeling 18.1**.
 
-## Current focus
+## Current repository state
 
-**H871 Part Filter ver-03 – internal-tab UI prototype implemented; Modeling 18.1 runtime validation and native Apply hand-off remain pending.**
+- **Canonical branch:** `main`.
+- **Preserved Part Filter references:** ver-02, ver-03 UICT reference and ver-03 native Browser rebuild.
+- **Experimental ver-04/ver-05/ver-06/ver-07 source:** removed from the current working tree; their reusable findings are consolidated in [Part Filter Experiment History](docs/PART_FILTER_EXPERIMENT_HISTORY.md).
+- **All executable LISP and diagnostic/test code:** stored under `src/`.
+- **Written test procedures:** stored under `tests/`.
 
-The confirmed filter behavior is based on an exact Density Instance + Density Base pair. The mapped UI uses Machining Process and Material convention labels, which map to those existing Density values; it does not read the model's actual Material property.
+The latest native Browser rebuild opens Results, but the user reports that only Part Name is visible. It is not a completed or runtime-accepted replacement.
 
-See [ver-03 Implementation Record](docs/VER03_IMPLEMENTATION_NOTES.md) before loading the prototype.
+## Start here
 
-## Start here (AI / new development session)
-
-1. Read [AI_START_HERE](docs/AI_START_HERE.md) for the mandatory handover workflow.
-2. Read [PROJECT_CONTEXT](PROJECT_CONTEXT.md) for the current state and active feature.
-3. Read [ENGINEERING_KNOWLEDGE_BASE](docs/ENGINEERING_KNOWLEDGE_BASE.md) for consolidated APIs, mappings, failure causes, compatibility limits and engineering rules.
-4. Read [TECHNICAL_DECISIONS](docs/TECHNICAL_DECISIONS.md), [KNOWN_ISSUES](docs/KNOWN_ISSUES.md), and [LESSONS_LEARNED](docs/LESSONS_LEARNED.md).
-5. Inspect the exact versioned LISP source before editing.
+1. [AI Start Here](docs/AI_START_HERE.md)
+2. [Project Context](PROJECT_CONTEXT.md)
+3. [Part Filter Experiment History](docs/PART_FILTER_EXPERIMENT_HISTORY.md)
+4. [Engineering Knowledge Base](docs/ENGINEERING_KNOWLEDGE_BASE.md)
+5. [API Verification Register](docs/API_VERIFICATION_REGISTER.md)
+6. [Technical Decisions](docs/TECHNICAL_DECISIONS.md), [Known Issues](docs/KNOWN_ISSUES.md), [Lessons Learned](docs/LESSONS_LEARNED.md)
 
 ## Repository map
 
-- `docs/AI_START_HERE.md` – compact instructions for new chats and new tool development.
-- `PROJECT_CONTEXT.md` – live project state and handover.
-- `docs/ENGINEERING_KNOWLEDGE_BASE.md` – consolidated technical memory and reusable engineering skills.
-- `src/part-filter/ver-01/` – preserved ver-01 source.
-- `src/part-filter/ver-02/` – mapped-choice ver-02 source.
-- `src/part-filter/ver-03/` – ver-03 source, specification and implementation notes.
-- `docs/VER03_IMPLEMENTATION_NOTES.md` – implemented scope, limitations and first runtime test.
-- `docs/TECHNICAL_DECISIONS.md` – active decisions.
-- `docs/KNOWN_ISSUES.md` – unresolved or unverified items only.
-- `docs/LESSONS_LEARNED.md` – confirmed root causes and prevention rules.
-- `docs/DEVELOPMENT_LOG.md` – milestone history and verification evidence.
-- `tests/` – repeatable manual regression procedures.
+- `src/part-filter/ver-02/` – preserved mapped-choice baseline.
+- `src/part-filter/ver-03/` – preserved UICT/internal-tab reference source.
+- `src/part-filter/ver-03-rebuild/` – preserved native Graphical Browser rebuild reference.
+- `src/part-filter/` – shared commands and diagnostic/test LISP files.
+- `docs/` – engineering knowledge, API evidence, decisions and history.
+- `tests/` – written regression procedures and sanitized test assets.
+- `skills/creo-elements-direct-modeling/` – reusable cross-chat Creo skill package.
 
-## Main-branch and version policy
+## Main-branch policy
 
-- `main` is the single shared development and knowledge branch.
-- Do not create a branch for each LISP version or routine feature iteration.
-- Keep each released/experimental LISP version in its own `ver-XX` folder.
-- Never overwrite a previously user-confirmed version; create the next version instead.
-- Update the shared context, knowledge base, decisions, issues, lessons and log whenever a meaningful discovery is made.
-- Experimental or superseded code must be clearly labelled and must never be presented as the active version.
-
-## Development rules
-
-1. Inspect repository state, current source and relevant docs before changing code.
-2. Preserve confirmed Results Browser row selection, Select All and native Apply behavior.
-3. Target Modeling 18.1; never assume Creo Parametric or later Elements/Direct APIs are compatible.
-4. Make small, isolated changes and distinguish static checks from actual Creo runtime tests.
-5. Record exact user-observed results; never claim runtime success without evidence.
-6. Keep customer models, proprietary drawings, credentials and personal data out of this public repository.
-
-## Verification terminology
-
-- **Specified** – requirement/design recorded; no implementation claim.
-- **Implemented** – source has been changed.
-- **Static-checked** – source structure/syntax inspected; not proof of Creo compatibility.
-- **Loaded in Creo** – file loaded in the target application.
-- **Functionally tested** – behavior exercised in Creo.
-- **User-confirmed** – user reported the behavior working in their target environment.
-- **Regression-tested** – existing confirmed behavior retested after a change.
-
-## Reusable Creo skill package
-
-The complete cross-chat skill package is in [`skills/creo-elements-direct-modeling/`](skills/creo-elements-direct-modeling/SKILL.md). It includes platform/language boundaries, recovered user-provided Annotation references, BOM and drawing macro analysis, Part Filter history, API evidence, debugging procedures and a reusable development workflow.
-
-Also see [API Verification Register](docs/API_VERIFICATION_REGISTER.md) and [User Reference Inventory](docs/USER_REFERENCE_INVENTORY.md). The package is designed to let a new chat continue after the original project conversation is unavailable.
+- Work directly on `main`; do not create a branch for every experiment.
+- Preserve ver-02 and ver-03 source files unchanged unless the user explicitly authorizes a baseline revision.
+- Experimental code is temporary. Once an experiment is rejected, keep its lessons, not another permanent version folder.
+- Never claim runtime success from static inspection or a trace marker.
+- Keep customer models, proprietary drawings, credentials and personal data out of this public repository.
