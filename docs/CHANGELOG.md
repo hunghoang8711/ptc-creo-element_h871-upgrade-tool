@@ -25,3 +25,12 @@
 - Consolidated prior chats and user-provided Annotation macro sources from October 2026.
 - Recorded unverified measurement/export APIs and frame catalogue registration as unresolved, not as implemented facts.
 - Preserved source provenance and avoided mirroring confidential legacy source text into public GitHub.
+
+
+
+## 2026-11-17 – Main branch consolidation
+
+- Consolidated Part Filter experiment history and failure lessons in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`.
+- Preserved ver-02, ver-03 UICT and ver-03 native Browser rebuild source references.
+- Retired ver-04/ver-05 experimental source files from the current main tree; ver-06/ver-07 lessons are documented rather than retained as code versions.
+- Standardized executable LISP/test/diagnostic code location under `src/`.
