@@ -293,7 +293,7 @@ Resolved:
 - Active source remains `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`; command remains `H871_PART_FILTER_VER_03_REBUILD`.
 - User-confirmed current behavior: standalone Results Browser opens and Part rows can be selected. User reports Density columns are not visible.
 - Source inspection confirmed the four table columns and Density display callbacks were already defined. The table root had been assigned after `sd-show-graphical-browser`.
-- Focused change: assign the active table and table root, then activate table mode, then show the Browser. Added explicit error messages if the root cannot be resolved/assigned or table mode cannot be activated.
+- Focused change: assign the active table and table root, then activate table mode, then show the Browser. Added an explicit guard if the root cannot be resolved. The return values of Browser commands are not interpreted because their Modeling 18.1 success contract is not assumed.
 - No changes to Density collector, normalization, filter mapping, BrowserNode row data, row selection, Select All/Clear Selection, or native Apply.
 - Static checks completed; edited source still requires runtime confirmation in Modeling 18.1. The user should test on a disposable Assembly copy and confirm column headers and cell values separately.
 - Experimental VER-04/05/06/07 branches are not active development bases. Do not create another numbered version for the next iteration.
