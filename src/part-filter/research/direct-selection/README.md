@@ -119,3 +119,15 @@ This only validates Part/SEL_ITEM handles. It does **not** prove that Modeling's
 - Existing V1 evidence remains valid: four selected result cells yielded values whose `TYPE-OF` was `ELAN::SEL_ITEM`; V1's `SD-INQ-PART-P` and pathname inquiries returned NIL. This does not establish that the handles are invalid.
 - Next research must avoid executing unverified SEL_ITEM accessors. First inspect the exact 18.1 Integration Kit documentation/signatures or use a strictly passive symbol-availability/type-only diagnostic. If no safe, documented route exists, retain the Apply Bridge rather than risking another native crash.
 - No change to official VER-03, Results UI, or Apply Bridge.
+
+
+## 2026-11-17 — Follow-up after V3 fatal exception: pathname-first strategy
+
+- PTC documentation clarifies that SEL_ITEM is an opaque, temporary handle. It may become invalid after a Modeling operation; accessing an invalid SEL_ITEM can cause a system crash. Direct slot access is unsupported except for the documented type slot. See the PTC Object Inquiries SEL_ITEM section and Inquiring Data > SEL_ITEM section.
+- V1's NIL inquiry results and V3's fatal exception are consistent with stale/invalid stored handles, but this remains a hypothesis, not a confirmed diagnosis.
+- VER-03 already stores a visible `:assembly-path` string column alongside the hidden `:part-object` column. The path is captured while constructing each Results row.
+- New probe `H871_PF_V03_PATH_RESOLVE_PROBE_V4` reads only selected rows' `:assembly-path` strings and resolves fresh handles using documented `SD-PATHNAME-TO-OBJ`. It then calls only documented `SD-INQ-PART-P`, `SD-INQ-OBJ-BASENAME`, and `SD-INQ-OBJ-PATHNAME` on the freshly resolved handles.
+- V4 does not call `SEL_ITEM-P` or `SEL_ITEM-TYPE`, and does not call inquiry functions on the old hidden `:part-object` values. It uses the table name confirmed by the user's V1 report: `H871-PF-V03-PAGE-1-DISPLAY-TABLE`.
+- V4 is still an experimental runtime probe, not yet validated in Modeling 18.1. Do not run V3 again.
+- If V4 confirms fresh handles are valid Parts, the next experiment can build a separate Apply prototype from freshly resolved pathname handles. The existing VER-03 Apply Bridge remains unchanged until that prototype passes single-Part and multi-Part runtime tests.
+- No changes to official VER-03, Results UI, or Apply Bridge.
