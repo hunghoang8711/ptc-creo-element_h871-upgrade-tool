@@ -330,3 +330,14 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Test sequence: write note on disposable Part → save as a new file → close/reopen → read note → test a second Part has an independent note.
 - PTC references inspected are later Integration Kit releases. UDA concepts predate 18.1, but exact API runtime behavior and save/reopen persistence are not yet user-confirmed.
 - No changes to filter predicates, density convention, native Apply, Select All, Clear Selection, or protected VER-03 source.
+
+## 2026-11-17 — UDA notes verified; VER-06.1 UI candidate
+
+- User confirmed the isolated Part Note UDA WRITE and READ test works as intended in Modeling 18.1.
+- Added separate source `src/part-filter/ver-06/H871_PART_FILTER_VER_06_1_WITH_NOTES.lsp`; original VER-06 source is not overwritten.
+- VER-06.1 adds a Part Note table column and an Edit Note toolbar action for exactly one selected result Part.
+- Note values use the confirmed instance-level `H871_PART_FILTER_NOTE` attribute, key `:note`, filing `:sd-file`.
+- The editor loads the existing note for the selected Part; after save, the Browser requests `:refresh-tree` to redraw the Note column.
+- Native Apply, Select All, Clear Selection and Density matching source paths are preserved.
+- Static source check passed: balanced parentheses and expected feature symbols/keywords found.
+- Runtime status: UDA itself is user-confirmed; VER-06.1 Browser button → editor launch, Note-column refresh, selection preservation and Apply regression remain **pending user test**.
