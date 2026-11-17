@@ -136,3 +136,6 @@ The next layout revision must be based on the actual Modeling 18.1 behavior and 
 - This is a concrete correction for the observed outer-window-only resize behavior. The tab control is already bound as a child of this root resizable Grid; the next Modeling 18.1 test must confirm the tab/page client area now follows the shell size.
 - Per-page table/button bindings remain diagnostic until the new trace confirms whether Modeling 18.1 accepts them. Do not assume the Display Table itself stretches until visually verified.
 - Static check after this correction: 928 opening and 928 closing parentheses. Runtime test pending.
+
+- Additional hardening: tab insertion now runs under IGNORE-ERRORS with both returned value and captured condition written to trace. A thrown UICT error and a normal NIL return are therefore distinguishable.
+- Latest static parenthesis scan after this addition: 930 opening and 930 closing parentheses. Runtime behavior remains unverified until loaded in Modeling 18.1.
