@@ -127,3 +127,12 @@ An optional companion file now adds a separate Native Graphical Browser for righ
 PTC UICT documentation states that sd-set-control-binding applies only to an intermediate child control of a resizable grid area. A tab page's -TAB-GA is documented as a regular page grid whose size is automatically determined by the parent tab control. Therefore, applying bindings directly to the page's Display Table and buttons may be rejected; the previous source hid those failures with ignore-errors. The new trace records will confirm this in the user's runtime.
 
 The next layout revision must be based on the actual Modeling 18.1 behavior and a supported UICT parent/binding hierarchy. Do not claim that the Display Table can resize until the user confirms that the table itself expands. Reference: PTC UICT Creation of UI Controls and Specific UI Control Utility Functions (resizable grid areas, tab pages, and sd-set-control-binding).
+
+
+### Follow-up correction — Root Grid binding placement
+
+- Code review found that the root Results Grid binding had been placed inside the failure branch of sd-create-resizable-grid-area. It therefore ran only when Grid creation failed, not after successful creation.
+- Moved the binding outside that failure branch so the successfully created/recovered root Grid is bound to the resizable dialog shell. Added a trace of the binding result and Grid state.
+- This is a concrete correction for the observed outer-window-only resize behavior. The tab control is already bound as a child of this root resizable Grid; the next Modeling 18.1 test must confirm the tab/page client area now follows the shell size.
+- Per-page table/button bindings remain diagnostic until the new trace confirms whether Modeling 18.1 accepts them. Do not assume the Display Table itself stretches until visually verified.
+- Static check after this correction: 928 opening and 928 closing parentheses. Runtime test pending.
