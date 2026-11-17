@@ -41,3 +41,10 @@
 - User confirmed all four result columns are visible after widening the standalone Browser; no source correction was necessary.
 - User confirmed individual Part selection + native Apply, Select All and Clear Selection in Modeling 18.1.
 - Added an isolated UDA-based per-Part note feasibility probe. Production integration is pending runtime and save/reopen tests.
+
+## 2026-11-17 — Part Note UDA verified; VER-06.1 candidate added
+
+- User confirmed Part Note UDA WRITE/READ works in Modeling 18.1.
+- Added a separate VER-06.1 source candidate with a Note column and Edit Note toolbar action.
+- Preserved original VER-06 and native Apply path.
+- Static checks passed; Browser UI integration is not yet runtime-verified.
