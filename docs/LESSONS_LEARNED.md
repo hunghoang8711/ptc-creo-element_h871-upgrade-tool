@@ -108,3 +108,16 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 - **Requirement:** The accepted final design is one Results window with internal tabs, one tab per unique process/material pair. Re-filtering the same pair refreshes that tab; another pair adds a tab.
 - **Failure mode:** Treating a successful multi-Browser Apply test as completion of VER-05 overlooked the explicit single-window requirement.
 - **Prevention:** Verify both functional behavior and the agreed top-level UI architecture before declaring a version complete. A technically working alternative architecture is still a regression when it violates an explicit user constraint.
+
+
+## LL-020 – Treat model-data warnings after UI lifecycle changes as a stop condition
+
+- Observation: After using the VER-05 Manager Open action, the user reported that the Filter page closes while result Browsers remain independent. Closing the command and starting it again then produces a “Model data may have been damaged” warning before a Graphical Browser appears.
+- Evidence limit: The exact trigger and responsible API/lifecycle operation are unknown. The current source's sd-show-graphical-browser Open callback and sd-return-from-ok-action Search-dialog exit are investigation points, not confirmed causes.
+- Prevention: Stop repeated testing on the original model as soon as this warning appears. Reproduce only on a disposable copy, capture the trace and exact action sequence, and inspect Browser/Tree creation, destruction, callback lifetime and dialog close ordering before modifying code. Never claim the model itself was damaged by a specific call without evidence.
+
+## LL-021 – Resizability is an explicit Results-window acceptance criterion
+
+- Requirement: The Graphical Browser/Results window must allow the user to drag-resize both width and height; the result table and controls must remain usable after resizing.
+- Evidence limit: Setting :minHeight, :maxWidth and :maxHeight in sd-create-graphical-browser does not by itself prove that interactive resizing is enabled. No verified Modeling 18.1 resize flag/signature has yet been recorded.
+- Prevention: Verify the exact 18.1 API/options before adding a guessed keyword. Test horizontal and vertical resizing and content adaptation in the target runtime.
