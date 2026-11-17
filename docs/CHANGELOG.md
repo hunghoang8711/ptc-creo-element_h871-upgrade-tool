@@ -34,3 +34,10 @@
 - Preserved ver-02, ver-03 UICT and ver-03 native Browser rebuild source references.
 - Retired ver-04/ver-05 experimental source files from the current main tree; ver-06/ver-07 lessons are documented rather than retained as code versions.
 - Standardized executable LISP/test/diagnostic code location under `src/`.
+
+
+## 2026-11-17 — VER-06 Results Browser and Stage 2
+
+- User confirmed all four result columns are visible after widening the standalone Browser; no source correction was necessary.
+- User confirmed individual Part selection + native Apply, Select All and Clear Selection in Modeling 18.1.
+- Added an isolated UDA-based per-Part note feasibility probe. Production integration is pending runtime and save/reopen tests.
