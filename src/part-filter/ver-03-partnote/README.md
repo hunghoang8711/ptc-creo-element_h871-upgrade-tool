@@ -110,3 +110,20 @@ An optional companion file now adds a separate Native Graphical Browser for righ
 - The first run after loading this revision intentionally destroys the old fixed-size Results shell and clears its in-memory page registry; run the filter again to rebuild the result tabs. This avoids retaining an old non-resizable shell under the same UICT handle.
 - Static source check passed: balanced parentheses, no unterminated strings. **Not yet runtime-tested in Creo Elements/Direct Modeling 18.1.** In particular, verify that the tab page's Display Table binding is accepted and actually stretches with the window; UICT binding behavior can vary by control parent/version.
 - The standalone Edit Note button and original Apply Bridge logic remain in the same source; no Right-click Add-on is required.
+
+
+## 2026-11-17 — Persistent UICT Failure and Resize Diagnostics
+
+- Changed the trace file from overwrite-per-filter to append-per-filter. Each run now receives a sequential run number, so a successful retry no longer erases the earlier failing run.
+- Added explicit trace records around sd-insert-tab-control-page, including its return value and the existence checks for the tab handle and its -TAB-GA page grid.
+- Added trace records for each resize binding. The helper captures both the return value and any condition raised inside ignore-errors, rather than silently discarding binding failures.
+- Added post-creation state checks for the page grid, Display Table, status line, and action buttons.
+- This is diagnostic instrumentation only. It does not change filter predicates, logical-table contents, Apply Bridge behavior, Note storage, or the tab creation strategy.
+- Static check: source parentheses balanced (921 opening and 921 closing parentheses); no runtime test has yet been performed after this instrumentation.
+- Next test: load this source, run the pair that fails on the first filter, then run a second pair if needed. Send the complete H871_PART_FILTER_VER_03_TRACE.txt; it now retains both runs.
+
+### Resize architecture finding
+
+PTC UICT documentation states that sd-set-control-binding applies only to an intermediate child control of a resizable grid area. A tab page's -TAB-GA is documented as a regular page grid whose size is automatically determined by the parent tab control. Therefore, applying bindings directly to the page's Display Table and buttons may be rejected; the previous source hid those failures with ignore-errors. The new trace records will confirm this in the user's runtime.
+
+The next layout revision must be based on the actual Modeling 18.1 behavior and a supported UICT parent/binding hierarchy. Do not claim that the Display Table can resize until the user confirms that the table itself expands. Reference: PTC UICT Creation of UI Controls and Specific UI Control Utility Functions (resizable grid areas, tab pages, and sd-set-control-binding).
