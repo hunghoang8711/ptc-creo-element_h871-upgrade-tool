@@ -1,47 +1,53 @@
-# ver-03 Rebuild — Stage 0 baseline
+# Part Filter — Active VER-03 Rebuild Line
 
-**Branch:** `rebuild/ver-03-from-ver-02`  
-**Target:** PTC Creo Elements/Direct Modeling 18.1  
-**Status:** Source baseline created; runtime test required before any feature work.
+**Active development branch:** `rebuild/ver-03-stable-restart`  
+**Stable references:** VER-02 and the user-confirmed VER-03 rebuild behavior  
+**Target:** PTC Creo Elements/Direct Modeling 18.1
 
-## Purpose
+## Single active source
 
-This rebuild deliberately starts from the user-confirmed ver-02 implementation rather than the unstable UICT-based ver-03 implementation.
+Use only this source for the next test:
 
-## Baseline source
+`src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`
 
-- `H871_PART_FILTER_VER_03_REBUILD.lsp`
-- Derived from `src/part-filter/ver-02/H871_PART_FILTER_VER_02.lsp`
-- Original ver-02 source is not modified.
-- Internal helper/global symbols use the isolated `h871-pf-rb-` prefix to avoid collisions if ver-02 and the rebuild are loaded in the same Creo session.
-- Dialog command: `H871_PART_FILTER_VER_03_REBUILD`
+Load it and run:
 
-## What this stage contains
+`H871_PART_FILTER_VER_03_REBUILD`
 
-This is a mechanical baseline clone of ver-02 behavior:
-- Same Filter dialog structure and numeric mappings.
-- Same recursive Density Instance + Density Base search semantics.
-- Same native Graphical Browser Results UI.
-- Same native row selection, Select All, Clear Selection, and Apply behavior.
-- No UICT Display Table, no logical table, no internal tabs, and no hidden Apply bridge.
-- No new Search callback, collection, or selection algorithm.
+Do not load the experimental VER-04/05/06/07 files or the UICT multi-page prototype for this test. No new version directory or command name is being introduced.
 
-## Required Stage 0 runtime test
+## Current implementation
 
-Use a disposable model copy, never the original customer model.
+This source remains based on the VER-02 Density collector and native Graphical Browser workflow:
+- Density Instance + Density Base exact numeric matching.
+- Existing /1000 API-to-Properties normalization.
+- One standalone Results Graphical Browser.
+- Native Browser row selection and native Apply handoff.
+- Select All / Clear Selection.
+- Four table columns: Part Name, Density Instance, Density Base, Assembly Path.
 
-1. Load this file.
+## Current focused change
+
+The custom table definition and Density display callbacks were already present. The previous initialization sequence showed the Browser before assigning its table root. The active source now assigns the root before enabling table mode and showing the Browser.
+
+This is a focused initialization-order test. It does not change the Density collector, row client data, display callbacks, Browser selection, or Apply implementation.
+
+## Test in Creo 18.1
+
+Use a disposable Assembly copy.
+
+1. Load this exact file.
 2. Run `H871_PART_FILTER_VER_03_REBUILD`.
-3. Search a known pair such as CNC + SUS304 (numeric Density Instance=1, Density Base=304).
-4. Confirm matching rows appear in the Graphical Browser.
-5. Select one row and Apply; confirm the corresponding Part becomes selected in Modeling.
-6. Test Select All, Clear Selection, and multiple-row selection.
-7. Confirm the Filter dialog can be closed normally.
+3. Search a known pair, e.g. CNC-SUS304 (Density Instance=1, Density Base=304).
+4. Confirm that the Results Browser is one standalone window.
+5. Confirm the four columns are visible and Density Instance/Base values are populated.
+6. Select a row and verify the expected Part is selected in the viewport; test Select All and Clear Selection.
+7. Test Apply only if the Apply control is available in this current source; report whether the viewport selection handoff succeeds.
 
-**Do not start Stage 1 until the user confirms Stage 0 works in Modeling 18.1.**
+If the Density headers are still absent, capture the whole Results window. If the headers exist but values are blank or "-", also send `H871_PART_FILTER_RESULT.txt`.
 
-## Safety and versioning
+## Validation status
 
-- ver-01 and ver-02 remain immutable regression baselines.
-- Existing `src/part-filter/ver-03/` remains preserved for forensic reference; it is not the active rebuild base.
-- Every later feature must be added as one small isolated change and runtime-tested before proceeding.
+- Static source checks: completed after the focused edit.
+- Creo 18.1 runtime validation of this edited source: pending user test.
+- VER-02 and the pre-edit VER-03 rebuild remain the regression references.
