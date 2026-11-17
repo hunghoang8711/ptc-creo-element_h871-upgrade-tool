@@ -309,3 +309,12 @@ Resolved:
 - No changes to Density collection/matching, numeric normalization, BrowserNode row data, table callbacks, selection, Select All/Clear Selection, or native Apply.
 - Updated the active README and stable-restart notes. No new branch, version folder, or command was created.
 - Static/runtime status: source edit and documentation commits completed; Creo 18.1 runtime retest pending. Test only on a disposable Assembly copy.
+
+## 2026-11-17 – VER-03 table headers still missing: activate table after root assignment
+
+- User tested the post-SHOW root correction: Results now appears, but only the Part Name column is visible; Density Instance, Density Base and Assembly Path are still absent.
+- Confirmed the active source still defines all four custom columns and their callbacks. The table definition itself was not changed in this iteration.
+- Reviewed PTC Graphical Browser documentation: a table is populated only after a table root is selected; `:change-table-root` marks the root whose children appear in the table. Table Mode can be queried independently via `:is-table-mode`.
+- Focused next experiment: move `:set-table-mode` and `sd-browser-set-active-table` to after SHOW and after `:change-table-root`, so the table is activated only once the tree/root exists. This tests whether the previous pre-SHOW mode state was lost during Browser initialization.
+- Updated only the active VER-03 rebuild source and its README/stable-restart notes. Density collector, normalization, row client data, display callbacks, selection, Select All/Clear Selection and native Apply are unchanged.
+- Static/runtime status: source edit and documentation updates committed; Creo 18.1 runtime retest pending. Do not claim the custom columns are fixed until the user confirms.
