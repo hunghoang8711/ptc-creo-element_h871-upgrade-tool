@@ -1,31 +1,20 @@
-# Part Filter – LISP Source
+# Part Filter Source Index
 
-## Upload location
+## Preserved source references
 
-Upload the LISP files for the Part property filter currently under development into this folder:
+- `ver-01/H871_PART_FILTER_VER_01.lsp`
+- `ver-02/H871_PART_FILTER_VER_02.lsp` – preserve unchanged.
+- `ver-03/H871_PART_FILTER_VER_03.lsp` – preserve unchanged; UICT/internal-tab reference.
+- `ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp` – native Graphical Browser rebuild reference, separate from UICT ver-03.
 
-`src/part-filter/`
+The ver-03 rebuild currently opens Results but has a user-reported issue: only Part Name is visible although four column definitions exist. It is not accepted as complete.
 
-Keep the original filenames. Please include, where available:
-- The latest working or in-progress Part filter LISP file.
-- Related diagnostic/debug LISP files.
-- Earlier versions if they contain behavior or code that may be useful for comparison.
+## Shared diagnostic code
 
-## Before uploading
+The Density API tests and Part Filter diagnostics are kept directly in this folder. They are source/test utilities, not released versions.
 
-- Do not rename files just to make them look cleaner; preserving their names helps trace history.
-- If several files depend on each other, upload all of them.
-- Do not include customer-confidential CAD models, credentials, or private data.
-- If possible, include a short note identifying which file is the latest version and which one was last tested in Creo Elements/Direct Modeling 18.1.
+## Retired experiments
 
-## Review workflow
+ver-04/ver-05/ver-06/ver-07 implementation files are not retained in the current tree. Their architecture attempts, user-reported failures, useful findings and prevention rules are documented in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`.
 
-After the files are uploaded, the development workflow is:
-1. Inspect every file and map dependencies and command entry points.
-2. Identify the latest baseline without overwriting historical versions.
-3. Review syntax and the Part property retrieval logic.
-4. Compare the implementation with the exact Instance + Base matching requirement.
-5. Record findings and proposed changes before modifying the source.
-6. Distinguish static checks from tests actually performed in Creo 18.1.
-
-This folder currently contains no production LISP source.
+Before editing, read the project handover and experiment history. Preserve the exact Density mapping, /1000 normalization and native Apply baseline unless a specific test proves a change is required.
