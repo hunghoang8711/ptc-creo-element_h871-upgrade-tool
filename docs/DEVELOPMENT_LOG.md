@@ -285,3 +285,15 @@ Resolved:
 - Reviewed existing main-branch knowledge: docs/LESSONS_LEARNED.md LL-007 and docs/ENGINEERING_KNOWLEDGE_BASE.md Section 6 already state the correct internal-tab requirement and prohibit docking/multiple Graphical Browsers. The failure was not preserving/following this recorded requirement before the last change.
 - Next step: inspect the original UICT ver-03 Apply bridge and API return/object types; isolate the NODE... versus BROWSERNODE mismatch. Do not alter the standalone UICT shell, page tabs, labels, per-page tables, or filter logic during this investigation.
 - Runtime state remains as last reported by user: earlier UICT ver-03 showed standalone window/internal named pages but Apply failed; no claim that the Apply issue is fixed.
+
+
+## 2026-11-17 – Active VER-03 rebuild: Density table initialization order
+
+- Reorganized the active work around the existing `rebuild/ver-03-stable-restart` branch. No new branch, numbered version, source directory, or command was created.
+- Active source remains `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`; command remains `H871_PART_FILTER_VER_03_REBUILD`.
+- User-confirmed current behavior: standalone Results Browser opens and Part rows can be selected. User reports Density columns are not visible.
+- Source inspection confirmed the four table columns and Density display callbacks were already defined. The table root had been assigned after `sd-show-graphical-browser`.
+- Focused change: assign the active table and table root, then activate table mode, then show the Browser. Added explicit error messages if the root cannot be resolved/assigned or table mode cannot be activated.
+- No changes to Density collector, normalization, filter mapping, BrowserNode row data, row selection, Select All/Clear Selection, or native Apply.
+- Static checks completed; edited source still requires runtime confirmation in Modeling 18.1. The user should test on a disposable Assembly copy and confirm column headers and cell values separately.
+- Experimental VER-04/05/06/07 branches are not active development bases. Do not create another numbered version for the next iteration.
