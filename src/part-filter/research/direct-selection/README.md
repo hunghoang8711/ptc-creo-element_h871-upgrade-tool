@@ -86,3 +86,12 @@ This only validates Part/SEL_ITEM handles. It does **not** prove that Modeling's
 - V2 contains no reference to the VER-03 current-page variable and does not reuse the V1 dialog/function symbols. It scans only the registered page list and reads selected rows.
 - Static validation is required before runtime; the V2 test is not yet confirmed in Modeling 18.1.
 - User test: load the updated probe file, run the new command name exactly (do not run V1), then send the V2 report or exact error.
+
+
+## 2026-11-17 — V2 runtime result: VER-03 registry symbol unbound
+
+- User ran `H871_PF_V03_SELITEM_PROBE_V2`; command completed without a LISP error.
+- Report: `Page registry bound: NIL`, `Registered page count: 0`.
+- The official VER-03 source declares `(defvar *h871-pf-v03-pages* nil)` in package `:oli`. If that exact source has been loaded in the same Modeling session/package, the symbol should be bound even when its value is NIL.
+- Therefore this result does not establish that no rows are selected and does not yet test the runtime type of the stored Part handles. It indicates the probe's `:oli` environment cannot see the registry symbol expected from the official VER-03 source.
+- Next diagnostic is to establish whether the official VER-03 file was loaded in this same Modeling session before V2. Do not modify the official VER-03 file or Apply Bridge based on this result.
