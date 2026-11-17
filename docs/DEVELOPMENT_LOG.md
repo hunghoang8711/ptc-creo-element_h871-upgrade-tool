@@ -354,3 +354,19 @@ Next development direction:
 6. Keep this multi-Browser branch isolated as a reference/experiment; do not overwrite its working native Browser baseline.
 
 No LISP source was changed in this correction.
+
+
+## 2026-11-17 – VER-05 Open/lifecycle regression and resizable Results requirement
+
+User runtime-tested the latest VER-05 branch and reported:
+
+- The Results/Manager page shows entries for filtered process/material pairs.
+- Pressing Open closes the Filter page, but does not produce a unified Results interface. The Part-selection Graphical Browser windows remain separate and independent.
+- Closing the command and starting it again triggers a Modeling warning, “Model data may have been damaged”, before a Graphical Browser appears.
+- The Graphical Browser must be resizable by dragging its width and height.
+
+Source review confirms that the Manager Open callback calls sd-show-graphical-browser on the stored Browser name, while the Search dialog's :ok-action runs the filter and then calls sd-return-from-ok-action. Browser creation currently sets :minHeight 280 :maxWidth 900 :maxHeight 760; this does not establish that interactive resizing is enabled. These source facts are investigation leads only, not proven causes of the observed close/warning behavior.
+
+SAFETY STATUS: model-data warning is a high-priority unresolved lifecycle defect. Suspend repeated tests on the original Assembly. No LISP source was changed in response to this report; no root cause or fix is claimed.
+
+Next work must replace the per-pair top-level Browser architecture with one persistent Results window and internal tabs, verify the exact Modeling 18.1 lifecycle/resize APIs, preserve visible native selection and Apply, and test repeated close/reopen cycles only on a disposable model copy. The Results window must be interactively resizable in both dimensions and its contents must adapt accordingly.
