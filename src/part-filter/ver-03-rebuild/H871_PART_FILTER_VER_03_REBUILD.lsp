@@ -270,17 +270,13 @@
     (unless root
       (sd-display-error "H871: Results tree root is unavailable.")
       (return-from h871-pf-rb-open-results-browser nil))
-    (unless
-      (sd-browser-exec-cmd
-        *h871-pf-rb-browser-name* :change-table-root root t)
-      (sd-display-error "H871: Could not assign the Results table root.")
-      (return-from h871-pf-rb-open-results-browser nil)))
-
-  (unless
+    ;; Keep the native Browser commands' return values uninterpreted:
+    ;; Modeling 18.1's success return contract is not assumed here.
     (sd-browser-exec-cmd
-      *h871-pf-rb-browser-name* :set-table-mode)
-    (sd-display-error "H871: Could not activate the Results table mode.")
-    (return-from h871-pf-rb-open-results-browser nil))
+      *h871-pf-rb-browser-name* :change-table-root root t))
+
+  (sd-browser-exec-cmd
+    *h871-pf-rb-browser-name* :set-table-mode)
 
   (sd-show-graphical-browser *h871-pf-rb-browser-name*)
   t)
