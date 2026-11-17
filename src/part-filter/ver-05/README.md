@@ -167,3 +167,33 @@ Acceptance criteria for the replacement Results UI:
 4. The visible Results window must support interactive resizing in both dimensions, with its contents adapting to the new size.
 5. Native Part selection and Apply to the 3D viewport must remain functional.
 6. Test only on a disposable Assembly copy until lifecycle safety is demonstrated.
+
+
+## Modeling 18.1 API boundary – strict single Results window (2026-11-17)
+
+The user explicitly rejects any secondary Graphical Browser, including a hidden or temporary Apply bridge. This constraint is mandatory.
+
+The official PTC Integration Kit release notes identify the following as **new in Modeling 20.6** (not 18.1):
+
+- `sd-create-resizable-dialog-shell`
+- `sd-create-resizable-grid-area`
+- `sd-set-control-binding`
+- `sd-set-graphical-browser-parent`
+
+The Browser-parent API is specifically documented as embedding a Graphical Browser in a resizable grid area below a resizable dialog shell. That is the API pattern needed to put the native Browser Apply workflow inside a single custom Results shell. It is not available as a documented Modeling 18.1 feature.
+
+PTC also documents UICT tabs and Display Tables, but Display Table selection/apply semantics do not document a direct operation that turns selected table rows into the Modeling viewport's native object selection. The proven native Apply path in this project is the Graphical Browser's `:select-and-execute` workflow. VER-03's Display Table implementation therefore used a separate Browser bridge, which the user now explicitly prohibits.
+
+**Conclusion:** The exact combination “custom UICT Results shell + literal internal tabs + embedded native Graphical Browser Apply + interactive resize” is not supported by the documented Modeling 18.1 API set found in this audit. Do not claim it is possible on 18.1, and do not call later-release APIs speculatively.
+
+### 18.1-compatible alternative for evaluation
+
+Use exactly **one native Graphical Browser as the Results window** and one Browser Tree for all process/material pairs. Represent each pair as a selectable table-root/navigation node; its child Parts populate the BOM-like table. Apply remains the Browser's own native Apply action, so no second Browser is needed. This replaces literal tab widgets with in-window pair navigation. Increase the Browser's documented `maxWidth` and `maxHeight` limits to allow a larger working area, but interactive drag-resize must still be verified in the actual 18.1 runtime; the Browser reference documents size limits, not a dedicated resize flag.
+
+This alternative is a proposal, not yet implemented or runtime-tested. Preserve the original VER-05 and VER-02 baselines. Do not proceed with a code test that silently substitutes pair navigation for literal tabs; obtain user acceptance of that UI trade-off first.
+
+Official PTC references:
+- Modeling 20.6 What's New: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/whatsnew.html
+- Graphical Browser API (parenting, table roots, native Apply): https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/reference/gbrowser.html
+- Modeling 20.6 UICT creation APIs: https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/uict_create.html
+- Modeling 20.7 release notes, 18.1 feature history: https://support.ptc.com/help/creo_elements_direct/r20.7.0.0/advanced_documentation/integration_kit/whatsnew.html
