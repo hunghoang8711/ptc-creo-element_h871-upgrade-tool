@@ -118,3 +118,12 @@ Evidence boundary: PTC 20.6 documentation supports the command sequence; Modelin
 ### TD-013 clarification – page caption order
 
 All Part Filter multi-page captions use PROCESS-MATERIAL order, e.g. CNC-SUS304 and CG-SS400. This is presentation only; search continues to use numeric Density Instance + Density Base. ver-05 has been corrected to match ver-03.
+
+
+
+## TD – Main branch and experimental source retention policy (2026-11-17)
+
+- `main` is the only canonical working branch for current source and engineering knowledge.
+- Preserve ver-02 and ver-03 source references unchanged; keep the native Browser ver-03 rebuild in a clearly separate folder from the UICT ver-03 reference.
+- Executable LISP tests and diagnostics belong under `src/`; written test procedures belong under `tests/`.
+- Rejected ver-04/ver-05/ver-06/ver-07 code is not retained as current source. Preserve the lessons in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`; Git history remains available.
