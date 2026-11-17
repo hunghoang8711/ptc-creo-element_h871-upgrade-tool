@@ -34,6 +34,8 @@
 (defvar *h871-pf-v03-assembly* nil)
 (defvar *h871-pf-v03-diagnostic-samples* nil)
 (defvar *h871-pf-v03-collect-visited-count* 0)
+(defvar *h871-pf-v03-trace-run-counter* 0)
+(defvar *h871-pf-v03-trace-run-id* 0)
 
 (defvar *h871-pf-v03-shell* "h871-pf-v03-results")
 (defvar *h871-pf-v03-shell-layout* nil)
@@ -60,10 +62,14 @@
     (user-homedir-pathname)))
 
 (defun h871-pf-v03-trace-reset ()
+  ;; Append a new run header instead of replacing the previous run.
+  ;; This preserves the first failing run when a later retry succeeds.
+  (incf *h871-pf-v03-trace-run-counter*)
+  (setf *h871-pf-v03-trace-run-id* *h871-pf-v03-trace-run-counter*)
   (with-open-file
     (stream (h871-pf-v03-trace-file)
-      :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (format stream "H871 VER-03 TRACE START~%")
+      :direction :output :if-exists :append :if-does-not-exist :create)
+    (format stream "~%H871 VER-03 TRACE RUN ~A START~%" *h871-pf-v03-trace-run-id*)
     (force-output stream))
   t)
 
@@ -71,9 +77,19 @@
   (with-open-file
     (stream (h871-pf-v03-trace-file)
       :direction :output :if-exists :append :if-does-not-exist :create)
-    (format stream "~A | ~S~%" stage detail)
+    (format stream "RUN ~A | ~A | ~S~%"
+      *h871-pf-v03-trace-run-id* stage detail)
     (force-output stream))
   t)
+
+(defun h871-pf-v03-trace-binding (control-name binding)
+  ;; Capture both normal return value and any condition swallowed by
+  ;; IGNORE-ERRORS; a failed binding must never disappear from the trace.
+  (multiple-value-bind (result condition)
+      (ignore-errors (sd-set-control-binding control-name binding))
+    (h871-pf-v03-trace "RESIZE/BINDING"
+      (list control-name binding result condition))
+    result))
 
 ;; Page entry:
 ;; (:instance n :base n :label string :page string :table string
@@ -570,7 +586,7 @@
         *h871-pf-v03-grid* (concatenate 'string *h871-pf-v03-shell* "-RG")
         :x 0 :y 0 :width 92 :height 56
         :cellSize 10,10 :margin 4 :spacing 2)
-      (sd-set-control-binding *h871-pf-v03-grid* '(:resize-both))
+      (h871-pf-v03-trace-binding *h871-pf-v03-grid* '(:resize-both))
       (h871-pf-v03-trace "CREATE-SHELL/GRID-CREATE-FAILED" *h871-pf-v03-grid*)
       (sd-display-error "H871 ver-03: Could not create the Results layout.")
       (return-from h871-pf-v03-create-shell nil)))
@@ -587,8 +603,10 @@
       (sd-display-error "H871 ver-03: Could not create the internal tab control.")
       (return-from h871-pf-v03-create-shell nil)))
   ;; Keep the internal tabs fitted to the resizable content grid.
-  (sd-set-control-binding *h871-pf-v03-tabs* '(:resize-both))
-  (h871-pf-v03-trace "CREATE-SHELL/OK" nil)
+  (h871-pf-v03-trace-binding *h871-pf-v03-tabs* '(:resize-both))
+  (h871-pf-v03-trace "CREATE-SHELL/OK"
+    (list (sd-control-p *h871-pf-v03-grid*)
+          (sd-control-p *h871-pf-v03-tabs*)))
   t)
 
 (defun h871-pf-v03-create-logical-table (logical-table)
@@ -614,13 +632,27 @@
          (status-name (h871-pf-v03-status-name page-name))
          (tab-grid (concatenate 'string page-name "-TAB-GA")))
 
-    (h871-pf-v03-trace "CREATE-PAGE/INSERT-TAB/BEGIN" (list page-name *h871-pf-v03-tabs*))
-    (unless
-      (sd-insert-tab-control-page
-        page-name *h871-pf-v03-tabs*
-        :tabTitle label :cellSize 10,10 :margin 3 :spacing 1)
-      (sd-display-error "H871 ver-03: Could not add an internal results tab.")
-      (return-from h871-pf-v03-create-page nil))
+    (h871-pf-v03-trace "CREATE-PAGE/INSERT-TAB/BEGIN"
+      (list page-name *h871-pf-v03-tabs* label
+            (sd-control-p *h871-pf-v03-tabs*)
+            (sd-control-p page-name)
+            (sd-control-p tab-grid)))
+    (let ((insert-result
+            (sd-insert-tab-control-page
+              page-name *h871-pf-v03-tabs*
+              :tabTitle label :cellSize 10,10 :margin 3 :spacing 1)))
+      (h871-pf-v03-trace "CREATE-PAGE/INSERT-TAB/RETURN"
+        (list insert-result
+              (sd-control-p page-name)
+              (sd-control-p tab-grid)))
+      (unless insert-result
+        (h871-pf-v03-trace "CREATE-PAGE/INSERT-TAB/FAILED-STATE"
+          (list page-name tab-grid
+                (sd-control-p *h871-pf-v03-tabs*)
+                (sd-control-p page-name)
+                (sd-control-p tab-grid)))
+        (sd-display-error "H871 ver-03: Could not add an internal results tab.")
+        (return-from h871-pf-v03-create-page nil)))
 
     (h871-pf-v03-trace "CREATE-PAGE/LOGICAL-TABLE/BEGIN" logical-table)
     (unless (h871-pf-v03-create-logical-table logical-table)
@@ -628,10 +660,13 @@
       (return-from h871-pf-v03-create-page nil))
 
     (h871-pf-v03-trace "CREATE-PAGE/TEXT-CONTROL/BEGIN" (list status-name tab-grid))
-    (sd-create-text-control
-      status-name tab-grid
-      :x 0 :y 0 :width 86 :height 2
-      :editable nil :showModified nil)
+    (let ((status-result
+            (sd-create-text-control
+              status-name tab-grid
+              :x 0 :y 0 :width 86 :height 2
+              :editable nil :showModified nil)))
+      (h871-pf-v03-trace "CREATE-PAGE/TEXT-CONTROL/RETURN"
+        (list status-result (sd-control-p status-name))))
 
     (h871-pf-v03-trace "CREATE-PAGE/DISPLAY-TABLE/BEGIN" (list table-name tab-grid logical-table))
     (unless
@@ -680,12 +715,24 @@
 
     ;; Resize the results table with the page when the UICT page supports
     ;; control bindings; keep action buttons anchored to the bottom-left.
-    (ignore-errors (sd-set-control-binding table-name '(:resize-both)))
-    (ignore-errors (sd-set-control-binding status-name '(:resize-horizontal)))
-    (ignore-errors (sd-set-control-binding (concatenate 'string page-name "-SELECT-ALL-PB") '(:left :bottom)))
-    (ignore-errors (sd-set-control-binding (concatenate 'string page-name "-CLEAR-PB") '(:left :bottom)))
-    (ignore-errors (sd-set-control-binding (concatenate 'string page-name "-APPLY-PB") '(:left :bottom)))
-    (ignore-errors (sd-set-control-binding (concatenate 'string page-name "-EDIT-NOTE-PB") '(:left :bottom)))
+    (h871-pf-v03-trace-binding table-name '(:resize-both))
+    (h871-pf-v03-trace-binding status-name '(:resize-horizontal))
+    (h871-pf-v03-trace-binding
+      (concatenate 'string page-name "-SELECT-ALL-PB") '(:left :bottom))
+    (h871-pf-v03-trace-binding
+      (concatenate 'string page-name "-CLEAR-PB") '(:left :bottom))
+    (h871-pf-v03-trace-binding
+      (concatenate 'string page-name "-APPLY-PB") '(:left :bottom))
+    (h871-pf-v03-trace-binding
+      (concatenate 'string page-name "-EDIT-NOTE-PB") '(:left :bottom))
+    (h871-pf-v03-trace "CREATE-PAGE/CONTROLS-STATE"
+      (list (sd-control-p tab-grid)
+            (sd-display-table-p table-name)
+            (sd-control-p status-name)
+            (sd-control-p (concatenate 'string page-name "-SELECT-ALL-PB"))
+            (sd-control-p (concatenate 'string page-name "-CLEAR-PB"))
+            (sd-control-p (concatenate 'string page-name "-APPLY-PB"))
+            (sd-control-p (concatenate 'string page-name "-EDIT-NOTE-PB"))))
 
     (push
       (list :instance instance :base base :label label
