@@ -259,16 +259,30 @@
     (sd-display-error "H871: Could not create the BOM result table.")
     (return-from h871-pf-rb-open-results-browser nil))
 
+  ;; Initialize the table root before switching the Browser into table mode
+  ;; and before showing the window. The table displays the children of this
+  ;; root; doing this after SHOW can leave the initial Results view in tree
+  ;; mode without the custom Density columns.
   (sd-browser-set-active-table
     *h871-pf-rb-browser-name* :table-name "h871-pf-rb-bom")
-  (sd-browser-exec-cmd *h871-pf-rb-browser-name* :set-table-mode)
-  (sd-show-graphical-browser *h871-pf-rb-browser-name*)
 
-  ;; Root node is the table root; the table displays all matching Parts.
   (let ((root (sd-get-browsernode-struct *h871-pf-rb-tree-name* :root)))
-    (when root
+    (unless root
+      (sd-display-error "H871: Results tree root is unavailable.")
+      (return-from h871-pf-rb-open-results-browser nil))
+    (unless
       (sd-browser-exec-cmd
-        *h871-pf-rb-browser-name* :change-table-root root t)))
+        *h871-pf-rb-browser-name* :change-table-root root t)
+      (sd-display-error "H871: Could not assign the Results table root.")
+      (return-from h871-pf-rb-open-results-browser nil)))
+
+  (unless
+    (sd-browser-exec-cmd
+      *h871-pf-rb-browser-name* :set-table-mode)
+    (sd-display-error "H871: Could not activate the Results table mode.")
+    (return-from h871-pf-rb-open-results-browser nil))
+
+  (sd-show-graphical-browser *h871-pf-rb-browser-name*)
   t)
 
 ;; ------------------------------------------------------------
