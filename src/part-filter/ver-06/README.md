@@ -145,3 +145,40 @@ Source:
 10. Retest Select All and Clear Selection.
 
 Stop and report the exact error if the dialog does not open, the Note column does not refresh, or selection changes unexpectedly. Do not modify the native Apply pipeline as a workaround.
+
+
+## 2026-11-17 — VER-06.2 Edit Note launch correction
+
+### User-reported issue
+In VER-06.1, right-clicking a selected Part and choosing **Edit Note** produced no visible response; the note editor did not open.
+
+### Root cause identified by static API review
+The Browser callback invoked the interactive dialog using:
+
+```lisp
+(sd-call-cmds (h871_pf_v06_note_editor))
+```
+
+PTC's Integration Kit documentation states that action routines called through `sd-call-cmds` cannot become interactive. A note editor requiring user text input must not be launched as a nested `sd-call-cmds` action. This is consistent with the user's observed no-dialog behavior. The cited documentation is from a later Modeling release and must still be runtime-verified on 18.1.
+
+### VER-06.2 correction
+New isolated candidate:
+`src/part-filter/ver-06/H871_PART_FILTER_VER_06_2_WITH_NOTES.lsp`
+
+The Edit Note callback now:
+1. Resolves exactly one selected Part using the existing Browser selection query.
+2. Stores that Part in `*h871-pf-v06-note-edit-part*`.
+3. Queues the interactive dialog command with `sd-put-buffer` so it can start after the Browser callback returns.
+
+The UDA read/write implementation, Note display column, native Apply, Select All, Clear Selection and density filter are unchanged. VER-06.1 and the original VER-06 remain preserved.
+
+### Runtime test required in Modeling 18.1
+- Load VER-06.2 (not VER-06.1).
+- Run the filter and select exactly one row that already has a note.
+- Right-click > Edit Note.
+- Confirm the editor opens and is prefilled with the existing note.
+- Change the text and save; confirm the Part Note cell updates.
+- Reopen Edit Note and confirm the changed text is present.
+- Retest native Apply, Select All and Clear Selection.
+
+**Status:** source correction committed; not yet runtime-tested by the user. If the editor opens but the Note column does not refresh, investigate refresh behavior separately; do not alter selection/Apply.
