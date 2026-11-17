@@ -168,3 +168,27 @@ PTC Graphical Browser documentation explicitly defines modeMenu as a row of togg
 - Source correction: resolve the root and each created Part node with `sd-get-browsernode-struct` before using them in Browser selection commands.
 - Static source check: balanced Lisp parentheses after commit `068ee4123b5aadf6cde5bce54321f1ee031ea064`.
 - Runtime status: not yet verified in Modeling 18.1. In particular, this does not establish that a hidden Graphical Browser can hand off selection to Modeling. Acceptance requires observing the intended Part(s) selected in the viewport.
+
+
+## J. User-Defined Attributes for per-Part notes — feasibility candidate (2026-11-17)
+
+PTC's later Integration Kit references document these functions:
+- `sd-attach-item-attribute`
+- `sd-mod-item-attribute`
+- `sd-inq-item-attributes`
+- `sd-inq-item-attribute`
+
+The documented `:filing :sd-file` option includes the UDA in standard Modeling output files. `:attachment :instance` is the initial candidate for notes that belong to a specific Part instance rather than shared contents.
+
+Version evidence: PTC's later What's New documentation records UDA behavior changes as early as Modeling 17.0, and the Modeling 18.1 What's New section does not indicate that these functions were introduced later. This is useful historical evidence, but it is **not** proof that every exact 20.x signature/keyword behaves identically in 18.1.
+
+Probe source:
+`research/attributes/H871_PF_PART_NOTE_ATTRIBUTE_PROBE.lsp`
+
+Evidence status:
+- Function family / concept: later-release documented; historical feature predates 18.1.
+- Exact 18.1 runtime availability and signatures: pending user test.
+- Save/reopen persistence: pending user test.
+- Production integration: prohibited until probe passes in a disposable model.
+
+Do not use Model Manager database-exchange functions (`sd-define-db-attribute`, etc.) for this local-file note feature; no Model Manager dependency has been established.
