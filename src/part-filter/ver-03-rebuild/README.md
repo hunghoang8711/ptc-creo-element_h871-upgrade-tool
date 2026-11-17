@@ -28,9 +28,15 @@ This source remains based on the VER-02 Density collector and native Graphical B
 
 ## Current focused change
 
-The custom table definition and Density display callbacks were already present. The previous initialization sequence showed the Browser before assigning its table root. The active source now assigns the root before enabling table mode and showing the Browser. It does not infer success/failure from the return values of those Browser commands.
+The custom table definition and Density display callbacks were already present. The previous attempt queried the Browser Tree root before the Graphical Browser had been shown. Comparison with the VER-02 baseline showed that VER-02 activates table mode and shows the Browser before calling `sd-get-browsernode-struct`.
 
-This is a focused initialization-order test. It does not change the Density collector, row client data, display callbacks, Browser selection, or Apply implementation.
+The active source now restores that VER-02 lifecycle order:
+1. Set the active custom table.
+2. Activate Table Mode.
+3. Show the Graphical Browser so its tree update callback can build the root.
+4. Resolve the root and apply it with `:change-table-root`.
+
+This is a focused initialization-order correction. It does not change the Density collector, row client data, display callbacks, Browser selection, Select All/Clear Selection, or native Apply implementation. Runtime behavior still requires confirmation in Modeling 18.1.
 
 ## Test in Creo 18.1
 
