@@ -28,7 +28,7 @@ This source remains based on the VER-02 Density collector and native Graphical B
 
 ## Current focused change
 
-The custom table definition and Density display callbacks were already present. The previous initialization sequence showed the Browser before assigning its table root. The active source now assigns the root before enabling table mode and showing the Browser.
+The custom table definition and Density display callbacks were already present. The previous initialization sequence showed the Browser before assigning its table root. The active source now assigns the root before enabling table mode and showing the Browser. It does not infer success/failure from the return values of those Browser commands.
 
 This is a focused initialization-order test. It does not change the Density collector, row client data, display callbacks, Browser selection, or Apply implementation.
 
