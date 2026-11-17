@@ -131,3 +131,45 @@ This only validates Part/SEL_ITEM handles. It does **not** prove that Modeling's
 - V4 is still an experimental runtime probe, not yet validated in Modeling 18.1. Do not run V3 again.
 - If V4 confirms fresh handles are valid Parts, the next experiment can build a separate Apply prototype from freshly resolved pathname handles. The existing VER-03 Apply Bridge remains unchanged until that prototype passes single-Part and multi-Part runtime tests.
 - No changes to official VER-03, Results UI, or Apply Bridge.
+
+
+## 2026-11-17 — V4 pathname-resolution probe caused fatal Modeling exception
+
+- User ran `H871_PF_V03_PATH_RESOLVE_PROBE_V4` with 3 selected rows.
+- The report confirmed the Display Table selection and columns were readable, with 3 selected `:assembly-path` strings and 3 stored `:part-object` values.
+- The report ended after printing the first selected pathname:
+  `/05.cum-ve-sinh_do/03.CUM-DO/01.CUM-EP/02.CO-DINH/C-SHFMQ25.stp/truc.1.1`
+- Modeling then raised the fatal “Model data may have been damaged” exception.
+- The report ending at the pathname does **not** identify the failing expression. V4 writes the report inside one `with-open-file`; a native process crash can prevent buffered output from being flushed/closed. The next expression in source is `SD-PATHNAME-TO-OBJ`, followed by Part/path inquiries, but the exact crash point is unknown.
+- Treat V4 as unsafe for this Modeling 18.1 installation. Do not rerun V4, V3, or any probe that invokes the same pathname conversion/accessor sequence. Do not use `SD-PATHNAME-TO-OBJ` in a new Apply implementation without a separately verified compatibility basis.
+- No conclusion can be drawn that the pathname itself is invalid or that `SD-PATHNAME-TO-OBJ` alone caused the crash.
+
+## 2026-11-17 — Re-analysis of the official VER-03 Apply architecture
+
+The official `main` baseline was inspected again; its source remains unchanged.
+
+The Apply pipeline is:
+
+1. `h871-pf-v03-apply` reads the selected Display Table rows and extracts the hidden `:part-object` column.
+2. It queues `H871_PF_V03_APPLY_ACTION` through `sd-put-buffer`, preserving the required Modeling User Action context.
+3. `h871-pf-v03-native-apply` creates a temporary Browser Tree and Graphical Browser.
+4. `h871-pf-v03-build-apply-tree` creates a BrowserNode for each selected Part, using the Part's object pathname for `:objPath`, its basename for `:objPname`, and the original Part reference as client data.
+5. The bridge obtains BrowserNode structures through `sd-get-browsernode-struct`, sets Browser selection, and invokes `:select-and-execute` inside `sd-call-cmds`.
+
+Technical conclusions:
+- VER-03 does not pass raw `SEL_ITEM` values directly to Modeling's active selection. It uses BrowserNodes as the native hand-off layer.
+- A valid `SEL_ITEM` alone would not prove that a BrowserNode-free direct selection API exists.
+- The current research question must be narrowed to whether Modeling 18.1 exposes a documented action/selection routine that accepts a list of live Part `SEL_ITEM`s and causes the same active-selection behavior without a Graphical Browser.
+- Do not alter the existing BrowserNode bridge while that alternative remains unproven.
+- Do not use pathname conversion as a workaround after the V4 fatal exception.
+- Further progress should be based on static source/documentation research first. Any later runtime test must isolate one documented operation, flush its trace immediately before and after the call, and avoid speculative accessors or calls known to crash.
+
+## Current status after V4
+
+- Official VER-03 baseline: protected; no source changes.
+- Results UI and current Apply Bridge: preserved.
+- V1: confirms selected hidden values are typed `ELAN::SEL_ITEM`; object inquiries returned NIL.
+- V3: fatal Modeling exception; retired.
+- V4: fatal Modeling exception; retired.
+- Direct selection without BrowserNode: not proven.
+- Runtime validation: no direct-selection prototype has passed in Modeling 18.1.
