@@ -47,7 +47,7 @@ The source is a candidate ported from the VER-02 native Browser workflow. PTC do
 Static inspection and source creation are not runtime validation. Only mark each behavior as verified after the user observes it in Modeling 18.1. Keep the exact error and trace file if a test fails.
 
 
-## 2026-11-17 — first Modeling 18.1 runtime feedback
+## 2026-11-17 — Modeling 18.1 runtime validation
 
 User tested Stage 1 in Creo Elements/Direct Modeling 18.1 and confirmed:
 
@@ -55,19 +55,9 @@ User tested Stage 1 in Creo Elements/Direct Modeling 18.1 and confirmed:
 - Selecting one Part and pressing native Apply selects the correct Part in the 3D viewport.
 - Select All works.
 - Clear Selection works.
-- **Issue:** only the Part Name column is visible; Density Instance, Density Base and Assembly Path are not visible.
+- Initial display appeared to show only Part Name. User then widened the Results Browser and confirmed that all four columns became visible: Part Name, Density Instance, Density Base and Assembly Path.
 
-This is a partial runtime success: the native Browser lifecycle and native selection handoff are verified. The four-column presentation is not accepted yet.
-
-### Source comparison / investigation boundary
-
-The sd-browser-define-table block in VER-06 is structurally the same as the corresponding known VER-02 block after namespacing the callback and Browser symbols. Therefore do not rewrite the Apply or selection pipeline to address the missing columns.
-
-The main UI-level difference in the Browser creation call is that VER-06 requests :createAsTab nil and uses a floating Browser, while VER-02 did not explicitly request floating placement. The next investigation should distinguish:
-1. The table is actually defined with four columns but the floating window/layout shows only the first column (e.g. width/scroll/layout).
-2. Modeling 18.1 is not applying the custom table definition in this floating Browser instance and is falling back to the default Name column.
-
-Before changing source, inspect a screenshot of the entire Results Browser, including its right and bottom edges, and determine whether a horizontal scrollbar or table/tree mode toggle is present. Do not add speculative Browser keywords or change native Apply.
+**Conclusion:** the table definition was correct; the apparent missing columns were outside the visible horizontal area. No source change was needed. Do not add speculative Browser keywords or alter native Apply to address this resolved presentation issue.
 
 ### Validation status after first runtime test
 
@@ -77,5 +67,42 @@ Before changing source, inspect a screenshot of the entire Results Browser, incl
 | Native Apply to 3D selection | User-confirmed |
 | Select All | User-confirmed |
 | Clear Selection | User-confirmed |
-| Four custom columns | Failed / unresolved |
-| Modeling 18.1 runtime overall | Partially verified |
+| Four custom columns | User-confirmed after widening Browser |
+| Modeling 18.1 Stage 1 overall | Accepted / user-confirmed |
+
+
+## Stage 2 — Per-Part Notes (feasibility first)
+
+### Goal
+Allow a user to store a text note against an individual Part and read it again after saving and reopening the model. Keep this independent from the native Results Browser selection/Apply pipeline.
+
+### Proposed storage direction
+PTC Integration Kit references document User-Defined Attributes (UDA):
+- `sd-attach-item-attribute`
+- `sd-mod-item-attribute`
+- `sd-inq-item-attributes`
+- `sd-inq-item-attribute`
+
+The documented filing option `:sd-file` includes the attribute in standard Modeling output files. An instance-level attachment (`:attachment :instance`) is the initial candidate so notes can belong to a specific Part instance rather than being unintentionally shared through contents. This is a design candidate, not yet proven in this Modeling 18.1 session.
+
+PTC references consulted (20.x documentation; exact 18.1 behavior still requires runtime verification):
+- https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/reference/user_atts.html
+- https://support.ptc.com/help/creo_elements_direct/r20.4.0.0/advanced_documentation/integration_kit/whatsnew.html (notes UDA behavior/API history reaching back to earlier releases)
+
+### Isolated test file
+`research/attributes/H871_PF_PART_NOTE_ATTRIBUTE_PROBE.lsp`
+
+Commands:
+- `H871_PF_NOTE_PROBE_WRITE` — select a disposable Part and attach/update a test note.
+- Save that test model to a new file, close it, reopen it.
+- `H871_PF_NOTE_PROBE_READ` — select the same Part and verify that the note is still present.
+
+### Acceptance criteria
+1. Both probe commands load and run without undefined-function or type errors in Modeling 18.1.
+2. Write command reports the same note that was entered.
+3. The test model is saved to a new file and reopened.
+4. Read command returns the same note after reopen.
+5. A second Part can hold a different note without changing the first Part's note.
+6. No change to native Apply, Select All, Clear Selection, filter predicates, or the protected VER-03 source.
+
+Do not integrate UDA calls into the VER-06 production source until these checks pass. Runtime status: **pending user test**.
