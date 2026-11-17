@@ -95,3 +95,14 @@ This only validates Part/SEL_ITEM handles. It does **not** prove that Modeling's
 - The official VER-03 source declares `(defvar *h871-pf-v03-pages* nil)` in package `:oli`. If that exact source has been loaded in the same Modeling session/package, the symbol should be bound even when its value is NIL.
 - Therefore this result does not establish that no rows are selected and does not yet test the runtime type of the stored Part handles. It indicates the probe's `:oli` environment cannot see the registry symbol expected from the official VER-03 source.
 - Next diagnostic is to establish whether the official VER-03 file was loaded in this same Modeling session before V2. Do not modify the official VER-03 file or Apply Bridge based on this result.
+
+
+## 2026-11-17 — V1 runtime confirms selected cells contain ELAN::SEL_ITEM
+
+- User ran the original V1 probe while the VER-03 Results window was open and four rows were selected.
+- All four hidden `:part-object` values had `TYPE-OF = ELAN::SEL_ITEM`.
+- For all four, `sd-inq-part-p`, `sd-inq-obj-pathname`, and the pathname roundtrip returned NIL.
+- This proves the Results table is returning SEL_ITEM-typed structures, but it does not yet prove the handles resolve to live Part objects. Do not treat NIL from these inquiries as proof of invalid handles until the correct SEL_ITEM accessor/package is checked.
+- PTC Integration Kit references describe `sel_item-p` and `sel_item-type` as SEL_ITEM structure accessors. A V3 non-mutating probe was added to resolve and call these accessors in both :ELAN and :OLI, then also record basename/pathname/sysid inquiries.
+- V3 command: `H871_PF_V03_SELITEM_PROBE_V3`; report: `H871_PF_V03_SELITEM_PROBE_V3.txt`.
+- No changes to official VER-03 or its Apply Bridge. V3 still requires user runtime validation in Modeling 18.1.
