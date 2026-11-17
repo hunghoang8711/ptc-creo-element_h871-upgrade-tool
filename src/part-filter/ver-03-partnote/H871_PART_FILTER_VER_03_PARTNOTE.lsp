@@ -644,15 +644,16 @@
             (sd-control-p *h871-pf-v03-tabs*)
             (sd-control-p page-name)
             (sd-control-p tab-grid)))
-    (let ((insert-result
-            (sd-insert-tab-control-page
-              page-name *h871-pf-v03-tabs*
-              :tabTitle label :cellSize 10,10 :margin 3 :spacing 1)))
+    (multiple-value-bind (insert-result insert-condition)
+        (ignore-errors
+          (sd-insert-tab-control-page
+            page-name *h871-pf-v03-tabs*
+            :tabTitle label :cellSize 10,10 :margin 3 :spacing 1))
       (h871-pf-v03-trace "CREATE-PAGE/INSERT-TAB/RETURN"
-        (list insert-result
+        (list insert-result insert-condition
               (sd-control-p page-name)
               (sd-control-p tab-grid)))
-      (unless insert-result
+      (unless (and insert-result (null insert-condition))
         (h871-pf-v03-trace "CREATE-PAGE/INSERT-TAB/FAILED-STATE"
           (list page-name tab-grid
                 (sd-control-p *h871-pf-v03-tabs*)
