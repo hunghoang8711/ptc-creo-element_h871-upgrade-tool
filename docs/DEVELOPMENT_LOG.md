@@ -297,3 +297,15 @@ Resolved:
 - No changes to Density collector, normalization, filter mapping, BrowserNode row data, row selection, Select All/Clear Selection, or native Apply.
 - Static checks completed; edited source still requires runtime confirmation in Modeling 18.1. The user should test on a disposable Assembly copy and confirm column headers and cell values separately.
 - Experimental VER-04/05/06/07 branches are not active development bases. Do not create another numbered version for the next iteration.
+
+## 2026-11-17 – VER-03 Results tree root unavailable: restore VER-02 lifecycle order
+
+- User tested the previous active source and reported: `H871: Results tree root is unavailable.`
+- Compared the exact VER-02 source (`src/part-filter/H871_PART_FILTER_VER_02.lsp`) with the active VER-03 rebuild. Both create the Browser Tree with `h871-pf-rb-build-results-tree` as the update callback.
+- Critical difference: VER-02 sets the active table, activates Table Mode, shows the Graphical Browser, and only then calls `sd-get-browsernode-struct ... :root`. The previous VER-03 edit attempted to resolve the root before SHOW.
+- Diagnosis: root lookup was premature because the Browser's initial tree-update callback may not have created the root yet. This is directly supported by the source-order comparison; runtime confirmation is still required.
+- Corrected only the active source on `rebuild/ver-03-stable-restart` to restore the exact VER-02 lifecycle order: set active table → set table mode → show Browser → resolve root → change table root.
+- The post-SHOW guard remains, with a more precise error message if the root is still unavailable after initialization.
+- No changes to Density collection/matching, numeric normalization, BrowserNode row data, table callbacks, selection, Select All/Clear Selection, or native Apply.
+- Updated the active README and stable-restart notes. No new branch, version folder, or command was created.
+- Static/runtime status: source edit and documentation commits completed; Creo 18.1 runtime retest pending. Test only on a disposable Assembly copy.
