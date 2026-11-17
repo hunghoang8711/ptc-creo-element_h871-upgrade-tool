@@ -74,3 +74,29 @@ Stop and capture the exact Modeling error/trace if any UICT table creation, dial
 ## Evidence discipline
 
 The source and README are committed, but the candidate is not yet runtime-validated. Mark each test as passed only after observing it in Creo Elements/Direct Modeling 18.1. Preserve VER-03 on `main` and preserve VER-06 Native Results Browser as an independent development line.
+
+## Right-click actions add-on
+
+An optional companion file now adds a separate Native Graphical Browser for right-click actions while preserving the VER-03 UICT Results table and Apply Bridge:
+
+- Add-on: `H871_PART_FILTER_VER_03_PARTNOTE_RIGHTCLICK_ADDON.lsp`
+- Load the original `H871_PART_FILTER_VER_03_PARTNOTE.lsp` first, then load the add-on.
+- The auxiliary Browser mirrors the currently active VER-03 Results tab and displays Part Name, Density Instance, Density Base, Assembly Path, and Part Note.
+- Right-click a Part row in the auxiliary Browser for `Edit Note`, `Select All`, and `Clear Selection`.
+- `Edit Note` requires exactly one selected Part and reuses the existing instance-level UDA editor.
+- The original Edit Note button under the UICT table remains available.
+- Switching Results tabs or refreshing/saving a Note rebuilds the auxiliary Browser for the active tab.
+- The auxiliary Browser uses its own tree and selection; it does not reuse or modify the hidden Apply Bridge tree.
+
+### Add-on test sequence
+
+1. Load the base VER-03-PARTNOTE LISP file.
+2. Load the RIGHTCLICK_ADDON LISP file.
+3. Run `H871_PART_FILTER_VER_03` and perform a known filter search.
+4. Confirm both the original UICT Results window and the separate `H871 - VER-03 PART ACTIONS` Browser appear.
+5. Right-click a Part row in the auxiliary Browser and confirm the menu contains Edit Note, Select All, and Clear Selection.
+6. Select one Part, right-click, choose Edit Note, save a note, and confirm the Part Note column refreshes.
+7. Switch to another Results tab and confirm the auxiliary Browser follows that tab.
+8. Regression-test the original UICT Edit Note button, Select All, Clear Selection, and Apply Bridge.
+
+**Runtime status:** The add-on has passed a static LISP parenthesis/string scan. It has not yet been executed in the user's Modeling 18.1 session; treat it as a test candidate until the sequence above is confirmed.
