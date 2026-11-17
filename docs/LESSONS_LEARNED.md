@@ -121,3 +121,12 @@ Confirmed engineering knowledge and prevention rules for PTC Creo Elements/Direc
 - Requirement: The Graphical Browser/Results window must allow the user to drag-resize both width and height; the result table and controls must remain usable after resizing.
 - Evidence limit: Setting :minHeight, :maxWidth and :maxHeight in sd-create-graphical-browser does not by itself prove that interactive resizing is enabled. No verified Modeling 18.1 resize flag/signature has yet been recorded.
 - Prevention: Verify the exact 18.1 API/options before adding a guessed keyword. Test horizontal and vertical resizing and content adaptation in the target runtime.
+
+
+## LL-022 – Do not promise embedded Browser tabs on Modeling 18.1 without API evidence
+
+- PTC release notes list resizable dialog shells, resizable grid areas, control resize bindings, and Graphical Browser parenting as new in Modeling 20.6.
+- These APIs form the documented mechanism to embed the native Graphical Browser in a custom tabbed Results shell. Do not call them in an 18.1 LISP build.
+- UICT Display Tables support row selection, but the documented contract does not provide a direct native viewport selection transfer. A separate Graphical Browser bridge was used by VER-03 and is explicitly disallowed by the user.
+- For strict one-window 18.1 compatibility, evaluate a single native Graphical Browser with process/material pair nodes as table roots and its own native Apply. Be transparent that this is navigation rather than literal tabs. Verify Browser resizing in 18.1 before claiming it.
+- Never substitute this UI trade-off silently. Preserve the multi-Browser and VER-02 baselines.
