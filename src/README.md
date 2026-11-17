@@ -13,3 +13,5 @@ All executable Creo Lisp, test scripts and diagnostic utilities belong under `sr
 Do not place executable LISP test files in the repository-level `tests/` folder. That folder is reserved for written procedures and sanitized test fixtures.
 
 Experimental ver-04 through ver-07 implementations have been removed from the current source tree. Their findings are consolidated in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`.
+
+- `part-filter/legacy/` – relocated superseded source retained only for forensic reference; not an active implementation.
