@@ -151,3 +151,13 @@ The hidden Browser Apply bridge remains unproven. Never equate a resolved Browse
 A previous assistant handover incorrectly treated UICT ver-03 as the accepted development base. This repeated an obsolete implementation and risked returning to the fatal `0xC00000FD` path. The user's proven baseline is Stage 0: a native Graphical Browser with working direct row selection, Select All and Apply. ver-04 separately demonstrated page-root switching and selected-row restoration in one Browser. The correct engineering task is to combine those two proven pieces inside exactly one visible Results Browser.
 
 Do not use UICT Display Table selection bridged through a hidden Browser. Do not create an intermediate-window workflow, one Browser per query, Browser Bar tabs, or reparent a Browser into a host shell. Do not treat a `:SUCCESS` trace as proof of viewport selection. Preserve Stage 0 unchanged; integrate and test page navigation independently.
+
+
+
+## LL-019 – Retire failed experiment code, retain its evidence (2026-11-17)
+
+Do not keep every attempted LISP implementation as a permanent version. When an experiment is rejected, preserve its useful API findings, runtime evidence, exact errors and prevention rules in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`, then remove the experimental source from the current working tree. Git history remains available for forensic review. Keep the accepted ver-02/ver-03 references unchanged.
+
+## LL-020 – Source definitions do not prove runtime UI activation (2026-11-17)
+
+A custom Browser table may contain four column definitions in source while the runtime Results window shows only Part Name. Never claim the columns are implemented merely because their definitions/callbacks exist. Inspect actual Browser mode, active table, table roots, activation return values and the full rendered window. Do not continue speculative lifecycle-order changes without a diagnostic result.
