@@ -177,3 +177,17 @@ Use these separate evidence boundaries:
 - ver-05: integration candidate; horizontal page selector behavior in Modeling 18.1 remains unverified.
 
 Target is one standalone visible Results Browser combining Stage 0 native selection/Apply with ver-04 page-root logic. No intermediate-window workflow, UICT/hidden bridge, Browser Bar docking, extra Browser per search, or reparenting.
+
+
+
+## KI – Native Browser Results shows only Part Name (2026-11-17)
+
+**User-reported symptom:** the native Browser rebuild opens Results, but only Part Name is visible; Density Instance, Density Base and Assembly Path are absent.
+
+**Source observation:** the preserved rebuild source defines four columns and callbacks. This does not establish that the custom table is active or rendered in Modeling 18.1.
+
+**Latest test:** moving table activation and `:set-table-mode` after Browser show/root assignment did not change the result. Do not repeat that ordering hypothesis.
+
+**Next diagnostic:** inspect the complete Results window and runtime values for Browser table mode, active table, table roots, table definition result and table activation result. Also determine whether horizontal scrolling/column width hides columns. Do not alter Density collection, mapping, selection or Apply while diagnosing table visibility.
+
+**Status:** unresolved; not runtime-fixed.
