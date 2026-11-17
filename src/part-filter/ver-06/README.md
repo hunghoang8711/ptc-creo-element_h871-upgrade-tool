@@ -45,3 +45,37 @@ The source is a candidate ported from the VER-02 native Browser workflow. PTC do
 ## Evidence discipline
 
 Static inspection and source creation are not runtime validation. Only mark each behavior as verified after the user observes it in Modeling 18.1. Keep the exact error and trace file if a test fails.
+
+
+## 2026-11-17 — first Modeling 18.1 runtime feedback
+
+User tested Stage 1 in Creo Elements/Direct Modeling 18.1 and confirmed:
+
+- The H871 Results Browser appears as a separate window.
+- Selecting one Part and pressing native Apply selects the correct Part in the 3D viewport.
+- Select All works.
+- Clear Selection works.
+- **Issue:** only the Part Name column is visible; Density Instance, Density Base and Assembly Path are not visible.
+
+This is a partial runtime success: the native Browser lifecycle and native selection handoff are verified. The four-column presentation is not accepted yet.
+
+### Source comparison / investigation boundary
+
+The sd-browser-define-table block in VER-06 is structurally the same as the corresponding known VER-02 block after namespacing the callback and Browser symbols. Therefore do not rewrite the Apply or selection pipeline to address the missing columns.
+
+The main UI-level difference in the Browser creation call is that VER-06 requests :createAsTab nil and uses a floating Browser, while VER-02 did not explicitly request floating placement. The next investigation should distinguish:
+1. The table is actually defined with four columns but the floating window/layout shows only the first column (e.g. width/scroll/layout).
+2. Modeling 18.1 is not applying the custom table definition in this floating Browser instance and is falling back to the default Name column.
+
+Before changing source, inspect a screenshot of the entire Results Browser, including its right and bottom edges, and determine whether a horizontal scrollbar or table/tree mode toggle is present. Do not add speculative Browser keywords or change native Apply.
+
+### Validation status after first runtime test
+
+| Behavior | Status |
+|---|---|
+| Separate floating Results Browser | User-confirmed |
+| Native Apply to 3D selection | User-confirmed |
+| Select All | User-confirmed |
+| Clear Selection | User-confirmed |
+| Four custom columns | Failed / unresolved |
+| Modeling 18.1 runtime overall | Partially verified |
