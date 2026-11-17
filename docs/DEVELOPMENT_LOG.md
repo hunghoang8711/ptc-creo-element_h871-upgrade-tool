@@ -305,3 +305,16 @@ Recovered project milestones:
 - ver-05 is the single-Browser integration candidate; page-selector UI is not yet confirmed in Modeling 18.1.
 
 Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver-04 page-root/page-selection algorithm into the same visible Browser, then verify page navigation in 18.1. No intermediate-window workflow, UICT Display Table/hidden bridge, Browser Bar docking, extra Browser per search, or host-shell reparenting.
+
+
+
+## 2026-11-17 – Repository consolidation on main
+
+- User requested one canonical main branch, all executable test/diagnostic LISP under `src/`, preservation of ver-02/ver-03 source, and retirement of ver-04/ver-05/ver-06/ver-07 implementation code while retaining their engineering lessons.
+- Preserved ver-02 and the existing ver-03 UICT source unchanged. Copied the native Browser ver-03 rebuild reference from `rebuild/ver-03-stable-restart` into `src/part-filter/ver-03-rebuild/` without modifying its source text.
+- Removed the current-main ver-04 diagnostic LISP and ver-05 candidate LISP/README. No ver-06/ver-07 implementation files were present in the inspected main tree; findings from the available project history and user reports are recorded in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`.
+- Rewrote the repository handover/index documents to identify `main` as canonical and distinguish UICT ver-03 from the native Browser ver-03 rebuild.
+- All existing executable diagnostic/test LISP files remain under `src/part-filter/`; `tests/` contains written procedures only.
+- Important current issue carried forward: user reports the native Browser rebuild opens Results but only Part Name is visible. Four source column definitions do not prove runtime table activation. The rebuild is not marked complete.
+- Git history is retained. Experimental branch refs were not deleted by this cleanup; current working source and consolidated knowledge are on `main`.
+- Runtime verification: not performed by this repository cleanup.
