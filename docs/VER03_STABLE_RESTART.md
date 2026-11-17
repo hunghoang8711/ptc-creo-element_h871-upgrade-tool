@@ -27,16 +27,18 @@ The user has confirmed the standalone Results Browser opens and Part rows can be
 
 ## Current focused test change
 
-The user reported that the standalone Results window and row selection work, but Density columns are not visible.
+The user reported that the standalone Results window and row selection work, but Density columns are not visible. A subsequent test of the earlier ordering edit returned: `H871: Results tree root is unavailable.`
 
-Source review found the four column definitions and BrowserNode client-data callbacks already existed. The active source had assigned the table root only after showing the Browser. The focused change now:
+Comparison with the exact VER-02 source established that VER-02 performs this sequence:
 1. Sets the active table.
-2. Resolves the tree root.
-3. Assigns the root as table root.
-4. Activates table mode.
-5. Shows the Browser.
+2. Activates Table Mode.
+3. Shows the Graphical Browser.
+4. Resolves the Browser Tree root.
+5. Applies the root with `:change-table-root`.
 
-No collector, Density mapping, Browser selection, or Apply code was changed.
+The root is created by the Browser Tree update callback, so querying it before showing/initializing the Browser was premature. The active VER-03 rebuild source has been corrected to follow the VER-02 order. If root resolution still fails after SHOW, the new error message explicitly says so; do not add a fallback Browser/window.
+
+No collector, Density mapping, BrowserNode row data, Browser selection, Select All/Clear Selection, or native Apply code was changed.
 
 ## Runtime test still required
 
