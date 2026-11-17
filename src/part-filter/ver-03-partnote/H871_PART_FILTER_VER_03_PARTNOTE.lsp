@@ -586,10 +586,17 @@
         *h871-pf-v03-grid* (concatenate 'string *h871-pf-v03-shell* "-RG")
         :x 0 :y 0 :width 92 :height 56
         :cellSize 10,10 :margin 4 :spacing 2)
-      (h871-pf-v03-trace-binding *h871-pf-v03-grid* '(:resize-both))
-      (h871-pf-v03-trace "CREATE-SHELL/GRID-CREATE-FAILED" *h871-pf-v03-grid*)
+      (h871-pf-v03-trace "CREATE-SHELL/GRID-CREATE-FAILED"
+        (list *h871-pf-v03-grid*
+              (sd-control-p *h871-pf-v03-grid*)))
       (sd-display-error "H871 ver-03: Could not create the Results layout.")
       (return-from h871-pf-v03-create-shell nil)))
+  ;; Bind the successfully-created (or recovered) root grid to the
+  ;; resizable dialog shell. This must be outside the creation-failure branch.
+  (h871-pf-v03-trace-binding *h871-pf-v03-grid* '(:resize-both))
+  (h871-pf-v03-trace "CREATE-SHELL/GRID-STATE"
+    (list (sd-control-p *h871-pf-v03-grid*)
+          (sd-control-p *h871-pf-v03-tabs*)))
 
   (h871-pf-v03-trace "CREATE-SHELL/CHECK-TABS" *h871-pf-v03-tabs*)
   (unless (sd-control-p *h871-pf-v03-tabs*)
