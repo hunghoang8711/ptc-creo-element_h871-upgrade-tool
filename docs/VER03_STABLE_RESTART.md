@@ -1,90 +1,47 @@
-# VER-03 Stable Restart Baseline
+# VER-03 Stable Restart — Active Development Line
 
-## Decision (2026-11-16)
+## Source organization
 
-Restart Part Filter development from the user-verified **VER-03 REBUILD / VER-02 BASELINE**, not from the later UICT ver-03, ver-05, or ver-06 multi-page experiments.
+There is one active Part Filter development line:
 
-This is the version the user tested in PTC Creo Elements/Direct Modeling 18.1 and confirmed:
-- Results window opens and lists matching Parts.
-- Select All followed by Apply selects actual Parts in the Modeling viewport.
-- Double-clicking a result row selects the corresponding individual Part.
-- The Results window is a separate intermediate selection window; keep this proven interaction model.
+- **Active branch:** `rebuild/ver-03-stable-restart`
+- **Active source:** `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`
+- **Command:** `H871_PART_FILTER_VER_03_REBUILD`
+- **Target:** PTC Creo Elements/Direct Modeling 18.1
 
-## Immutable source baseline
+The original VER-02 source remains the stable logic reference. The pre-edit VER-03 rebuild commit remains available as a regression point on `rebuild/ver-03-from-ver-02`. Do not create additional numbered versions or parallel feature branches for this work.
 
-- Repository: `hunghoang8711/ptc-creo-element_h871-upgrade-tool`
-- Source branch: `rebuild/ver-03-from-ver-02`
-- Baseline commit: `b843b921f013941d48169821ca33ed19d34fcfbc`
-- File: `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp`
-- File blob at baseline: `3f5e272220fe77e4dd6b868d1974a5dc983332f7`
-- Command: `H871_PART_FILTER_VER_03_REBUILD`
-- Restart work branch: `rebuild/ver-03-stable-restart`
+## User-confirmed baseline behavior
 
-The restart branch was created from the exact baseline commit above. Do not edit the baseline source in place. Make changes incrementally on the restart branch and retain a clean copy of this known-good file.
+The user has confirmed the standalone Results Browser opens and Part rows can be selected as intended. VER-02/VER-03 rebuild remain the only accepted stable references. Do not infer that an untested change is runtime-verified.
 
-## Preserve these proven behaviors
+## Preserved implementation
 
-1. Keep the standalone native Graphical Browser Results window.
-2. Keep the native Apply/OK action and the exact working Part-selection handoff.
-3. Keep direct row selection and double-click selection.
-4. Keep Select All and Clear Selection.
-5. Keep the existing results table columns: Part Name, Density Instance, Density Base, Assembly Path.
-6. Keep the existing recursive Assembly collector and exact Density Instance AND Density Base predicate until a separate diagnostic proves a required correction.
-7. Keep numeric convention:
-   - Process / Density Instance: CNC=1, KH=2, CG=3, COVER=4.
-   - Material / Density Base: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
-   - API values are normalized by dividing by 1000.
-   - `1-304` means CNC-SUS304.
-   - Matching must use both Instance AND Base.
+- Standalone native Graphical Browser Results window.
+- Native Browser selection and Apply workflow.
+- Select All / Clear Selection.
+- Recursive Assembly collector and exact Density Instance AND Density Base match.
+- Numeric convention: CNC=1, KH=2, CG=3, COVER=4; material values SUS304=304, etc.
+- API density values normalized by dividing by 1000.
+- Four table columns are defined: Part Name, Density Instance, Density Base, Assembly Path.
 
-## Lessons and restrictions carried forward
+## Current focused test change
 
-- Do not replace the proven Results window with UICT Dialog Shell / Display Table / Tab Control.
-- Do not add Browser Bar docking, hidden Browser bridges, host-shell reparenting, or multiple result Browser windows.
-- Do not replace native Apply with a custom callback that loses the actual BrowserNode/Part selection handoff.
-- Do not infer successful viewport selection from a trace status, a selected Browser row, or a returned success symbol. Verify actual highlighted Parts in the 3D viewport.
-- Do not use the obsolete UICT ver-03 source or the later ver-06 candidate as the new base.
-- Do not run risky recursive collector experiments on the customer's original Assembly. Use a disposable Assembly copy.
-- Do not change multiple subsystems in one iteration. First establish a known-good baseline, then change one item, run static checks, and test in Modeling 18.1.
-- Treat APIs documented for newer Creo versions as unverified until tested in Modeling 18.1.
+The user reported that the standalone Results window and row selection work, but Density columns are not visible.
 
-## Open issues to diagnose on top of this baseline
+Source review found the four column definitions and BrowserNode client-data callbacks already existed. The active source had assigned the table root only after showing the Browser. The focused change now:
+1. Sets the active table.
+2. Resolves the tree root.
+3. Assigns the root as table root.
+4. Activates table mode.
+5. Shows the Browser.
 
-### A. Process selector and displayed Process Code desynchronization
-A recent run showed the selector as CG while the separate Process Code display remained 1. The report for that run recorded Requested Density Instance=3, so the filter input was CG=3 even though the display field was stale. The `:after-input` synchronization for the display-only field is not reliable enough to be treated as authoritative.
+No collector, Density mapping, Browser selection, or Apply code was changed.
 
-Next implementation should remove this duplicated state where possible: use the selected Process value itself as the only filter input and make the displayed code derive from that same value through a verified Modeling 18.1 dialog mechanism. Do not change the Density matching engine to compensate for a UI display issue.
+## Runtime test still required
 
-### B. Density Instance returns NIL in one Assembly
-A report from Assembly `/B_NAV2610-02/05.cum-ve-sinh_do` showed:
-- Requested Density Instance=3; Requested Density Base=304.
-- Sampled Parts returned NIL for `(sd-inq-part-density part :instance)`.
-- Density Base values were readable, including raw 304000.0.
-- Consequently, exact-pair matching rejected these sampled Parts because the Instance value was NIL.
+Use a disposable Assembly copy. Load the active source from this branch and run `H871_PART_FILTER_VER_03_REBUILD`. Verify the four columns and actual Density values, then test row selection, Select All/Clear Selection, and Apply in the viewport. The edited source is not marked as runtime-verified until the user confirms these checks.
 
-This does not prove that the Assembly contains no CG-SUS304 Parts. It proves that the current Instance inquiry did not return a value for the sampled Parts in that Assembly. Do not weaken the exact AND predicate or silently substitute a different property source. Diagnose a known Part whose Creo Properties explicitly show the expected Instance and Base.
+## Branch hygiene
 
-Existing read-only diagnostic files:
-- `src/part-filter/H871_DENSITY_DIAG.lsp`
-- `src/part-filter/H871_DENSITY_API_TEST.lsp`
-- `src/part-filter/H871_DENSITY_KIND_TEST.lsp`
-
-The diagnostic should compare default Density inquiry, `:instance`, `:contents`, and Instance/Contents attributes, recording return values and errors distinctly. Only after identifying a verified source for Density Instance should the collector be changed.
-
-## Test protocol
-
-1. Work only on a disposable copy of the Assembly.
-2. Load the unchanged baseline and confirm the Results window, Select All + Apply, and double-click selection still work.
-3. Record the selected Process label, numeric value passed to the filter, selected Material label/value, and report header.
-4. Test the Density API on one known Part whose Properties visibly show the expected Density Instance and Density Base.
-5. Change only the smallest proven defect; retain the baseline Apply and Browser code.
-6. Re-test actual Part selection in the 3D viewport.
-7. Update this file and the development log with exact tested / not-tested status and commit references.
-
-## Status
-
-- Baseline Results window and native Apply: **USER-VERIFIED in Modeling 18.1**.
-- Baseline double-click selection: **USER-VERIFIED in Modeling 18.1**.
-- Process Code display synchronization: **OPEN ISSUE**.
-- Density Instance inquiry for the reported Assembly: **OPEN ISSUE**.
-- Any new changes on this restart branch: **NOT YET RUNTIME-TESTED**.
+Experimental VER-04/05/06/07 lines are not active and must not be used as development bases. Preserve only the technical lessons already established; do not add their source files to the active development line. Keep the workflow on this single VER-03 rebuild line.
