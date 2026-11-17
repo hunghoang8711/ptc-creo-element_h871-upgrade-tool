@@ -318,3 +318,15 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Important current issue carried forward: user reports the native Browser rebuild opens Results but only Part Name is visible. Four source column definitions do not prove runtime table activation. The rebuild is not marked complete.
 - Git history is retained. Experimental branch refs were not deleted by this cleanup; current working source and consolidated knowledge are on `main`.
 - Runtime verification: not performed by this repository cleanup.
+
+
+## 2026-11-17 — VER-06 Results Browser accepted; per-Part note feasibility begins
+
+- User confirmed that widening the standalone Results Browser reveals all four columns. The earlier apparent missing-column issue was a window-width/visible-area issue, not a failed table definition.
+- User-confirmed VER-06 runtime behaviors: standalone Results Browser, individual Part selection + native Apply to the 3D viewport, Select All, Clear Selection, and all four columns after widening.
+- No production Browser source changes were needed. Keep native Apply and selection commands untouched.
+- Started the previously planned per-Part Notes feature with an isolated UDA feasibility probe at `research/attributes/H871_PF_PART_NOTE_ATTRIBUTE_PROBE.lsp`.
+- Candidate storage: Part instance-level UDA with `:filing :sd-file`, so note persistence follows the saved Modeling file and notes can remain specific to an individual instance.
+- Test sequence: write note on disposable Part → save as a new file → close/reopen → read note → test a second Part has an independent note.
+- PTC references inspected are later Integration Kit releases. UDA concepts predate 18.1, but exact API runtime behavior and save/reopen persistence are not yet user-confirmed.
+- No changes to filter predicates, density convention, native Apply, Select All, Clear Selection, or protected VER-03 source.
