@@ -30,13 +30,13 @@ This source remains based on the VER-02 Density collector and native Graphical B
 
 The custom table definition and Density display callbacks were already present. The previous attempt queried the Browser Tree root before the Graphical Browser had been shown. Comparison with the VER-02 baseline showed that VER-02 activates table mode and shows the Browser before calling `sd-get-browsernode-struct`.
 
-The active source now restores that VER-02 lifecycle order:
-1. Set the active custom table.
-2. Activate Table Mode.
-3. Show the Graphical Browser so its tree update callback can build the root.
-4. Resolve the root and apply it with `:change-table-root`.
+The previous post-SHOW root correction removed the root-unavailable error, but the user's latest test still displayed only the Part Name column. The active source now isolates table activation timing:
+1. Show the Graphical Browser so its tree update callback can build the root.
+2. Resolve the root and apply it with `:change-table-root`.
+3. Re-activate the custom table.
+4. Switch to Table Mode only after the root is assigned.
 
-This is a focused initialization-order correction. It does not change the Density collector, row client data, display callbacks, Browser selection, Select All/Clear Selection, or native Apply implementation. Runtime behavior still requires confirmation in Modeling 18.1.
+This tests whether Modeling 18.1 was retaining the pre-SHOW table/mode state incorrectly. It does not change the Density collector, row client data, display callbacks, Browser selection, Select All/Clear Selection, or native Apply implementation. Runtime behavior still requires confirmation in Modeling 18.1.
 
 ## Test in Creo 18.1
 
