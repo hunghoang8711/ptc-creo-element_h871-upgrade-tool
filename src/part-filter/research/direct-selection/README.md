@@ -173,3 +173,29 @@ Technical conclusions:
 - V4: fatal Modeling exception; retired.
 - Direct selection without BrowserNode: not proven.
 - Runtime validation: no direct-selection prototype has passed in Modeling 18.1.
+
+
+## 2026-11-17 — PTC action-routine selection parameters: scope clarified
+
+Additional PTC Integration Kit documentation was reviewed:
+
+- Creating a User Defined Command, “Identifying Objects Using a SEL_ITEM”:
+  https://support.ptc.com/help/creo_elements_direct/r20.5.0.0/advanced_documentation/integration_kit/concepts/user_cmd.html
+- Inquiring Data, SEL_ITEM and Selection:
+  https://support.ptc.com/help/creo_elements_direct/r20.8.0.0/advanced_documentation/integration_kit/concepts/inquiry.html
+- GET_SELECTION:
+  https://support.ptc.com/help/creo_elements_direct/r20.6.0.0/advanced_documentation/integration_kit/reference/get_selection.html
+
+Findings:
+1. PTC states that Action Routines accept a list of SEL_ITEMs wherever a selection input parameter is expected. This means a known Modeling command can consume a supplied selection list as one of its command arguments.
+2. This documentation does not define a generic API that assigns an arbitrary list of SEL_ITEMs to the global/current interactive selection and leaves those objects highlighted for the next user command.
+3. GET_SELECTION is documented as invoking the standard SELECT subaction and returning the selected items. PTC describes it as a programmatic inquiry mechanism used through sd-call-cmds, not as a setter for the current selection.
+4. PTC warns that SEL_ITEM handles are temporary and may become invalid after the next Modeling operation. This reinforces the need to keep handles within one immediate action sequence and not persist them across unrelated Modeling operations.
+5. The cited manuals are for later releases (20.5/20.6/20.8). They are useful architectural evidence, but do not establish exact API compatibility with Modeling 18.1.
+
+Decision:
+- No generic BrowserNode-free “set current selection” API has been identified in the reviewed PTC documentation.
+- Do not invent or guess a function such as a hypothetical SD-SET-SELECTION.
+- If the actual goal is to execute a particular Modeling command on the filtered Parts, a separate command-specific prototype may pass a list of fresh/live SEL_ITEMs to that command's documented selection parameter. That would execute the command; it would not be equivalent to leaving a persistent interactive selection.
+- If the required behavior is to highlight the Parts as the current interactive selection and return control to the user, retain the Graphical Browser `:SET-OBJECT-SELECTION` + `:SELECT-AND-EXECUTE` hand-off unless a version-18.1 documented setter is found.
+- Next safe research step: inspect the exact Modeling 18.1 Commands Reference/Recorder output for the specific downstream command or user workflow the Apply selection is intended to feed. Do not run another generic SEL_ITEM/pathname probe.
