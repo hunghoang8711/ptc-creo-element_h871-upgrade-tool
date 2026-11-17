@@ -100,3 +100,13 @@ An optional companion file now adds a separate Native Graphical Browser for righ
 8. Regression-test the original UICT Edit Note button, Select All, Clear Selection, and Apply Bridge.
 
 **Runtime status:** The add-on has passed a static LISP parenthesis/string scan. It has not yet been executed in the user's Modeling 18.1 session; treat it as a test candidate until the sequence above is confirmed.
+
+
+## 2026-11-17 — Resizable Results Window
+
+- Replaced the fixed UICT dialog shell with `sd-create-resizable-dialog-shell` (initial client size 920 × 560 px).
+- Replaced the fixed content grid with a resizable grid and bound the internal tab control to resize with it.
+- Added best-effort resize bindings for each page's Display Table and status line; action buttons are anchored to the lower-left edge.
+- The first run after loading this revision intentionally destroys the old fixed-size Results shell and clears its in-memory page registry; run the filter again to rebuild the result tabs. This avoids retaining an old non-resizable shell under the same UICT handle.
+- Static source check passed: balanced parentheses, no unterminated strings. **Not yet runtime-tested in Creo Elements/Direct Modeling 18.1.** In particular, verify that the tab page's Display Table binding is accepted and actually stretches with the window; UICT binding behavior can vary by control parent/version.
+- The standalone Edit Note button and original Apply Bridge logic remain in the same source; no Right-click Add-on is required.
