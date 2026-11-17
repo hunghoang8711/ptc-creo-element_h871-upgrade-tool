@@ -106,3 +106,16 @@ This only validates Part/SEL_ITEM handles. It does **not** prove that Modeling's
 - PTC Integration Kit references describe `sel_item-p` and `sel_item-type` as SEL_ITEM structure accessors. A V3 non-mutating probe was added to resolve and call these accessors in both :ELAN and :OLI, then also record basename/pathname/sysid inquiries.
 - V3 command: `H871_PF_V03_SELITEM_PROBE_V3`; report: `H871_PF_V03_SELITEM_PROBE_V3.txt`.
 - No changes to official VER-03 or its Apply Bridge. V3 still requires user runtime validation in Modeling 18.1.
+
+
+
+## 2026-11-17 — V3 caused fatal Modeling 18.1 exception
+
+- User ran `H871_PF_V03_SELITEM_PROBE_V3` and Modeling terminated with fatal exception `0xc00000fd` (Windows status commonly associated with stack overflow).
+- The crash occurred during the V3 command. The exact failing call is unknown because V3 invoked several candidate functions dynamically (`SEL_ITEM-P`, `SEL_ITEM-TYPE` in :ELAN/:OLI) and then several object inquiry functions for each selected handle.
+- `ignore-errors` cannot protect against a native process-level crash; the V3 probe must be considered unsafe for this Modeling 18.1 runtime.
+- Stop running V3. Do not repeat it, and do not test the candidate accessors by direct invocation in Modeling 18.1.
+- The user was testing a disposable sample model, so no original production model was at risk. Nevertheless, after any fatal exception, restart Modeling cleanly and do not save/overwrite important model data from the crashed session.
+- Existing V1 evidence remains valid: four selected result cells yielded values whose `TYPE-OF` was `ELAN::SEL_ITEM`; V1's `SD-INQ-PART-P` and pathname inquiries returned NIL. This does not establish that the handles are invalid.
+- Next research must avoid executing unverified SEL_ITEM accessors. First inspect the exact 18.1 Integration Kit documentation/signatures or use a strictly passive symbol-availability/type-only diagnostic. If no safe, documented route exists, retain the Apply Bridge rather than risking another native crash.
+- No change to official VER-03, Results UI, or Apply Bridge.
