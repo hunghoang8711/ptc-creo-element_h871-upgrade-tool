@@ -182,3 +182,16 @@ The UDA read/write implementation, Note display column, native Apply, Select All
 - Retest native Apply, Select All and Clear Selection.
 
 **Status:** source correction committed; not yet runtime-tested by the user. If the editor opens but the Note column does not refresh, investigate refresh behavior separately; do not alter selection/Apply.
+
+
+## 2026-11-17 — VER-06.2 Edit Note runtime test passed
+
+User tested the VER-06.2 candidate in Modeling 18.1 and confirmed:
+
+- Edit Note can now be launched from the Results Browser.
+- The note can be edited directly from the result row workflow.
+- The edited note is saved successfully outside the Part, as reported by the user.
+
+**Conclusion:** the queued-dialog launch correction in VER-06.2 resolves the no-response behavior observed in VER-06.1. Preserve VER-06.2 as the currently user-validated Notes candidate. Do not revert the `sd-put-buffer` launch path.
+
+**Scope of this confirmation:** the user confirmed editing and saving. A separate close/reopen persistence test and regression checks of native Apply, Select All and Clear Selection after editing have not been explicitly reconfirmed in this test report; retain those as outstanding checks rather than assuming they passed.
