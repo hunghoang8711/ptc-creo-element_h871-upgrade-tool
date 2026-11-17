@@ -1,33 +1,30 @@
 ;; ============================================================================
 ;; H871 PART FILTER - DIRECT SELECTION RESEARCH
-;; Stage 1: SEL_ITEM handle probe (NON-MUTATING)
+;; Stage 1: SEL_ITEM handle probe - isolated V2 command
 ;; Target: Creo Elements/Direct Modeling 18.1
 ;;
-;; Load this file AFTER H871_PART_FILTER_VER_03.lsp.
-;; Select one or more rows in a VER-03 Results tab, then run:
-;;   H871_PF_V03_SELITEM_PROBE
+;; IMPORTANT: This file defines a NEW command:
+;;   H871_PF_V03_SELITEM_PROBE_V2
+;; It intentionally uses new function/dialog symbols so Modeling cannot
+;; dispatch the previously registered V1 dialog action by name.
 ;;
-;; This revision does not depend on *h871-pf-v03-current-page*.
-;; It scans the registered VER-03 pages and reports every page that has
-;; selected rows. This avoids assuming that the current-page variable is
-;; bound in the callback's runtime context.
+;; Load this file AFTER VER-03. Select rows in any Results tab, then run V2.
 ;;
-;; It DOES NOT create BrowserNodes, open a browser, change model geometry,
-;; change Modeling's active selection, or replace the VER-03 Apply Bridge.
+;; Non-mutating: no BrowserNodes, no browser, no geometry changes, and no
+;; changes to Modeling's active selection. It only reads the UICT result
+;; tables and writes a report in the user's home folder.
 ;;
-;; SEL_ITEM-P is deliberately NOT used. A previous Modeling 18.1 test
-;; reported it as undefined, so this probe relies on TYPE-OF and the
-;; existing Part/path inquiry functions.
+;; No reference is made to the VER-03 current-page variable.
 ;; ============================================================================
 
 (in-package :oli)
 
-(defun h871-pf-v03-probe-trace-file ()
+(defun h871-pf-v03-probe-v2-trace-file ()
   (merge-pathnames
-    "H871_PF_V03_SELITEM_PROBE.txt"
+    "H871_PF_V03_SELITEM_PROBE_V2.txt"
     (user-homedir-pathname)))
 
-(defun h871-pf-v03-probe-page (entry stream total)
+(defun h871-pf-v03-probe-v2-page (entry stream total)
   (let* ((page-name (getf entry :page))
          (table-name (getf entry :table))
          (selection (and (stringp table-name)
@@ -39,12 +36,7 @@
       (incf (car total) (length parts))
       (format stream "PAGE: ~S~%" page-name)
       (format stream "  Table: ~S~%" table-name)
-      (format stream "  Selection container type: ~S~%"
-        (type-of selection))
-      (format stream "  Columns container type: ~S~%"
-        (and columns (type-of columns)))
-      (format stream "  Selected Part count: ~S~%"
-        (length parts))
+      (format stream "  Selected Part count: ~S~%" (length parts))
       (dolist (part parts)
         (incf index)
         (let* ((path (ignore-errors (sd-inq-obj-pathname part)))
@@ -67,7 +59,7 @@
           (format stream "    RAW TYPE-OF: ~S~%" (type-of part))
           (format stream "    SD-INQ-PART-P: ~S~%" part-p)
           (format stream "    PATHNAME: ~S~%" path)
-          (format stream "    PATHNAME-TO-OBJ TYPE-OF: ~S~%"
+          (format stream "    ROUNDTRIP TYPE-OF: ~S~%"
             (and roundtrip (type-of roundtrip)))
           (format stream "    ROUNDTRIP SD-INQ-PART-P: ~S~%"
             roundtrip-part-p)
@@ -75,55 +67,49 @@
           (format stream "    PATH MATCH: ~S~%" path-match)))
       (terpri stream))))
 
-(defun h871-pf-v03-probe-run ()
-  (let* ((pages-bound-p (boundp '*h871-pf-v03-pages*))
-         (pages (and pages-bound-p *h871-pf-v03-pages*))
-         (current-page-bound-p (boundp '*h871-pf-v03-current-page*))
-         (current-page
-           (and current-page-bound-p *h871-pf-v03-current-page*))
-         (trace-file (h871-pf-v03-probe-trace-file))
+(defun h871-pf-v03-probe-run-v2 ()
+  (let* ((registry-bound-p (boundp '*h871-pf-v03-pages*))
+         (pages (and registry-bound-p *h871-pf-v03-pages*))
+         (trace-file (h871-pf-v03-probe-v2-trace-file))
          (total (list 0)))
     (with-open-file
       (stream trace-file
         :direction :output
         :if-exists :supersede
         :if-does-not-exist :create)
-      (format stream "H871 VER-03 SEL_ITEM PROBE~%")
-      (format stream "Current page variable bound: ~S~%"
-        current-page-bound-p)
-      (format stream "Current page value: ~S~%" current-page)
-      (format stream "Page registry bound: ~S~%" pages-bound-p)
+      (format stream "H871 VER-03 SEL_ITEM PROBE V2~%")
+      (format stream "Page registry bound: ~S~%" registry-bound-p)
       (format stream "Registered page count: ~S~%"
         (if pages (length pages) 0))
       (terpri stream)
       (cond
-        ((not pages-bound-p)
+        ((not registry-bound-p)
           (format stream
-            "RESULT: VER-03 page registry is unbound. Confirm VER-03 was loaded in this Modeling session before the probe.~%"))
+            "RESULT: VER-03 page registry is unbound. Load VER-03 first in this Modeling session.~%"))
         ((null pages)
           (format stream
-            "RESULT: No registered Results pages. Run a Part Filter search first, then select rows and retry.~%"))
+            "RESULT: No Results pages registered. Run a Part Filter search first.~%"))
         (t
           (dolist (entry pages)
-            (h871-pf-v03-probe-page entry stream total))
+            (h871-pf-v03-probe-v2-page entry stream total))
           (if (= (car total) 0)
               (format stream
-                "RESULT: No selected Part rows found on any registered Results page. Select rows and retry.~%")
+                "RESULT: No selected Part rows found. Select rows in Results and retry.~%")
             (format stream
-              "RESULT: Probe inspected ~A selected Part row(s).~%"
+              "RESULT: Inspected ~A selected Part row(s).~%"
               (car total))))))
     (sd-display-message
       (format nil
-        "H871 SEL_ITEM probe finished. Selected rows inspected: ~A. Report: ~A"
+        "H871 SEL_ITEM probe V2 finished. Rows inspected: ~A. Report: ~A"
         (car total)
         (namestring trace-file)))
     trace-file))
 
-(sd-defdialog 'h871_pf_v03_selitem_probe
-  :dialog-title "H871 - SEL_ITEM Probe"
+(sd-defdialog 'h871_pf_v03_selitem_probe_v2
+  :dialog-title "H871 - SEL_ITEM Probe V2"
   :dialog-control :sequential
   :variables '()
   :ok-action
-    '(h871-pf-v03-probe-run))
+    '(h871-pf-v03-probe-run-v2))
 
-;; Command: H871_PF_V03_SELITEM_PROBE
+;; Command: H871_PF_V03_SELITEM_PROBE_V2
