@@ -75,3 +75,14 @@ This only validates Part/SEL_ITEM handles. It does **not** prove that Modeling's
 - The revised report records whether the current-page variable and page registry are bound, the registered page count, and each page with selected Part rows.
 - Static validation after the correction: balanced parentheses, no unterminated strings. This is not a Modeling 18.1 runtime pass.
 - Next test: reload the revised probe file in the same Modeling session where VER-03 is already loaded, select one or more rows in Results, and run `H871_PF_V03_SELITEM_PROBE`. Send `H871_PF_V03_SELITEM_PROBE.txt` from the user home folder.
+
+
+## 2026-11-17 — V2 isolated command after repeated unbound-variable error
+
+- User confirmed the error occurs when running the probe command (not while loading the file).
+- The previous revision still contained a conditional read of the current-page variable and reused the original dialog command name. To eliminate both possible sources, the probe has been isolated under new function/dialog symbols.
+- New command: `H871_PF_V03_SELITEM_PROBE_V2`.
+- New report: `H871_PF_V03_SELITEM_PROBE_V2.txt`.
+- V2 contains no reference to the VER-03 current-page variable and does not reuse the V1 dialog/function symbols. It scans only the registered page list and reads selected rows.
+- Static validation is required before runtime; the V2 test is not yet confirmed in Modeling 18.1.
+- User test: load the updated probe file, run the new command name exactly (do not run V1), then send the V2 report or exact error.
