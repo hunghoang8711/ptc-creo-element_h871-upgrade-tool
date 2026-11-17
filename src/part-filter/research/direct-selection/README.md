@@ -64,3 +64,14 @@ This only validates Part/SEL_ITEM handles. It does **not** prove that Modeling's
 - Stage 2: investigate a documented, non-Graphical-Browser way to submit a list of Part SEL_ITEMs into Modeling's selection/action context.
 - Stage 3: runtime-test one Part, then multiple Parts.
 - Stage 4: only after successful runtime validation, implement an alternative Apply path behind a separate experimental command. Keep VER-03 Apply Bridge available until the alternative is proven.
+
+
+## 2026-11-17 — Stage 1 probe correction
+
+- First Modeling 18.1 runtime attempt stopped before reading any selected rows:
+  `The variable *H871-PF-V03-CURRENT-PAGE* is unbound.`
+- This is a probe-side assumption failure, not evidence of a VER-03 Results or Apply Bridge regression. The original probe assumed the current-page variable would be bound in the callback runtime.
+- Updated `H871_PF_V03_SELITEM_PROBE.lsp` to avoid directly requiring the current-page variable. It now scans the registered VER-03 page registry and inspects selected rows on each registered table.
+- The revised report records whether the current-page variable and page registry are bound, the registered page count, and each page with selected Part rows.
+- Static validation after the correction: balanced parentheses, no unterminated strings. This is not a Modeling 18.1 runtime pass.
+- Next test: reload the revised probe file in the same Modeling session where VER-03 is already loaded, select one or more rows in Results, and run `H871_PF_V03_SELITEM_PROBE`. Send `H871_PF_V03_SELITEM_PROBE.txt` from the user home folder.
