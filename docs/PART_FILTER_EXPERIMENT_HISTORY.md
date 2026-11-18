@@ -23,9 +23,10 @@ Experimental ver-04/ver-05/ver-06/ver-07 implementation files are not canonical 
 3. Numeric mappings are user conventions:
    - Process / Instance: CNC=1, KH=2, CG=3, COVER=4.
    - Material / Base: A6061=6061, SUS201=201, SUS304=304, SS400=400, POM=10, Bakelit=20, MC=30, MIKA=40, PU=50.
-4. In the tested Density workflow, API values are normalized by dividing by 1000:
+4. Historical tested Density workflow: API values were 1000 times Part Properties values:
    - UI 1/304 ↔ API 1000/304000.
    - UI 2/400 ↔ API 2000/400000.
+   - The Part Note All Pages source now uses the configurable `*h871-pf-v03-density-api-multiplier*` (default 1000.0) instead of a hard-coded divisor. Inputs are multiplied to API scale; displayed values are divided back. Set 1.0 if a workstation's API returns Part Properties values directly.
 5. The mapped Material label is not the Part's actual Material property.
 6. The desired multi-search product is one Results window with internal Density-pair pages, not one Browser per search and not Creo Browser Bar docking.
 7. Native row selection and native Apply must remain owned by the same visible Graphical Browser. The user's visible 3D viewport selection is the only acceptance proof for Apply.
