@@ -124,3 +124,15 @@ This is user-confirmed runtime behavior in the target application, not merely a 
 - Automatic startup loading and multi-workstation deployment are not implemented yet.
 - Successful Ribbon dispatch does not prove every Part Filter function. Regression-test Search, selection, Apply, Edit Note and cross-page controls separately after changes to the Lisp core.
 - Preserve factory and existing user customization files. Never overwrite `sd_avail_cmds.cmd`, an existing `user_avail_cmds.cmd`, or unrelated Ribbon customization files.
+
+
+### Portable installer – release 0.1 (2026-11-18)
+
+- Installer: src/h871-ribbon/portable/Install-H871.ps1.
+- Instructions: src/h871-ribbon/portable/README_INSTALL.txt.
+- Scope and acceptance: src/h871-ribbon/portable/INSTALLER_SCOPE.md.
+- It copies the canonical Part Note / All Pages Lisp, copies the Available Command reference, generates the 32×32 icon in a user-selected personal customization directory, and writes LOAD_H871_PART_FILTER.txt.
+- It stops on existing targets by default. The explicit -Force switch backs up existing target files to a timestamped backup folder before replacement.
+- It never writes to user_avail_cmds.cmd, sd_avail_cmds.cmd, Ribbon customization files or startup files.
+- On a new workstation, user still needs to LOAD the Lisp, register the user-defined command in Customize / Commands, and add it to a Ribbon tab/group. These are intentional safety boundaries, not completed automation.
+- Verification status: installer source committed; Windows PowerShell execution and second-workstation Modeling 18.1 acceptance remain pending. Do not claim one-click deployment.
