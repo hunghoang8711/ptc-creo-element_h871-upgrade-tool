@@ -138,3 +138,16 @@ All Part Filter multi-page captions use PROCESS-MATERIAL order, e.g. CNC-SUS304 
 - **Rollout:** First prove manual core LOAD + command dispatch + custom icon + user-defined Ribbon placement in Modeling 18.1. Only after confirmation should automatic startup loading and multi-workstation installation be added.
 - **Safety:** Never overwrite factory customization files or an existing `user_avail_cmds.cmd`; use Modeling's Customize UI or back up and merge any existing user command file.
 - **Evidence boundary:** PTC documentation confirms the general mechanism in later releases and Fluent UI was introduced in 18.0. Exact 18.1 command registration/icon behavior remains pending user runtime test.
+
+
+### TD-011 runtime verification update – 2026-11-18
+
+**User-confirmed on the target Modeling 18.1 installation:**
+- The H871 command was saved through Customize / Commands.
+- It appears in the custom command group `H871-TOOL`.
+- A custom Ribbon group/tool was created and the H871 button was placed on it.
+- Clicking the Ribbon button successfully opens the existing Part Filter dialog.
+
+**Updated evidence boundary:** Available Command registration, custom command grouping, Ribbon placement and command dispatch are no longer pending; they are user-confirmed runtime behavior in Modeling 18.1.
+
+**Still outside this phase:** The core Lisp source must be loaded in the current session before the button is clicked. Automatic startup loading, portable multi-workstation deployment and regression of every Part Filter cross-page action are separate tasks.
