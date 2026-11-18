@@ -133,7 +133,7 @@ All Part Filter multi-page captions use PROCESS-MATERIAL order, e.g. CNC-SUS304 
 
 - **Date:** 2026-11-18
 - **Decision:** Expose existing H871 Lisp tools through native Creo Elements/Direct Modeling user-defined Available Commands and Ribbon customization. Do not rewrite the Part Filter core or create an external executable for the first phase.
-- **First command:** Application `SolidDesigner`, Group `H871`, Command `H871 Part Filter - All Pages`, action string `h871_part_filter_ver_03`.
+- **First command:** Application `SolidDesigner`, Group `H871`, Command `H871 Part Filter - All Pages`, action string `H871_PART_FILTER_VER_03`.
 - **Icon:** Custom 32×32 BMP named `H871/part_filter`, installed under the user's Modeling customization directory at `bitmaps/bmp/commands/H871/part_filter.bmp`.
 - **Rollout:** First prove manual core LOAD + command dispatch + custom icon + user-defined Ribbon placement in Modeling 18.1. Only after confirmation should automatic startup loading and multi-workstation installation be added.
 - **Safety:** Never overwrite factory customization files or an existing `user_avail_cmds.cmd`; use Modeling's Customize UI or back up and merge any existing user command file.
