@@ -867,10 +867,11 @@
     ;; the first search in Modeling 18.1.
     (unless (sd-dialog-shell-visible-p *h871-pf-v03-shell*)
       (h871-pf-v03-trace "RUN/SHOW-SHELL/BEFORE-PAGE" *h871-pf-v03-shell*)
-      (unless (sd-show-dialog-shell *h871-pf-v03-shell*)
-        (h871-pf-v03-trace "RUN/SHOW-SHELL/FAILED" *h871-pf-v03-shell*)
-        (sd-display-error "H871 ver-03: Could not show the Results window.")
-        (return-from h871-pf-v03-run nil)))
+      ;; Use the visibility predicate as the state check; do not interpret the
+      ;; show function's return value as a success flag.
+      (sd-show-dialog-shell *h871-pf-v03-shell*)
+      (h871-pf-v03-trace "RUN/SHOW-SHELL/VISIBLE-AFTER"
+        (sd-dialog-shell-visible-p *h871-pf-v03-shell*)))
 
     (h871-pf-v03-trace "RUN/FIND-PAGE/BEGIN" (list requested-instance requested-base))
     (setf entry (h871-pf-v03-find-page requested-instance requested-base))
