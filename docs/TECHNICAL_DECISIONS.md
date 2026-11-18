@@ -127,3 +127,14 @@ All Part Filter multi-page captions use PROCESS-MATERIAL order, e.g. CNC-SUS304 
 - Preserve ver-02 and ver-03 source references unchanged; keep the native Browser ver-03 rebuild in a clearly separate folder from the UICT ver-03 reference.
 - Executable LISP tests and diagnostics belong under `src/`; written test procedures belong under `tests/`.
 - Rejected ver-04/ver-05/ver-06/ver-07 code is not retained as current source. Preserve the lessons in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`; Git history remains available.
+
+
+## TD-011 – H871 native Ribbon integration, phased
+
+- **Date:** 2026-11-18
+- **Decision:** Expose existing H871 Lisp tools through native Creo Elements/Direct Modeling user-defined Available Commands and Ribbon customization. Do not rewrite the Part Filter core or create an external executable for the first phase.
+- **First command:** Application `SolidDesigner`, Group `H871`, Command `H871 Part Filter - All Pages`, action string `h871_part_filter_ver_03`.
+- **Icon:** Custom 32×32 BMP named `H871/part_filter`, installed under the user's Modeling customization directory at `bitmaps/bmp/commands/H871/part_filter.bmp`.
+- **Rollout:** First prove manual core LOAD + command dispatch + custom icon + user-defined Ribbon placement in Modeling 18.1. Only after confirmation should automatic startup loading and multi-workstation installation be added.
+- **Safety:** Never overwrite factory customization files or an existing `user_avail_cmds.cmd`; use Modeling's Customize UI or back up and merge any existing user command file.
+- **Evidence boundary:** PTC documentation confirms the general mechanism in later releases and Fluent UI was introduced in 18.0. Exact 18.1 command registration/icon behavior remains pending user runtime test.
