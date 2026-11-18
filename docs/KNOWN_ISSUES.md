@@ -195,6 +195,9 @@ Target is one standalone visible Results Browser combining Stage 0 native select
 
 ## KI-011 – H871 Ribbon command and icon runtime compatibility
 
-- **Status:** Starter package implemented; Modeling 18.1 runtime test pending.
-- **Details:** The package defines an Available Command for the existing `h871_part_filter_ver_03` dialog and a custom BMP icon generator. Current evidence for Available Command file syntax and icon search path comes from later-release PTC Integration Kit documentation. The user's exact 18.1 Customize UI labels, command registration, custom icon discovery and button dispatch have not yet been tested.
-- **Next step:** Follow `src/h871-ribbon/INSTALL_AND_TEST.md` on a disposable model. Capture the Customize UI screenshot or exact error if any step differs. Do not add automatic startup loading until the button successfully opens the existing dialog.
+- **Status:** Core Ribbon workflow user-confirmed working in Modeling 18.1 on 2026-11-18.
+- **Confirmed:** The existing Part Filter Lisp source loads and works; the user-defined H871 command is saved through Customize / Commands and appears in the custom `H871-TOOL` command group; a custom Ribbon group/tool has been created; clicking the Ribbon button launches the existing Part Filter dialog.
+- **Evidence:** Direct user runtime confirmation on the target application, not inferred from later-release documentation.
+- **Remaining boundary:** This phase does not automatically load the Lisp source at Modeling startup. The source must already be loaded in the current session. Startup loading and multi-workstation deployment are future enhancements.
+- **Icon note:** The integration package includes a 32×32 BMP generator and the command definition references `H871/part_filter`. The user's report confirms the Ribbon tool works; if a future workstation shows a missing or incorrect icon, diagnose its customization-directory path and icon cache separately.
+- **Regression note:** Successful Ribbon dispatch does not independently verify every Part Filter operation. Test Search, row selection, Apply, Edit Note and each cross-page action separately when modifying the Lisp core.
