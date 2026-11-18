@@ -180,7 +180,7 @@ The user confirmed that **Select All Pages** works after this correction in Creo
 **Historical runtime evidence:** Part Properties showed Density Instance/Base 1/304 while the tested Modeling API returned 1000/304000. A second confirmed example was 2/400 -> 2000/400000. The old Part Filter source hard-coded division by 1000.0.
 
 **Implementation rule:** In the Part Note All Pages source, maintain one clearly marked setting near the top:
-`*h871-pf-v03-density-api-multiplier*` (default 1000.0). Multiply both user-facing Instance and Base filter inputs by this factor before comparing with raw `sd-inq-part-density` results. Divide raw API values by the same factor only for human-readable table display.
+`*h871-pf-v03-density-api-multiplier*` (a `defparameter`, re-applied whenever the LISP file is loaded) (default 1000.0). Multiply both user-facing Instance and Base filter inputs by this factor before comparing with raw `sd-inq-part-density` results. Divide raw API values by the same factor only for human-readable table display.
 
 **Per-machine adjustment:**
 - API returns 1000/304000 for UI 1/304 -> set 1000.0.
@@ -189,4 +189,4 @@ The user confirmed that **Select All Pages** works after this correction in Creo
 - Keep Instance and Base on the same factor unless separate measured evidence proves otherwise.
 - Do not infer a workstation's factor from its UI labels. Capture raw values for both :instance and :contents on a known Part.
 
-**Validation:** Static Lisp syntax check passed for commit 925248a95f5a4317298491fd8039c07378ac05f8. Creo 18.1 runtime test of the configurable factor is still required; do not claim cross-workstation compatibility until tested.
+**Validation:** Static Lisp syntax check passed for final source commit 15240e673769a6dedbbfce33149c1eb383f50ee9. Creo 18.1 runtime test of the configurable factor is still required; do not claim cross-workstation compatibility until tested.
