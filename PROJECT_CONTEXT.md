@@ -26,7 +26,8 @@ The ver-03 UICT source and the ver-03 native Browser rebuild are different imple
 - The Results window displays only the Part Name column. Density Instance, Density Base and Assembly Path are not visible.
 - The source contains four custom column definitions, but source presence is not proof that the custom table is active or rendered.
 - The most recent change to table activation order did not improve the runtime result.
-- The native Browser rebuild remains **not complete**. Do not make further speculative lifecycle-order changes. First add targeted runtime diagnostics for actual Browser mode, active table, table roots and table-definition/activation return values, and inspect the entire Results window including horizontal scroll state.\n- Separately, the ver-03 Part Note UICT extension includes cross-page Select All / Clear All / Apply All. The user confirmed Select All Pages works in Modeling 18.1 on source revision 415481d0a62a744d3b09cb7b0cc697b623b14716. Clear All Pages and Apply All Pages remain pending separate runtime verification.
+- The native Browser rebuild remains **not complete**. Do not make further speculative lifecycle-order changes. First add targeted runtime diagnostics for actual Browser mode, active table, table roots and table-definition/activation return values, and inspect the entire Results window including horizontal scroll state.
+- Separately, the ver-03 Part Note UICT extension includes cross-page Select All / Clear All / Apply All. The user confirmed Select All Pages works in Modeling 18.1 on source revision 415481d0a62a744d3b09cb7b0cc697b623b14716. Clear All Pages and Apply All Pages remain pending separate runtime verification.
 - Row selection, Select All, Clear Selection and native Apply must be regression-tested after any change. Do not assume they still work merely because Results opens.
 
 ## 4. Filter mapping and invariant
