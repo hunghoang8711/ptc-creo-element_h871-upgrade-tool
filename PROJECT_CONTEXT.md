@@ -15,6 +15,8 @@ Build reliable, reusable LISP tools for Creo Elements/Direct Modeling 18.1. This
 |---|---|---|
 | `src/part-filter/ver-02/H871_PART_FILTER_VER_02.lsp` | Mapped Process/Material filter; native Graphical Browser selection and Apply baseline | Keep unchanged |
 | `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp` | UICT/internal-tab implementation reference | Keep unchanged; do not assume hidden Apply bridge works |
+| `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE.lsp` | Part Note baseline with page-local selection and Edit Note | Preserve unchanged |
+| `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` | Part Note extension with Select All Pages / Clear All Pages / Apply All Pages; Select All Pages confirmed in Modeling 18.1 on 2026-11-18 | Current tested extension; Clear All Pages and Apply All Pages still require independent runtime verification |
 | `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp` | Stage 0 native Graphical Browser rebuild derived from ver-02 | Keep as a reference candidate; latest user test reports only Part Name visible |
 | `src/part-filter/ver-01/` | Earlier numeric filter baseline | Preserve |
 
