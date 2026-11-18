@@ -53,7 +53,7 @@
 ;; returns the same values as Part Properties, set this to 1.0.
 ;; The same factor is applied to BOTH Instance and Base density values.
 ;; ========================================================================
-(defvar *h871-pf-v03-density-api-multiplier* 1000.0)
+(defparameter *h871-pf-v03-density-api-multiplier* 1000.0)
 
 (defvar *h871-pf-v03-shell* "h871-pf-v03-results")
 (defvar *h871-pf-v03-grid* "h871-pf-v03-results-grid")
@@ -919,7 +919,8 @@
     (sd-display-error
       (format nil
         "H871 ver-03: Invalid density settings. Instance=~S; Base=~S; API multiplier=~S. Filter values must be numeric and API multiplier must be greater than zero."
-        requested-instance requested-base))
+        requested-instance requested-base
+        *h871-pf-v03-density-api-multiplier*))
     (return-from h871-pf-v03-run nil))
   (let ((matches nil)
         (entry nil)
