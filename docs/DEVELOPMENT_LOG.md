@@ -327,3 +327,13 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Resolved the UICT callback unbound-variable error by using a list-form :pushAction with an explicit nil argument and an optional callback parameter. The user confirmed Select All Pages works in Modeling 18.1.
 - Runtime status: Select All Pages confirmed; Clear All Pages and Apply All Pages still require independent user verification. Do not treat a trace status as proof of actual 3D selection.
 - Exact runtime-confirmed source commit: 415481d0a62a744d3b09cb7b0cc697b623b14716.
+
+## 2026-11-18 – Make Density API multiplier configurable
+
+- Recovered the historical confirmed scale mismatch: Part Properties 1/304 -> API 1000/304000; 2/400 -> 2000/400000.
+- Replaced the hard-coded /1000.0 normalization in the main Part Note All Pages source with one top-level setting: *h871-pf-v03-density-api-multiplier* = 1000.0.
+- Filter input values are now multiplied by the setting before comparison with raw API density values. Display values are divided by the same setting.
+- Added the active factor and expected raw Instance/Base values to the trace and result report for easier per-machine diagnosis.
+- Static Lisp check: balanced parentheses, no premature close, no unterminated string.
+- Commit: 925248a95f5a4317298491fd8039c07378ac05f8.
+- Runtime verification of the new configurable setting is pending in Creo Elements/Direct Modeling 18.1.
