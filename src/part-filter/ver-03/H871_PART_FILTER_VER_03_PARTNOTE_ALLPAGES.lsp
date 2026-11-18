@@ -1022,12 +1022,12 @@
        (sd-display-error "H871: Could not save the Part Note."))))
 
 ;; LOAD:
-;; (load "D:/HH871/05-TEST-LISP-PTC/H871_PART_FILTER_VER_03_PARTNOTE.lsp")
+;; (load "D:/HH871/05-TEST-LISP-PTC/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp")
 ;; COMMAND:
 ;; H871_PART_FILTER_VER_03
 ;;
 ;; RUNTIME TEST:
-;; 1. Search CNC + SUS304; expect a multi-column table in SUS304-CNC tab.
+;; 1. Search CNC + SUS304; expect a multi-column table in CNC-SUS304 tab.
 ;; 2. Search KH + A6061; expect a second tab in the same Results window.
 ;; 3. Repeat CNC + SUS304; expect that page to refresh without duplication.
 ;; 4. Click individual rows and Ctrl/Shift-select multiple rows.
