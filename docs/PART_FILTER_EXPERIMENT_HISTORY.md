@@ -160,3 +160,30 @@ Experimental ver-04/ver-05/ver-06/ver-07 implementation files are not canonical 
 - Confirm all required columns in Modeling 18.1.
 - Reconfirm row selection, Select All, Clear Selection and native Apply after any source change.
 - Do not mark the rebuild complete until the user confirms the full workflow.
+
+
+## 2026-11-18 – ver-03 Part Note with cross-page selection
+
+**Accepted development source:** src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp
+
+**Baseline and preservation:** Built from the user's exact ver-03-partnote baseline (H871_PART_FILTER_VER_03_PARTNOTE.lsp, main commit 4f84371351c4fdf3f1961873f7870d2a553b2f74). The original baseline remains unchanged. The feature is an additional source file, not an overwrite of ver-03 or ver-03-partnote.
+
+**Feature behavior:**
+- Preserves page-local Select All, Clear Selection, Apply and Edit Note.
+- Adds Select All Pages, Clear All Pages and Apply All Pages controls.
+- Select All Pages iterates the existing page registry and invokes the established page-local selection function for each page; it does not switch tabs or rebuild result pages.
+- Apply All Pages reads selected real Part objects from each page's hidden :part-object logical-table column, de-duplicates by eq, and routes the combined list through the existing Apply bridge.
+- The cross-page Apply path uses a nil pending-page sentinel so the completion handler can update statuses across pages.
+
+**Callback dispatch issue and resolution:** The first two UICT callback forms (bare symbol, then one-element list) both produced an unbound-variable error in Modeling 18.1. The working form uses a two-element list with an explicit nil argument, matching the existing page-scoped callbacks: (list 'callback-name nil). Each cross-page function accepts an optional callback argument. The user then confirmed that Select All Pages works.
+
+**Runtime evidence as of 2026-11-18:**
+- User confirms the cross-page Select All action now works in Modeling 18.1.
+- Existing page-local controls were reported stable during the test cycle.
+- Clear All Pages and Apply All Pages are present in source but have not yet been independently confirmed by the user; keep their status as pending runtime verification.
+- Do not infer that a trace :SUCCESS alone proves viewport selection. For Apply All Pages, the acceptance test remains observation of the actual 3D selection.
+
+**Commits on feature branch:**
+- ce2089bc6a14e530900cd796e18e6116e2cefa2c – initial cross-page implementation.
+- 7693ed8440091f8eb6413c90e0f8acf16c4b2bb3 – first callback-dispatch adjustment (not sufficient).
+- 415481d0a62a744d3b09cb7b0cc697b623b14716 – explicit nil callback argument, optional function argument and callback-entry traces; this is the runtime-confirmed source revision.

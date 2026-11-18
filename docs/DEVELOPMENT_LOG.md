@@ -318,3 +318,12 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Important current issue carried forward: user reports the native Browser rebuild opens Results but only Part Name is visible. Four source column definitions do not prove runtime table activation. The rebuild is not marked complete.
 - Git history is retained. Experimental branch refs were not deleted by this cleanup; current working source and consolidated knowledge are on `main`.
 - Runtime verification: not performed by this repository cleanup.
+
+
+## 2026-11-18 – ver-03 Part Note: Select All Pages
+
+- Started from the exact ver-03-partnote baseline at main commit 4f84371351c4fdf3f1961873f7870d2a553b2f74; the original source was preserved.
+- Added a separate H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp source with Select All Pages, Clear All Pages and Apply All Pages while retaining page-local controls and Edit Note.
+- Resolved the UICT callback unbound-variable error by using a list-form :pushAction with an explicit nil argument and an optional callback parameter. The user confirmed Select All Pages works in Modeling 18.1.
+- Runtime status: Select All Pages confirmed; Clear All Pages and Apply All Pages still require independent user verification. Do not treat a trace status as proof of actual 3D selection.
+- Exact runtime-confirmed source commit: 415481d0a62a744d3b09cb7b0cc697b623b14716.

@@ -34,3 +34,10 @@
 - Preserved ver-02, ver-03 UICT and ver-03 native Browser rebuild source references.
 - Retired ver-04/ver-05 experimental source files from the current main tree; ver-06/ver-07 lessons are documented rather than retained as code versions.
 - Standardized executable LISP/test/diagnostic code location under `src/`.
+
+
+## 2026-11-18 – Part Filter ver-03 Part Note / All Pages
+
+- Added a separate ver-03 Part Note source with cross-page Select All, Clear All and Apply All controls.
+- Preserved existing page-local selection/apply/note controls and the original ver-03-partnote baseline.
+- User-confirmed in Modeling 18.1: Select All Pages works. Clear All Pages and Apply All Pages remain pending independent runtime confirmation.

@@ -161,3 +161,16 @@ Do not keep every attempted LISP implementation as a permanent version. When an 
 ## LL-020 – Source definitions do not prove runtime UI activation (2026-11-17)
 
 A custom Browser table may contain four column definitions in source while the runtime Results window shows only Part Name. Never claim the columns are implemented merely because their definitions/callbacks exist. Inspect actual Browser mode, active table, table roots, activation return values and the full rendered window. Do not continue speculative lifecycle-order changes without a diagnostic result.
+
+
+## LL-021 – UICT pushAction needs an explicit argument list for zero-argument actions (2026-11-18)
+
+**Observed in Modeling 18.1:** The new cross-page button initially raised an unbound-variable error when its :pushAction was supplied as a bare quoted symbol. Wrapping the callback in a one-element list did not resolve the error.
+
+**Runtime-confirmed correction:** Use the same list-form dispatch pattern as the working page-scoped buttons, but supply an explicit second element (nil):
+- :pushAction (list 'h871-pf-v03-select-all-pages nil)
+- Define the callback with an optional argument, e.g. (defun h871-pf-v03-select-all-pages (&optional callback-arg) ...).
+
+The user confirmed that **Select All Pages** works after this correction in Creo Elements/Direct Modeling 18.1. The callback-entry trace is retained to distinguish dispatch failures from errors inside the function.
+
+**Prevention:** Do not assume a zero-argument symbol or one-element action list is accepted by UICT :pushAction. Match the known-working list-with-argument convention and verify the actual click in the target release. This finding is confirmed for this tested UICT control path; do not generalize to every callback API.
