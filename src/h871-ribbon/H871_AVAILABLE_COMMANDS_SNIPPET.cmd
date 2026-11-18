@@ -8,7 +8,7 @@
 ;; user_avail_cmds.cmd, back up that file first and preserve other entries.
 
 (:Application "SolidDesigner")
-(:Group "H871" :title "H871")
+(:Group "H871-TOOL" :title "H871-TOOL")
 
 ("H871 Part Filter - All Pages"
  :title "H871 Part Filter"
