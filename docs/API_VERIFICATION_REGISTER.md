@@ -168,3 +168,38 @@ PTC Graphical Browser documentation explicitly defines modeMenu as a row of togg
 - Source correction: resolve the root and each created Part node with `sd-get-browsernode-struct` before using them in Browser selection commands.
 - Static source check: balanced Lisp parentheses after commit `068ee4123b5aadf6cde5bce54321f1ee031ea064`.
 - Runtime status: not yet verified in Modeling 18.1. In particular, this does not establish that a hidden Graphical Browser can hand off selection to Modeling. Acceptance requires observing the intended Part(s) selected in the viewport.
+
+
+## J. Native Ribbon / Available Command integration – initial H871 package
+
+The H871 Ribbon starter package uses the Modeling Available Commands mechanism to expose the existing Part Filter dialog as a user-defined command. PTC's official Integration Kit documentation for Modeling 20.9 describes:
+- Available Command identity as Application + Group + Command.
+- A command `:action` may be a command string executed through the Modeling input buffer or a Lisp form evaluated on click.
+- `:image` resolves a BMP command icon from `bitmaps/bmp/commands/<image-name>.bmp` under the user customization directory (then site/corp/installation directories).
+- Available-command files use the Modeling application prefix and are read by a dedicated Modeling customization reader; they are **not** ordinary Lisp files and must not be loaded with `(load ...)`.
+- Modeling 18.0 introduced the Fluent Ribbon UI; the H871 package targets Modeling 18.1.
+
+H871 first command:
+- Application: `SolidDesigner`
+- Group: `H871`
+- Command: `H871 Part Filter - All Pages`
+- Action string: `h871_part_filter_ver_03` (the existing `sd-defdialog` command defined by the All Pages source)
+- Icon name: `H871/part_filter`
+
+Evidence classification:
+- **Later-release documentation:** PTC 20.9 Integration Kit customization guide.
+- **18.1 product context:** Fluent UI existed from 18.0; PTC 20.8 Modeling UI help describes Ribbon customization.
+- **Not runtime-confirmed:** Available Command registration, custom BMP discovery, Ribbon placement and button dispatch in the user's exact Modeling 18.1 installation.
+
+PTC references:
+- https://support.ptc.com/help/creo_elements_direct/r20.9.0.0/advanced_documentation/integration_kit/reference/advanced_cust.html
+- https://support.ptc.com/help/creo_elements_direct/r20.4.0.0/advanced_documentation/integration_kit/concepts/custom_ui.html
+- https://support.ptc.com/help/creo/ced_modeling/r20.8.0.0/en/ced_modeling/OSDM_Main/UI_Ribbon_Customize.html
+
+Repository implementation:
+- `src/h871-ribbon/README.md`
+- `src/h871-ribbon/H871_AVAILABLE_COMMANDS_SNIPPET.cmd`
+- `src/h871-ribbon/tools/Generate-H871Icon.ps1`
+- `src/h871-ribbon/INSTALL_AND_TEST.md`
+
+The first test deliberately has the user load the existing Part Filter Lisp source manually before clicking the Ribbon button. Automatic startup loading and deployment across multiple workstations are deferred until command registration and icon behavior are confirmed in Modeling 18.1.
