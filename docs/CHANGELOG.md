@@ -41,3 +41,10 @@
 - Added a separate ver-03 Part Note source with cross-page Select All, Clear All and Apply All controls.
 - Preserved existing page-local selection/apply/note controls and the original ver-03-partnote baseline.
 - User-confirmed in Modeling 18.1: Select All Pages works. Clear All Pages and Apply All Pages remain pending independent runtime confirmation.
+
+## 2026-11-18 – Configurable Density API multiplier
+
+- Added a single per-workstation Density API multiplier to Part Note All Pages (default 1000.0).
+- The multiplier is used consistently for both filter comparison and display normalization.
+- Added diagnostic trace/report output for the active multiplier and expected raw API values.
+- Static checks passed; Modeling 18.1 runtime verification pending.
