@@ -88,3 +88,16 @@ Read [Engineering Knowledge Base](docs/ENGINEERING_KNOWLEDGE_BASE.md), [API Veri
 ## 9. Other Creo knowledge
 
 The reusable skill package at `skills/creo-elements-direct-modeling/` preserves recovered knowledge beyond Part Filter, including Annotation sheet/frame macros, BOM layout customization, drawing arrangement, platform/language boundaries and debugging workflow. Do not copy confidential user-provided source dumps into this public repository; preserve technical summaries and provenance only.
+
+
+## 10. H871 Ribbon integration (2026-11-18)
+
+A first-phase native Ribbon integration package has been added under `src/h871-ribbon/`.
+
+- Existing Part Filter dialog entry point: `h871_part_filter_ver_03`.
+- Available Command identity: Application `SolidDesigner`, Group `H871`, Command `H871 Part Filter - All Pages`.
+- Button action invokes the existing dialog command; Part Filter core source is not modified.
+- Custom icon: `H871/part_filter`, generated as a 32×32 BMP by `src/h871-ribbon/tools/Generate-H871Icon.ps1`.
+- Follow `src/h871-ribbon/INSTALL_AND_TEST.md` to install and test.
+- First proof requires manually loading `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp`; automatic startup loading is deferred until the button is confirmed.
+- Current status: starter package and documentation committed; no Modeling 18.1 runtime test yet. Do not mark Ribbon integration complete until the icon appears and clicking it opens the Part Filter dialog.
