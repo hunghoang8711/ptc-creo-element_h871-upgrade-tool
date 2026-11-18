@@ -331,9 +331,9 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 ## 2026-11-18 – Make Density API multiplier configurable
 
 - Recovered the historical confirmed scale mismatch: Part Properties 1/304 -> API 1000/304000; 2/400 -> 2000/400000.
-- Replaced the hard-coded /1000.0 normalization in the main Part Note All Pages source with one top-level setting: *h871-pf-v03-density-api-multiplier* = 1000.0.
+- Replaced the hard-coded /1000.0 normalization in the main Part Note All Pages source with one top-level setting: (defparameter *h871-pf-v03-density-api-multiplier* 1000.0), so editing the value and reloading the file updates the active setting.
 - Filter input values are now multiplied by the setting before comparison with raw API density values. Display values are divided by the same setting.
 - Added the active factor and expected raw Instance/Base values to the trace and result report for easier per-machine diagnosis.
 - Static Lisp check: balanced parentheses, no premature close, no unterminated string.
-- Commit: 925248a95f5a4317298491fd8039c07378ac05f8.
+- Initial commit: 925248a95f5a4317298491fd8039c07378ac05f8; reload/validation correction: 15240e673769a6dedbbfce33149c1eb383f50ee9.
 - Runtime verification of the new configurable setting is pending in Creo Elements/Direct Modeling 18.1.
