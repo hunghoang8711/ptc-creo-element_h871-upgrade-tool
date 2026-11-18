@@ -38,6 +38,23 @@
 (defvar *h871-pf-v03-diagnostic-samples* nil)
 (defvar *h871-pf-v03-collect-visited-count* 0)
 
+;; ========================================================================
+;; MACHINE-SPECIFIC DENSITY API SCALE
+;; Edit ONLY this value when moving the tool to another Modeling workstation.
+;;
+;; Part Properties / filter input values stay in the familiar form:
+;;   Density Instance = 1, Density Base = 304
+;;
+;; In the previously tested workstation, the API returned values x1000:
+;;   UI 1 / 304  -> API 1000 / 304000
+;;   UI 2 / 400  -> API 2000 / 400000
+;;
+;; Therefore the default multiplier is 1000.0. If another workstation
+;; returns the same values as Part Properties, set this to 1.0.
+;; The same factor is applied to BOTH Instance and Base density values.
+;; ========================================================================
+(defvar *h871-pf-v03-density-api-multiplier* 1000.0)
+
 (defvar *h871-pf-v03-shell* "h871-pf-v03-results")
 (defvar *h871-pf-v03-grid* "h871-pf-v03-results-grid")
 (defvar *h871-pf-v03-tabs* "h871-pf-v03-tabs")
@@ -126,9 +143,17 @@
 (defun h871-pf-v03-as-number (value)
   (if (numberp value) value nil))
 
+;; Convert a Part Properties/filter value into the scale returned by Creo API.
+(defun h871-pf-v03-density-api-value (display-value)
+  (when (numberp display-value)
+    (* display-value *h871-pf-v03-density-api-multiplier*)))
+
+;; Convert a raw Creo API value back to the familiar Part Properties scale.
 (defun h871-pf-v03-density-display-value (api-value)
-  (when (numberp api-value)
-    (/ api-value 1000.0)))
+  (when (and (numberp api-value)
+             (numberp *h871-pf-v03-density-api-multiplier*)
+             (> *h871-pf-v03-density-api-multiplier* 0))
+    (/ api-value *h871-pf-v03-density-api-multiplier*)))
 
 (defun h871-pf-v03-numeric-equal-p (actual requested)
   (let ((a (h871-pf-v03-as-number actual))
@@ -145,8 +170,8 @@
     (h871-pf-v03-trace
       "COLLECT/PROGRESS"
       *h871-pf-v03-collect-visited-count*))
-  ;; Keep the ver-02 search semantics: compare numeric Density Instance and
-  ;; Density Base values after /1000 normalization; labels are never inputs.
+  ;; Keep the ver-02 exact-pair semantics. Scale the user-facing numeric inputs
+  ;; into the raw API scale using the one machine-specific multiplier above.
   (when (sd-inq-part-p obj)
     (let ((actual-instance (sd-inq-part-density obj :instance))
           (actual-base (sd-inq-part-density obj :contents)))
@@ -161,11 +186,11 @@
               (not (null actual-instance))
               (not (null actual-base))
               (h871-pf-v03-numeric-equal-p
-                (h871-pf-v03-density-display-value actual-instance)
-                requested-instance)
+                (h871-pf-v03-density-api-value requested-instance)
+                actual-instance)
               (h871-pf-v03-numeric-equal-p
-                (h871-pf-v03-density-display-value actual-base)
-                requested-base))
+                (h871-pf-v03-density-api-value requested-base)
+                actual-base))
         (push obj matches))))
   (dolist (child (sd-inq-obj-children obj))
     (setf matches
@@ -868,6 +893,9 @@
       (s report :direction :output :if-exists :supersede :if-does-not-exist :create)
       (format s "H871 PART FILTER VER-03-PARTNOTE - EXACT DENSITY PAIR~%")
       (format s "Assembly: ~A~%" (h871-pf-v03-path assembly))
+      (format s "Density API multiplier: ~A~%" *h871-pf-v03-density-api-multiplier*)
+      (format s "Expected raw API Instance: ~A~%" (h871-pf-v03-density-api-value requested-instance))
+      (format s "Expected raw API Base: ~A~%" (h871-pf-v03-density-api-value requested-base))
       (format s "Requested Density Instance: ~A~%" requested-instance)
       (format s "Requested Density Base: ~A~%" requested-base)
       (format s "~%RAW DENSITY SAMPLE (first 30 Parts)~%")
@@ -881,13 +909,16 @@
 (defun h871-pf-v03-run (assembly requested-instance requested-base)
   (h871-pf-v03-trace-reset)
   (h871-pf-v03-trace "RUN/BEGIN" (list (type-of assembly) requested-instance requested-base))
+  (h871-pf-v03-trace "DENSITY/API-MULTIPLIER" *h871-pf-v03-density-api-multiplier*)
   ;; Never use display labels as search criteria. Reject missing/non-numeric
   ;; dialog values before touching the assembly or creating any UI.
   (unless (and (numberp requested-instance)
-               (numberp requested-base))
+               (numberp requested-base)
+               (numberp *h871-pf-v03-density-api-multiplier*)
+               (> *h871-pf-v03-density-api-multiplier* 0))
     (sd-display-error
       (format nil
-        "H871 ver-03: Invalid numeric filter values. Density Instance=~S; Density Base=~S. Expected numeric codes such as 1 and 304."
+        "H871 ver-03: Invalid density settings. Instance=~S; Base=~S; API multiplier=~S. Filter values must be numeric and API multiplier must be greater than zero."
         requested-instance requested-base))
     (return-from h871-pf-v03-run nil))
   (let ((matches nil)
