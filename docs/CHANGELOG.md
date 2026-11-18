@@ -65,3 +65,11 @@
 - Updated the Ribbon installation guide with the confirmed sequence: register the command first, then add it to a custom Ribbon group.
 - Updated the package README and project context to distinguish confirmed runtime behavior from future startup-loading/deployment work.
 - No Part Filter Lisp core changes were required.
+
+
+## 2026-11-18 – H871 portable installer release 0.1
+
+- Added a safe PowerShell installer for copying the canonical Part Filter Lisp, command reference and generated icon to a second workstation.
+- Added timestamped backups for explicit replacement and fail-safe behavior when targets already exist.
+- Added portable installation instructions and a scope/verification checklist.
+- Kept command registration, Ribbon placement and startup LOAD outside installer automation to protect existing Modeling 18.1 user customization.
