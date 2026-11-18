@@ -337,3 +337,12 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Static Lisp check: balanced parentheses, no premature close, no unterminated string.
 - Initial commit: 925248a95f5a4317298491fd8039c07378ac05f8; reload/validation correction: 15240e673769a6dedbbfce33149c1eb383f50ee9.
 - Runtime verification of the new configurable setting is pending in Creo Elements/Direct Modeling 18.1.
+
+
+## 2026-11-18 – H871 native Ribbon integration starter
+
+- Inspected the exact current Part Note All Pages source and confirmed its public command entry is `h871_part_filter_ver_03`; no Part Filter logic was modified.
+- Added `src/h871-ribbon/` with an Available Command definition snippet, installation/acceptance procedure, and a PowerShell script that generates a 32×32 BMP icon in the Modeling customization icon folder.
+- Chosen first action: call the existing dialog command after the core Lisp file has been loaded. This isolates Ribbon dispatch from automatic Lisp startup loading.
+- PTC later-release Integration Kit documentation describes the Available Commands mechanism, action strings, icon lookup and user customization storage. Fluent UI was introduced in Modeling 18.0.
+- Static review only. No Modeling 18.1 load, command registration, icon rendering or Ribbon click test has been performed. Automatic startup loading remains deferred.
