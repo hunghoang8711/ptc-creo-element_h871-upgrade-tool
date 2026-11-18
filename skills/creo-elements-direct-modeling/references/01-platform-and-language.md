@@ -40,3 +40,12 @@ This is a separate command/macro language used by the Annotation module. Uploade
 - A preliminary `measure_export.lsp` and `measure_export_avail_cmds.cmd` concept was discussed on 2026-10-09.
 - Real geometry measurement APIs, units, edge/face/axis selection and 18.1 syntax were not verified.
 - Do not resurrect the draft as production code without first identifying a documented and tested inquiry path and a small test model.
+
+
+## Native Ribbon / Available Commands
+- Modeling's Fluent UI was introduced in Creo Elements/Direct Modeling 18.0; the target 18.1 generation therefore has a Ribbon-based UI.
+- PTC later-release Integration Kit documentation describes Available Commands as the basis for Ribbon/toolbars/context menus. Command identity is Application + Group + Command; an action string is sent through the Modeling input buffer; a custom icon is a BMP resolved under `bitmaps/bmp/commands/` in the customization directory.
+- Available Command customization files are not normal Lisp files. Do not load a `.cmd` definition using Lisp `(load ...)`.
+- For H871's first integration test, preserve the Part Filter core and create one user-defined command whose action is `h871_part_filter_ver_03`. Keep automatic startup loading deferred until the command and icon have been confirmed in the exact 18.1 installation.
+- Current package and test procedure: `src/h871-ribbon/README.md` and `src/h871-ribbon/INSTALL_AND_TEST.md`.
+- Evidence note: detailed file syntax and icon search behavior are from later-release documentation; exact 18.1 behavior still requires user runtime confirmation.
