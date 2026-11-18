@@ -360,3 +360,14 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Updated `src/h871-ribbon/README.md` and project status to remove the obsolete "runtime test pending" statement.
 - Scope remains unchanged: the Ribbon button calls the existing Lisp dialog; the Lisp source must already be loaded in the current session. Automatic startup loading and multi-workstation deployment are future work.
 - No Part Filter Lisp source was modified for this Ribbon documentation update.
+
+
+## 2026-11-18 – H871 portable installer release 0.1
+
+- Inspected canonical main branch at 0b576ff8bb1f5c7f22b8bdaff0f8065095a6c5eb before implementation.
+- Added a Windows PowerShell installer under src/h871-ribbon/portable/.
+- Installer copies the canonical Part Note / All Pages Lisp source and Available Command reference, calls the existing icon generator for a user-selected Modeling customization directory, and writes a LOAD instruction file with the resolved install path.
+- Existing destinations stop installation by default. Explicit -Force backs up existing files into a timestamped folder before replacement.
+- Deliberately does not modify user_avail_cmds.cmd, sd_avail_cmds.cmd, Ribbon customization or startup files. Command registration and Ribbon placement remain manual in Modeling 18.1 because cross-machine import/export behavior has not been verified for this version.
+- Added portable installation guide and scope/acceptance checklist. No Part Filter Lisp core was modified.
+- Verification boundary: repository content and installer logic reviewed; Windows PowerShell execution and second-workstation Modeling 18.1 runtime test remain pending. Do not describe this as a one-click Ribbon installer yet.
