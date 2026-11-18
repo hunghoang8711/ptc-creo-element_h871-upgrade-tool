@@ -191,3 +191,10 @@ Target is one standalone visible Results Browser combining Stage 0 native select
 **Next diagnostic:** inspect the complete Results window and runtime values for Browser table mode, active table, table roots, table definition result and table activation result. Also determine whether horizontal scrolling/column width hides columns. Do not alter Density collection, mapping, selection or Apply while diagnosing table visibility.
 
 **Status:** unresolved; not runtime-fixed.
+
+
+## KI-011 – H871 Ribbon command and icon runtime compatibility
+
+- **Status:** Starter package implemented; Modeling 18.1 runtime test pending.
+- **Details:** The package defines an Available Command for the existing `h871_part_filter_ver_03` dialog and a custom BMP icon generator. Current evidence for Available Command file syntax and icon search path comes from later-release PTC Integration Kit documentation. The user's exact 18.1 Customize UI labels, command registration, custom icon discovery and button dispatch have not yet been tested.
+- **Next step:** Follow `src/h871-ribbon/INSTALL_AND_TEST.md` on a disposable model. Capture the Customize UI screenshot or exact error if any step differs. Do not add automatic startup loading until the button successfully opens the existing dialog.
