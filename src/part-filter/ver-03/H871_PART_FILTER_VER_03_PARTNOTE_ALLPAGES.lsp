@@ -730,21 +730,21 @@
       tab-grid
       :x 0 :y 49 :width 27 :height 3
       :title "Select All Pages"
-      :pushAction 'h871-pf-v03-select-all-pages)
+      :pushAction (list 'h871-pf-v03-select-all-pages))
 
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-CLEAR-ALL-PAGES-PB")
       tab-grid
       :x 28 :y 49 :width 27 :height 3
       :title "Clear All Pages"
-      :pushAction 'h871-pf-v03-clear-all-pages)
+      :pushAction (list 'h871-pf-v03-clear-all-pages))
 
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-APPLY-ALL-PAGES-PB")
       tab-grid
       :x 56 :y 49 :width 30 :height 3
       :title "Apply All Pages"
-      :pushAction 'h871-pf-v03-apply-all-pages)
+      :pushAction (list 'h871-pf-v03-apply-all-pages))
 
     (push
       (list :instance instance :base base :label label
