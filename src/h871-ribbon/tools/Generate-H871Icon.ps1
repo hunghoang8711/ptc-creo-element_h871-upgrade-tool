@@ -15,16 +15,14 @@ $iconDirectory = Join-Path $CustomizationDirectory "bitmaps\bmp\commands\H871"
 New-Item -ItemType Directory -Path $iconDirectory -Force | Out-Null
 $iconPath = Join-Path $iconDirectory "part_filter.bmp"
 
-$bitmap = New-Object System.Drawing.Bitmap 32, 32, ([System.Drawing.Imaging.PixelFormat]::Format24bppRgb)
+$bitmap = [System.Drawing.Bitmap]::new(32, 32, [System.Drawing.Imaging.PixelFormat]::Format24bppRgb)
 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
 $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 $graphics.Clear([System.Drawing.Color]::FromArgb(22, 48, 76))
 
-$navy = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(22, 48, 76))
 $cyan = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(53, 190, 205))
-$white = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::White)
-$pen = New-Object System.Drawing.Pen ([System.Drawing.Color]::FromArgb(53, 190, 205), 2.2)
-$font = New-Object System.Drawing.Font "Arial", 18, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
+$pen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(53, 190, 205), 2.2)
+$font = [System.Drawing.Font]::new("Arial", 18, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
 
 # Simple H mark + filter bars: readable at small toolbar sizes.
 $graphics.FillRectangle($cyan, 4, 5, 4, 22)
@@ -39,9 +37,7 @@ $bitmap.Save($iconPath, [System.Drawing.Imaging.ImageFormat]::Bmp)
 
 $font.Dispose()
 $pen.Dispose()
-$white.Dispose()
 $cyan.Dispose()
-$navy.Dispose()
 $graphics.Dispose()
 $bitmap.Dispose()
 
