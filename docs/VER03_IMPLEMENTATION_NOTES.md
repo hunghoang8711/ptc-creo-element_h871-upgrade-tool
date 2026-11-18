@@ -162,3 +162,25 @@ No changes were made to Density filtering, result-table construction, tabs, logi
 - API contract cross-checked against PTC official Integration Kit 20.7 Graphical Browser reference.
 - Existing ver-02 source provides project-level evidence that `sd-get-browsernode-struct` is used.
 - Modeling 18.1 runtime Apply test remains mandatory. Test one selected Part and multiple selected Parts; verify only those Parts are selected.
+
+
+## 2026-11-18 – ver-03 Part Note: cross-page selection extension
+
+**Source:** src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp  
+**Baseline:** H871_PART_FILTER_VER_03_PARTNOTE.lsp, main commit 4f84371351c4fdf3f1961873f7870d2a553b2f74  
+**Runtime-confirmed source revision:** 415481d0a62a744d3b09cb7b0cc697b623b14716
+
+### Added controls
+- **Select All Pages** – selects every row on every existing Density-pair page while preserving page-local Select All.
+- **Clear All Pages** – clears selections on all pages.
+- **Apply All Pages** – aggregates selected real Part objects from all pages and uses the existing Apply hand-off path.
+
+### Callback dispatch finding
+Modeling 18.1 reported an unbound-variable error when the UICT :pushAction was authored as a bare symbol. A one-element list was also insufficient. The successful form supplies an explicit nil argument in a two-element list, and the target function accepts an optional argument. The user confirmed the Select All Pages click now executes successfully.
+
+### Runtime status
+- **Confirmed by user:** Select All Pages works in Creo Elements/Direct Modeling 18.1.
+- **Reported stable:** existing page-local functions remained stable during this test cycle.
+- **Not yet independently confirmed:** Clear All Pages and Apply All Pages. Verify Clear All by checking all page selection counts return to zero. Verify Apply All by observing the actual 3D viewport selection, not only a trace or callback return value.
+
+The source is an additional versioned file. The original H871_PART_FILTER_VER_03_PARTNOTE.lsp and ver-02/ver-03 baselines remain untouched.
