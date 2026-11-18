@@ -94,7 +94,7 @@ The reusable skill package at `skills/creo-elements-direct-modeling/` preserves 
 
 A first-phase native Ribbon integration package has been added under `src/h871-ribbon/`.
 
-- Existing Part Filter dialog entry point: `h871_part_filter_ver_03`.
+- Existing Part Filter dialog entry point: `H871_PART_FILTER_VER_03`.
 - Available Command identity: Application `SolidDesigner`, Group `H871`, Command `H871 Part Filter - All Pages`.
 - Button action invokes the existing dialog command; Part Filter core source is not modified.
 - Custom icon: `H871/part_filter`, generated as a 32×32 BMP by `src/h871-ribbon/tools/Generate-H871Icon.ps1`.
