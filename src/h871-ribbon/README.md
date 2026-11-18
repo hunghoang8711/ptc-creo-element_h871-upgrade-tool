@@ -7,7 +7,7 @@ This package adds a native Modeling user-defined command that can be placed on a
 ## Phase 1 scope
 
 - Register one command: **H871 Part Filter – All Pages**.
-- Command action: `h871_part_filter_ver_03`.
+- Command action: `H871_PART_FILTER_VER_03`.
 - Optional custom BMP icon: `H871/part_filter`.
 - User places the command on a custom H871 Ribbon group through Modeling's Customize UI.
 - The existing Part Filter source remains the executable core.
