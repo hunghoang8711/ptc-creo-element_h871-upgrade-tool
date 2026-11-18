@@ -69,3 +69,7 @@ Work on `main`. Do not create a branch per version. Store source in `src/<tool>/
 ## Skill references
 
 The reference files below are the accumulated project-specific knowledge. They deliberately distinguish confirmed facts from unverified ideas.
+
+
+## Native Ribbon integration
+When adding a button/icon for a Modeling Lisp tool, inspect `docs/API_VERIFICATION_REGISTER.md` section J and `src/h871-ribbon/INSTALL_AND_TEST.md`. Preserve the Lisp core, register a user-defined Available Command, and test command dispatch/icon rendering in the exact Modeling 18.1 installation before adding automatic startup loading. Never treat a later-release customization manual as proof of 18.1 runtime compatibility.
