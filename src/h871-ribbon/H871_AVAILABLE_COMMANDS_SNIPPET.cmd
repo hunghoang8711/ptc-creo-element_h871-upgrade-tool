@@ -12,7 +12,7 @@
 
 ("H871 Part Filter - All Pages"
  :title "H871 Part Filter"
- :action "h871_part_filter_ver_03"
+ :action "H871_PART_FILTER_VER_03"
  :description "Open the H871 Part Filter with Part Note and cross-page selection."
  :image "H871/part_filter"
  :ui-behavior :default)
