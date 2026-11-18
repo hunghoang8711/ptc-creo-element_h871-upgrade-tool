@@ -92,12 +92,35 @@ The reusable skill package at `skills/creo-elements-direct-modeling/` preserves 
 
 ## 10. H871 Ribbon integration (2026-11-18)
 
-A first-phase native Ribbon integration package has been added under `src/h871-ribbon/`.
+A first-phase native Ribbon integration package is available under `src/h871-ribbon/`.
 
-- Existing Part Filter dialog entry point: `H871_PART_FILTER_VER_03`.
-- Available Command identity: Application `SolidDesigner`, Group `H871`, Command `H871 Part Filter - All Pages`.
-- Button action invokes the existing dialog command; Part Filter core source is not modified.
-- Custom icon: `H871/part_filter`, generated as a 32×32 BMP by `src/h871-ribbon/tools/Generate-H871Icon.ps1`.
-- Follow `src/h871-ribbon/INSTALL_AND_TEST.md` to install and test.
-- First proof requires manually loading `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp`; automatic startup loading is deferred until the button is confirmed.
-- Current status: starter package and documentation committed; no Modeling 18.1 runtime test yet. Do not mark Ribbon integration complete until the icon appears and clicking it opens the Part Filter dialog.
+### Confirmed Modeling 18.1 runtime state
+
+The user has completed and confirmed the end-to-end UI workflow:
+
+- The existing Part Filter Lisp source is loaded and works normally.
+- The H871 user-defined command is saved in Modeling's Customize / Commands interface.
+- The command appears in the custom command group `H871-TOOL`.
+- The user created a custom Ribbon group/tool and placed the H871 command on it.
+- The Ribbon button is visible and clicking it successfully opens the existing H871 Part Filter dialog.
+
+This is user-confirmed runtime behavior in the target application, not merely a source-level or later-release documentation claim.
+
+### Command configuration
+
+- Existing dialog entry point: `H871_PART_FILTER_VER_03`.
+- Available Command application: `SolidDesigner`.
+- User-defined command: `H871 Part Filter - All Pages`.
+- Display title: `H871 Part Filter`.
+- User's Customize command group: `H871-TOOL`.
+- Icon resource: `H871/part_filter`, generated as a 32×32 BMP by `src/h871-ribbon/tools/Generate-H871Icon.ps1`.
+- The Ribbon wrapper calls the existing dialog; no Part Filter Lisp core rewrite was required.
+
+### Installation and lifecycle boundary
+
+- Follow `src/h871-ribbon/INSTALL_AND_TEST.md` for the detailed procedure.
+- The process has two distinct UI stages: (1) save/register the user-defined command in Customize / Commands, then (2) create/select a Ribbon tab/group and add the saved command to it.
+- The current workflow requires the Lisp source to have been loaded in the active Modeling session before clicking the Ribbon button.
+- Automatic startup loading and multi-workstation deployment are not implemented yet.
+- Successful Ribbon dispatch does not prove every Part Filter function. Regression-test Search, selection, Apply, Edit Note and cross-page controls separately after changes to the Lisp core.
+- Preserve factory and existing user customization files. Never overwrite `sd_avail_cmds.cmd`, an existing `user_avail_cmds.cmd`, or unrelated Ribbon customization files.
