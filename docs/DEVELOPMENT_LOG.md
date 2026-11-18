@@ -346,3 +346,17 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Chosen first action: call the existing dialog command after the core Lisp file has been loaded. This isolates Ribbon dispatch from automatic Lisp startup loading.
 - PTC later-release Integration Kit documentation describes the Available Commands mechanism, action strings, icon lookup and user customization storage. Fluent UI was introduced in Modeling 18.0.
 - Static review only. No Modeling 18.1 load, command registration, icon rendering or Ribbon click test has been performed. Automatic startup loading remains deferred.
+
+
+## 2026-11-18 – H871 Ribbon command and tool confirmed in Modeling 18.1
+
+- User confirmed that the existing Part Filter Lisp source had already been loaded and was working normally.
+- User saved the H871 user-defined command through Modeling's Customize / Commands interface.
+- The command appeared in the newly created custom command group `H871-TOOL`.
+- User then created the Ribbon group/tool in the Modeling UI and confirmed that the Ribbon button is present and works.
+- Clicking the Ribbon button successfully launches the existing H871 Part Filter dialog.
+- This is direct user runtime confirmation of command registration, Ribbon placement and command dispatch in the target Modeling 18.1 installation.
+- Updated `src/h871-ribbon/INSTALL_AND_TEST.md` with a detailed two-stage procedure: register/save the user-defined command first, then place it into a custom Ribbon tab/group.
+- Updated `src/h871-ribbon/README.md` and project status to remove the obsolete "runtime test pending" statement.
+- Scope remains unchanged: the Ribbon button calls the existing Lisp dialog; the Lisp source must already be loaded in the current session. Automatic startup loading and multi-workstation deployment are future work.
+- No Part Filter Lisp source was modified for this Ribbon documentation update.
