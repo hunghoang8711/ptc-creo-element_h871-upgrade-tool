@@ -44,7 +44,7 @@
 
 ## 2026-11-18 – Configurable Density API multiplier
 
-- Added a single per-workstation Density API multiplier to Part Note All Pages (default 1000.0).
+- Added a single per-workstation Density API multiplier to Part Note All Pages (default 1000.0), re-applied on every file load.
 - The multiplier is used consistently for both filter comparison and display normalization.
 - Added diagnostic trace/report output for the active multiplier and expected raw API values.
 - Static checks passed; Modeling 18.1 runtime verification pending.
