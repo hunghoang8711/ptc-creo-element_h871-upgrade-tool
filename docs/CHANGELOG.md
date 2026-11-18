@@ -48,3 +48,11 @@
 - The multiplier is used consistently for both filter comparison and display normalization.
 - Added diagnostic trace/report output for the active multiplier and expected raw API values.
 - Static checks passed; Modeling 18.1 runtime verification pending.
+
+
+## 2026-11-18 – H871 Ribbon integration starter
+
+- Added a native Available Command definition for the existing Part Filter All Pages dialog.
+- Added a PowerShell icon generator and first-install/runtime acceptance instructions.
+- Preserved the Part Filter Lisp source unchanged; the initial Ribbon test requires manual LOAD of the core source.
+- Modeling 18.1 runtime verification pending.
