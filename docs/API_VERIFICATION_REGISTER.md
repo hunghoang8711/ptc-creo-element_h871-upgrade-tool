@@ -183,7 +183,7 @@ H871 first command:
 - Application: `SolidDesigner`
 - Group: `H871`
 - Command: `H871 Part Filter - All Pages`
-- Action string: `h871_part_filter_ver_03` (the existing `sd-defdialog` command defined by the All Pages source)
+- Action string: `H871_PART_FILTER_VER_03` (the existing `sd-defdialog` command defined by the All Pages source)
 - Icon name: `H871/part_filter`
 
 Evidence classification:
