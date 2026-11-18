@@ -174,3 +174,19 @@ A custom Browser table may contain four column definitions in source while the r
 The user confirmed that **Select All Pages** works after this correction in Creo Elements/Direct Modeling 18.1. The callback-entry trace is retained to distinguish dispatch failures from errors inside the function.
 
 **Prevention:** Do not assume a zero-argument symbol or one-element action list is accepted by UICT :pushAction. Match the known-working list-with-argument convention and verify the actual click in the target release. This finding is confirmed for this tested UICT control path; do not generalize to every callback API.
+
+## LL-022 – Density API scale must be configurable per workstation (2026-11-18)
+
+**Historical runtime evidence:** Part Properties showed Density Instance/Base 1/304 while the tested Modeling API returned 1000/304000. A second confirmed example was 2/400 -> 2000/400000. The old Part Filter source hard-coded division by 1000.0.
+
+**Implementation rule:** In the Part Note All Pages source, maintain one clearly marked setting near the top:
+`*h871-pf-v03-density-api-multiplier*` (default 1000.0). Multiply both user-facing Instance and Base filter inputs by this factor before comparing with raw `sd-inq-part-density` results. Divide raw API values by the same factor only for human-readable table display.
+
+**Per-machine adjustment:**
+- API returns 1000/304000 for UI 1/304 -> set 1000.0.
+- API returns 1/304 directly -> set 1.0.
+- Do not edit multiple conversion expressions; change only the single configuration value.
+- Keep Instance and Base on the same factor unless separate measured evidence proves otherwise.
+- Do not infer a workstation's factor from its UI labels. Capture raw values for both :instance and :contents on a known Part.
+
+**Validation:** Static Lisp syntax check passed for commit 925248a95f5a4317298491fd8039c07378ac05f8. Creo 18.1 runtime test of the configurable factor is still required; do not claim cross-workstation compatibility until tested.
