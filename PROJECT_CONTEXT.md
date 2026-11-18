@@ -30,7 +30,7 @@ The ver-03 UICT source and the ver-03 native Browser rebuild are different imple
 - The most recent change to table activation order did not improve the runtime result.
 - The native Browser rebuild remains **not complete**. Do not make further speculative lifecycle-order changes. First add targeted runtime diagnostics for actual Browser mode, active table, table roots and table-definition/activation return values, and inspect the entire Results window including horizontal scroll state.
 - Separately, the ver-03 Part Note UICT extension includes cross-page Select All / Clear All / Apply All. The user confirmed Select All Pages works in Modeling 18.1 on source revision 415481d0a62a744d3b09cb7b0cc697b623b14716. Clear All Pages and Apply All Pages remain pending separate runtime verification.
-- Density API scaling is now configurable in the main Part Note All Pages source via `*h871-pf-v03-density-api-multiplier*` (default 1000.0). The new conversion code is static-checked but its runtime behavior has not yet been tested in Creo 18.1.
+- Density API scaling is now configurable in the main Part Note All Pages source via `*h871-pf-v03-density-api-multiplier*` (a `defparameter`, re-applied whenever the LISP file is loaded) (default 1000.0). The new conversion code is static-checked but its runtime behavior has not yet been tested in Creo 18.1.
 - Row selection, Select All, Clear Selection and native Apply must be regression-tested after any change. Do not assume they still work merely because Results opens.
 
 ## 4. Filter mapping and invariant
@@ -47,7 +47,7 @@ Material convention → Density Base:
 Historical tested API values were 1000 times the Part Properties values:
 - UI 1/304 ↔ API 1000/304000.
 - UI 2/400 ↔ API 2000/400000.
-- The Part Note All Pages source now uses `*h871-pf-v03-density-api-multiplier*` (default 1000.0): multiply filter inputs before comparing with raw API values, and divide only when displaying them. Set to 1.0 on a workstation where API values match Part Properties directly.
+- The Part Note All Pages source now uses `*h871-pf-v03-density-api-multiplier*` (a `defparameter`, re-applied whenever the LISP file is loaded) (default 1000.0): multiply filter inputs before comparing with raw API values, and divide only when displaying them. Set to 1.0 on a workstation where API values match Part Properties directly.
 
 These labels are user-defined mappings; the Material selector does not read the Part's actual Material property. Never replace numeric filter inputs with labels such as CNC-SUS304. Never weaken the AND predicate or invent a missing Density Instance value.
 
