@@ -22,7 +22,6 @@ $graphics.Clear([System.Drawing.Color]::FromArgb(22, 48, 76))
 
 $cyan = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(53, 190, 205))
 $pen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(53, 190, 205), 2.2)
-$font = [System.Drawing.Font]::new("Arial", 18, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
 
 # Simple H mark + filter bars: readable at small toolbar sizes.
 $graphics.FillRectangle($cyan, 4, 5, 4, 22)
@@ -35,7 +34,6 @@ $graphics.DrawLine($pen, 22, 20, 28, 20)
 
 $bitmap.Save($iconPath, [System.Drawing.Imaging.ImageFormat]::Bmp)
 
-$font.Dispose()
 $pen.Dispose()
 $cyan.Dispose()
 $graphics.Dispose()
