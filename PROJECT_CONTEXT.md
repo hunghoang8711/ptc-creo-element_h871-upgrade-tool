@@ -1,6 +1,6 @@
 # H871 Upgrade Tools – Project Context
 
-**Last consolidated:** 2026-11-17  
+**Last consolidated:** 2026-11-18  
 **Target application:** PTC Creo Elements/Direct Modeling 18.1  
 **Canonical branch:** `main`  
 **Repository:** `hunghoang8711/ptc-creo-element_h871-upgrade-tool`
@@ -20,13 +20,13 @@ Build reliable, reusable LISP tools for Creo Elements/Direct Modeling 18.1. This
 
 The ver-03 UICT source and the ver-03 native Browser rebuild are different implementation paths. Do not conflate their runtime results or Apply behavior.
 
-## 3. Current runtime status (2026-11-17)
+## 3. Current runtime status (2026-11-18)
 
 - User reports that the current native Browser rebuild opens the Results window.
 - The Results window displays only the Part Name column. Density Instance, Density Base and Assembly Path are not visible.
 - The source contains four custom column definitions, but source presence is not proof that the custom table is active or rendered.
 - The most recent change to table activation order did not improve the runtime result.
-- The rebuild is **not complete**. Do not make further speculative lifecycle-order changes. First add targeted runtime diagnostics for actual Browser mode, active table, table roots and table-definition/activation return values, and inspect the entire Results window including horizontal scroll state.
+- The native Browser rebuild remains **not complete**. Do not make further speculative lifecycle-order changes. First add targeted runtime diagnostics for actual Browser mode, active table, table roots and table-definition/activation return values, and inspect the entire Results window including horizontal scroll state.\n- Separately, the ver-03 Part Note UICT extension includes cross-page Select All / Clear All / Apply All. The user confirmed Select All Pages works in Modeling 18.1 on source revision 415481d0a62a744d3b09cb7b0cc697b623b14716. Clear All Pages and Apply All Pages remain pending separate runtime verification.
 - Row selection, Select All, Clear Selection and native Apply must be regression-tested after any change. Do not assume they still work merely because Results opens.
 
 ## 4. Filter mapping and invariant
