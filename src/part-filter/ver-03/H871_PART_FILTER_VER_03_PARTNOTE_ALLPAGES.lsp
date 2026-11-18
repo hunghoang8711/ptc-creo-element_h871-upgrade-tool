@@ -301,7 +301,8 @@
 
 ;; Cross-page selection actions deliberately operate on each existing table
 ;; independently. They do not switch tabs or rebuild/refresh any result page.
-(defun h871-pf-v03-select-all-pages ()
+(defun h871-pf-v03-select-all-pages (&optional callback-arg)
+  (h871-pf-v03-trace "SELECT-ALL-PAGES/CALLBACK-ENTER" callback-arg)
   (dolist (entry *h871-pf-v03-pages*)
     (h871-pf-v03-select-all (getf entry :page)))
   (sd-display-message
@@ -309,7 +310,8 @@
       (length *h871-pf-v03-pages*)))
   t)
 
-(defun h871-pf-v03-clear-all-pages ()
+(defun h871-pf-v03-clear-all-pages (&optional callback-arg)
+  (h871-pf-v03-trace "CLEAR-ALL-PAGES/CALLBACK-ENTER" callback-arg)
   (dolist (entry *h871-pf-v03-pages*)
     (h871-pf-v03-clear-selection (getf entry :page)))
   (sd-display-message
@@ -535,7 +537,8 @@
     (when entry
       (h871-pf-v03-apply (getf entry :page)))))
 
-(defun h871-pf-v03-apply-all-pages ()
+(defun h871-pf-v03-apply-all-pages (&optional callback-arg)
+  (h871-pf-v03-trace "APPLY-ALL-PAGES/CALLBACK-ENTER" callback-arg)
   (let ((parts (h871-pf-v03-collect-selected-parts-all-pages)))
     (h871-pf-v03-trace "APPLY/ALL-PAGES-SELECTION"
       (list (length *h871-pf-v03-pages*) (length parts)))
@@ -730,21 +733,21 @@
       tab-grid
       :x 0 :y 49 :width 27 :height 3
       :title "Select All Pages"
-      :pushAction (list 'h871-pf-v03-select-all-pages))
+      :pushAction (list 'h871-pf-v03-select-all-pages nil))
 
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-CLEAR-ALL-PAGES-PB")
       tab-grid
       :x 28 :y 49 :width 27 :height 3
       :title "Clear All Pages"
-      :pushAction (list 'h871-pf-v03-clear-all-pages))
+      :pushAction (list 'h871-pf-v03-clear-all-pages nil))
 
     (sd-create-pushbutton-control
       (concatenate 'string page-name "-APPLY-ALL-PAGES-PB")
       tab-grid
       :x 56 :y 49 :width 30 :height 3
       :title "Apply All Pages"
-      :pushAction (list 'h871-pf-v03-apply-all-pages))
+      :pushAction (list 'h871-pf-v03-apply-all-pages nil))
 
     (push
       (list :instance instance :base base :label label
