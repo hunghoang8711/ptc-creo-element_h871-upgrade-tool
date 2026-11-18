@@ -40,7 +40,7 @@ Use Modeling's Customize interface (the exact menu wording can vary slightly by 
 | Group | `H871` |
 | Command name | `H871 Part Filter - All Pages` |
 | Title / Tooltip | `H871 Part Filter` |
-| Action / Command text | `h871_part_filter_ver_03` |
+| Action / Command text | `H871_PART_FILTER_VER_03` |
 | Description | `Open the H871 Part Filter with Part Note and cross-page selection.` |
 | Icon | Browse to the generated `part_filter.bmp` |
 
