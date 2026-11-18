@@ -33,3 +33,14 @@ This package exposes the existing H871 Part Filter Lisp dialog as a native user-
 The confirmed button dispatches the existing dialog command. The Lisp core must already be loaded in the current Modeling session. Automatic startup loading and multi-workstation deployment are future phases, not part of this confirmed implementation.
 
 Keep factory customization files and existing user customization files safe. Never replace `sd_avail_cmds.cmd`, an existing `user_avail_cmds.cmd`, or unrelated Ribbon customization files just to install this tool.
+
+
+## Portable installation helper (release 0.1)
+
+A safe copy-based installer is available under portable/:
+
+- portable/Install-H871.ps1 – copies the canonical Lisp source and command reference, generates the icon in a user-selected customization directory, and writes the exact LOAD expression.
+- portable/README_INSTALL.txt – workstation transfer and installation instructions.
+- portable/INSTALLER_SCOPE.md – scope, safety behavior and acceptance checklist.
+
+The installer stops if target files already exist. Use -Force only when replacement is intended; existing targets are backed up first. It does not write to user_avail_cmds.cmd, sd_avail_cmds.cmd or Ribbon customization files. Command registration and Ribbon placement remain manual through Modeling 18.1 Customize UI. Manual LOAD remains required in each session.
