@@ -20,8 +20,11 @@ A durable, cross-chat reference for Creo Elements/Direct Modeling 18.1 LISP deve
 - In the tested workflow, raw API values are 1000 times the Part Properties display values. Examples:
   - UI Instance/Base 1/304 → API raw 1000/304000.
   - UI Instance/Base 2/400 → API raw 2000/400000.
-- The current Part Filter normalizes these Density values by dividing by 1000.
-- Do not apply this conversion to any other property without independently checking its scale and units.
+- The Part Note All Pages source now exposes one machine-specific configuration value near the top of the file: `*h871-pf-v03-density-api-multiplier*` (default `1000.0`).
+- User/filter inputs are multiplied by this factor before comparison with raw API values; displayed table values are divided by the same factor.
+- Historical workstation: factor 1000.0 (e.g. 1/304 -> API 1000/304000). A workstation whose API returns the Part Properties values directly should use 1.0.
+- Apply the same factor to Instance and Base only for this Density API workflow. Do not apply it to any other property without independently checking its scale and units.
+- The configurable implementation is committed on main in `925248a95f5a4317298491fd8039c07378ac05f8`; runtime verification on the target machine is still pending.
 
 ### Assembly traversal and Part identification
 - The current implementation recursively traverses `(sd-inq-obj-children obj)`.
