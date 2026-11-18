@@ -27,6 +27,7 @@ The latest native Browser rebuild opens Results, but the user reports that only 
 - `src/part-filter/ver-03/` – preserved UICT/internal-tab reference source.
 - `src/part-filter/ver-03-rebuild/` – preserved native Graphical Browser rebuild reference.
 - `src/part-filter/` – shared commands and diagnostic/test LISP files.
+- `src/h871-ribbon/` – native Modeling Available Command / Ribbon integration starter for H871 tools.
 - `docs/` – engineering knowledge, API evidence, decisions and history.
 - `tests/` – written regression procedures and sanitized test assets.
 - `skills/creo-elements-direct-modeling/` – reusable cross-chat Creo skill package.
