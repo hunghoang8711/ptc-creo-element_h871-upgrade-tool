@@ -549,9 +549,9 @@
       (sd-create-resizable-dialog-shell
         *h871-pf-v04-shell*
         :title "H871 - PART FILTER RESULTS VER-04-PARTNOTE-RESIZE-V4"
-        ;; Keep the minimum window size compact. The content grid below
-        ;; establishes the normal initial layout; the shell can then shrink
-        ;; below the original 920 x 560 pixel footprint.
+        ;; Match the 90 x 53 grid cells at 10 x 10 cell size (approximately
+        ;; 900 x 530 client pixels before margins). The user can resize from
+        ;; this coherent initial layout; child controls follow via bindings.
         :width 920 :height 560
         :cellSize 10,10
         :spacing 2
@@ -633,7 +633,7 @@
   (h871-pf-v04-trace "CREATE-PAGE/BEGIN" (list instance base))
   (let* ((label (h871-pf-v04-pair-label instance base))
          (page-name
-           (format nil "H871-PF-V03-PAGE-~A"
+           (format nil "H871-PF-V04-PAGE-~A"
              (incf *h871-pf-v04-page-counter*)))
          (table-name (h871-pf-v04-table-name page-name))
          (logical-table (h871-pf-v04-logical-table-name page-name))
