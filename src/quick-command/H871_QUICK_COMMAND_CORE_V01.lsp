@@ -25,7 +25,7 @@
 
 (defun h871-qc-normalize (value)
   (if (stringp value)
-      (string-upcase (string-trim '(#\\Space #\\Tab #\\Newline) value))
+      (string-upcase (string-trim '(#\Space #\Tab #\Newline) value))
       ""))
 
 (defun h871-qc-prefix-p (prefix candidate)
