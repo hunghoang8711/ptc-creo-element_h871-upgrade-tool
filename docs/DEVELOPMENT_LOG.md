@@ -381,3 +381,10 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Only non-empty pair buckets create or refresh Results tabs. Pair order follows the existing convention table. Existing tabs are left unchanged for pairs with no match.
 - Static checks: balanced parentheses, no negative nesting, no unterminated strings, no duplicate DEFUN names; 4 selector combination cases checked (ALL/SUS304 = 4 pairs, CNC/ALL = 9, ALL/ALL = 36, KH/SS400 = 1).
 - Not tested in Creo Elements/Direct Modeling 18.1. Runtime acceptance is required for dialog range handling, 1/36-page UI behavior, page refresh, row selection, Apply, Edit Note and cross-page controls.
+
+
+## 2026-11-23 – Filter All default selection
+
+- Changed the default Machining Process and Material selections to `ALL` (`-1`) in the Filter All extension. Updated their display-only code defaults to `-1` as well, so the dialog starts with both selectors visibly and internally aligned to ALL.
+- Existing individual choices and the single-pair filtering path are unchanged. Canonical Part Note / All Pages baseline remains untouched.
+- Static source check only; user previously confirmed the Filter All feature runs successfully. Verify the initial dialog display once after loading this update in Modeling 18.1.

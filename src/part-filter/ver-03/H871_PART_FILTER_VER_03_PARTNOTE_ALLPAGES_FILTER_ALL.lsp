@@ -1173,14 +1173,14 @@
               (2 :label "KH")
               (3 :label "CG")
               (4 :label "COVER"))
-      :initial-value 1
+      :initial-value -1
       :title "Machining Process"
       :after-input
         (setq MACHINING_PROCESS_CODE MACHINING_PROCESS))
 
     (MACHINING_PROCESS_CODE
       :value-type :display-only
-      :initial-value 1
+      :initial-value -1
       :title "Process Code")
 
     ("MATERIAL")
@@ -1195,14 +1195,14 @@
               (30 :label "MC")
               (40 :label "MIKA")
               (50 :label "PU"))
-      :initial-value 304
+      :initial-value -1
       :title "Material"
       :after-input
         (setq MATERIAL_CODE MATERIAL))
 
     (MATERIAL_CODE
       :value-type :display-only
-      :initial-value 304
+      :initial-value -1
       :title "Material Code")
   )
   :ok-action

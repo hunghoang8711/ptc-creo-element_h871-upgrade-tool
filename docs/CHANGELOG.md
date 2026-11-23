@@ -82,3 +82,10 @@
 - Added one-pass assembly traversal that buckets Parts by exact mapped Density Instance/Base pairs; supports ALL on either selector or both (up to 36 combinations).
 - Results tabs are created/refreshed only for populated pairs. No-match searches leave existing tabs unchanged.
 - Static delimiter/string/duplicate-function checks and selector-combination assertions passed. Creo Elements/Direct Modeling 18.1 runtime acceptance remains pending.
+
+
+## 2026-11-23 – Filter All default selection
+
+- Changed the default Machining Process and Material selections to `ALL` (`-1`) in the Filter All extension. Updated their display-only code defaults to `-1` as well, so the dialog starts with both selectors visibly and internally aligned to ALL.
+- Existing individual choices and the single-pair filtering path are unchanged. Canonical Part Note / All Pages baseline remains untouched.
+- Static source check only; user previously confirmed the Filter All feature runs successfully. Verify the initial dialog display once after loading this update in Modeling 18.1.

@@ -201,3 +201,10 @@ Experimental ver-04/ver-05/ver-06/ver-07 implementation files are not canonical 
 - The new collector traverses the assembly once, applies the exact Density Instance AND Density Base predicate, and groups each matching Part under its mapped pair.
 - A Results tab is created/refreshed only when its pair bucket contains at least one Part. No-match pairs do not produce empty tabs; prior tabs are not deleted or cleared by a no-match.
 - Static checks passed. No Modeling 18.1 runtime evidence is available yet. In particular, verify that the dialog accepts the `-1 :label "ALL"` range entries and that the recursive collector preserves the existing 18.1 traversal behavior.
+
+
+## 2026-11-23 – Filter All default selection
+
+- Changed the default Machining Process and Material selections to `ALL` (`-1`) in the Filter All extension. Updated their display-only code defaults to `-1` as well, so the dialog starts with both selectors visibly and internally aligned to ALL.
+- Existing individual choices and the single-pair filtering path are unchanged. Canonical Part Note / All Pages baseline remains untouched.
+- Static source check only; user previously confirmed the Filter All feature runs successfully. Verify the initial dialog display once after loading this update in Modeling 18.1.
