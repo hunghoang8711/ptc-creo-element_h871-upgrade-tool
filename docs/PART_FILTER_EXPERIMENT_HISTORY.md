@@ -188,3 +188,16 @@ Experimental ver-04/ver-05/ver-06/ver-07 implementation files are not canonical 
 - ce2089bc6a14e530900cd796e18e6116e2cefa2c – initial cross-page implementation.
 - 7693ed8440091f8eb6413c90e0f8acf16c4b2bb3 – first callback-dispatch adjustment (not sufficient).
 - 415481d0a62a744d3b09cb7b0cc697b623b14716 – explicit nil callback argument, optional function argument and callback-entry traces; this is the runtime-confirmed source revision.
+
+
+## 2026-11-23 – Filter All extension (separate from the canonical baseline)
+
+**Source:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp`
+
+- Derived from the selected canonical `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp`; no changes were made to the canonical source.
+- Added `ALL` to both Machining Process and Material selectors. Existing options, mappings and default values are retained.
+- `-1` is a dialog-only sentinel; actual filter pairs always use the established numeric codes.
+- Selecting ALL in only one selector expands that dimension (4 process values or 9 material values). Selecting ALL in both expands the 36 mapped pairs.
+- The new collector traverses the assembly once, applies the exact Density Instance AND Density Base predicate, and groups each matching Part under its mapped pair.
+- A Results tab is created/refreshed only when its pair bucket contains at least one Part. No-match pairs do not produce empty tabs; prior tabs are not deleted or cleared by a no-match.
+- Static checks passed. No Modeling 18.1 runtime evidence is available yet. In particular, verify that the dialog accepts the `-1 :label "ALL"` range entries and that the recursive collector preserves the existing 18.1 traversal behavior.

@@ -371,3 +371,13 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Deliberately does not modify user_avail_cmds.cmd, sd_avail_cmds.cmd, Ribbon customization or startup files. Command registration and Ribbon placement remain manual in Modeling 18.1 because cross-machine import/export behavior has not been verified for this version.
 - Added portable installation guide and scope/acceptance checklist. No Part Filter Lisp core was modified.
 - Verification boundary: repository content and installer logic reviewed; Windows PowerShell execution and second-workstation Modeling 18.1 runtime test remain pending. Do not describe this as a one-click Ribbon installer yet.
+
+
+## 2026-11-23 – Part Filter Filter All extension
+
+- Re-fetched the canonical `main` source and confirmed its blob SHA `013ed4d5d4db751a0753b1f2d7cbfd489a69ff0e` before editing. The canonical Part Note / All Pages file was not modified.
+- Created a separate Filter All source derived from that baseline. The two selectors now include an `ALL` option using the reserved numeric sentinel `-1`; existing process/material codes and defaults are preserved.
+- Added Cartesian pair expansion for the selected dimensions and a single recursive assembly traversal that assigns each Part to its exact mapped Density Instance + Density Base pair. This avoids rescanning the full assembly for each of up to 36 pairs.
+- Only non-empty pair buckets create or refresh Results tabs. Pair order follows the existing convention table. Existing tabs are left unchanged for pairs with no match.
+- Static checks: balanced parentheses, no negative nesting, no unterminated strings, no duplicate DEFUN names; 4 selector combination cases checked (ALL/SUS304 = 4 pairs, CNC/ALL = 9, ALL/ALL = 36, KH/SS400 = 1).
+- Not tested in Creo Elements/Direct Modeling 18.1. Runtime acceptance is required for dialog range handling, 1/36-page UI behavior, page refresh, row selection, Apply, Edit Note and cross-page controls.

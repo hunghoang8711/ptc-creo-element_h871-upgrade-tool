@@ -73,3 +73,12 @@
 - Added timestamped backups for explicit replacement and fail-safe behavior when targets already exist.
 - Added portable installation instructions and a scope/verification checklist.
 - Kept command registration, Ribbon placement and startup LOAD outside installer automation to protect existing Modeling 18.1 user customization.
+
+
+## 2026-11-23 – Part Filter Filter All extension
+
+- Added a separate `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp` derived from the canonical Part Note / All Pages source; the baseline file remains unchanged.
+- Added an `ALL` choice to both Machining Process and Material selectors while preserving every existing individual choice and default.
+- Added one-pass assembly traversal that buckets Parts by exact mapped Density Instance/Base pairs; supports ALL on either selector or both (up to 36 combinations).
+- Results tabs are created/refreshed only for populated pairs. No-match searches leave existing tabs unchanged.
+- Static delimiter/string/duplicate-function checks and selector-combination assertions passed. Creo Elements/Direct Modeling 18.1 runtime acceptance remains pending.
