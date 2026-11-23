@@ -88,4 +88,12 @@
 
 - Changed the default Machining Process and Material selections to `ALL` (`-1`) in the Filter All extension. Updated their display-only code defaults to `-1` as well, so the dialog starts with both selectors visibly and internally aligned to ALL.
 - Existing individual choices and the single-pair filtering path are unchanged. Canonical Part Note / All Pages baseline remains untouched.
-- Static source check only; user previously confirmed the Filter All feature runs successfully. Verify the initial dialog display once after loading this update in Modeling 18.1.
+- User confirmed that the Filter All feature runs perfectly in Creo Elements/Direct Modeling 18.1. The later default-selection change is source-checked; verify the initial ALL+ALL display after reloading that specific revision.
+
+
+## 2026-11-23 – Filter All runtime confirmation
+
+- User explicitly confirmed: “Rất tốt. chạy hoàn hảo” for the Filter All implementation in Creo Elements/Direct Modeling 18.1.
+- Record the Filter All behavior as user-confirmed runtime success, not merely static-checked: ALL expansion, pair grouping and populated-result behavior are accepted by the user.
+- The subsequent change that makes both selectors default to ALL (`-1`) is a separate small revision. Its source values were statically verified; the initial dialog display should still be checked after reloading the latest revision.
+- Preserve the canonical Part Note / All Pages baseline and the separate Filter All derivative. Do not fold this feature into the baseline without an explicit request.

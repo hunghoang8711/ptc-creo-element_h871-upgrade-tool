@@ -208,3 +208,27 @@ Experimental ver-04/ver-05/ver-06/ver-07 implementation files are not canonical 
 - Changed the default Machining Process and Material selections to `ALL` (`-1`) in the Filter All extension. Updated their display-only code defaults to `-1` as well, so the dialog starts with both selectors visibly and internally aligned to ALL.
 - Existing individual choices and the single-pair filtering path are unchanged. Canonical Part Note / All Pages baseline remains untouched.
 - Static source check only; user previously confirmed the Filter All feature runs successfully. Verify the initial dialog display once after loading this update in Modeling 18.1.
+
+
+## 2026-11-23 – Filter All accepted in Creo Elements/Direct Modeling 18.1
+
+**Accepted source:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp`
+
+**User runtime evidence:**
+- User explicitly confirmed that the Filter All feature runs perfectly in the target Creo Elements/Direct Modeling 18.1 environment.
+- Treat the Filter All implementation as user-confirmed runtime success. This supersedes the earlier “runtime acceptance pending” statements above, which accurately described the state before the user test.
+- Do not downgrade this accepted feature to an untested prototype in future handovers.
+
+**Preservation and architecture rules:**
+- Keep Filter All as a separate derivative of `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp`; do not overwrite the canonical baseline.
+- Keep `-1` as a dialog-only ALL sentinel. Never pass `-1` into the actual Density comparison; expand it to the established numeric process/material codes first.
+- Preserve the exact Density Instance AND Density Base predicate. Do not substitute labels for numeric filter values.
+- Preserve the single-pass assembly traversal and grouping by mapped pair. Create/refresh only result pages whose pair buckets contain Parts; no-match pairs must not create empty pages or erase existing valid pages.
+- Preserve the original single-pair execution path when neither selector is ALL.
+
+**Default-selection follow-up:**
+- Commit `9fefe722e7ddfb9a2e09db64cd45b417dcd7cd1f` sets all four dialog defaults (selected Process, Process display code, selected Material, Material display code) to `-1`, so the dialog is intended to open as ALL + ALL.
+- Static source verification passed for these four defaults and balanced LISP structure.
+- The feature itself is runtime-confirmed, but the specific initial ALL + ALL display introduced by this later commit should be visually checked once after reloading the latest file. Keep this narrow verification separate from the already accepted Filter All behavior.
+
+**Next-work rule:** Make future changes incrementally against the accepted Filter All derivative, re-fetch `main` before editing, preserve the canonical baseline, and record both the exact commit and whether verification was static or user-confirmed in Creo 18.1.

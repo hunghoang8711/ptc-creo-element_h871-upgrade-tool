@@ -388,3 +388,13 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Changed the default Machining Process and Material selections to `ALL` (`-1`) in the Filter All extension. Updated their display-only code defaults to `-1` as well, so the dialog starts with both selectors visibly and internally aligned to ALL.
 - Existing individual choices and the single-pair filtering path are unchanged. Canonical Part Note / All Pages baseline remains untouched.
 - Static source check only; user previously confirmed the Filter All feature runs successfully. Verify the initial dialog display once after loading this update in Modeling 18.1.
+
+
+## 2026-11-23 – Filter All user runtime acceptance and default follow-up
+
+- User explicitly reported that the Filter All implementation runs perfectly in Creo Elements/Direct Modeling 18.1 (“Rất tốt. chạy hoàn hảo”). This is direct user runtime confirmation of the feature, superseding the earlier pending-runtime notes written before the test.
+- Accepted source remains the separate derivative: `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp`.
+- The canonical `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` remains unchanged. Keep the derivative separate to protect the known-good baseline.
+- The subsequent commit `9fefe722e7ddfb9a2e09db64cd45b417dcd7cd1f` changed four dialog defaults to `-1`: selected Process, Process display code, selected Material and Material display code. This makes the initial intended state ALL + ALL while retaining the individual selector options and their numeric mappings.
+- Static verification of the default revision passed: all four defaults are `-1`; parentheses are balanced; no negative nesting or unterminated string was found. The user's earlier runtime acceptance confirms the Filter All feature, but does not by itself prove the latest dialog's initial ALL + ALL display. Verify that small UI detail after reloading the latest source.
+- Future changes should preserve the exact Density Instance AND Density Base matching rule, the one-pass assembly bucketing approach, the non-empty-pair-only result tabs, and the single-pair route through the established original filter function.
