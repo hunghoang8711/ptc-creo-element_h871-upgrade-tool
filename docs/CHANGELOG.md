@@ -113,3 +113,12 @@
 - The Results close action uses `sd-hide-dialog-shell`, so closing the window hides the shell instead of destroying it. The reset now destroys the parent Results Dialog Shell (and its child Grid/Tab controls) before rebuilding the window.
 - Old per-page Logical Tables are still destroyed separately. An orphaned Tab Control is handled as a fallback; the old post-destroy `sd-control-p` assertion was removed.
 - Static source check passed. Creo Elements/Direct Modeling 18.1 runtime validation is still required.
+
+
+## 2026-11-25 – Filter All Results refresh accepted in Modeling 18.1
+
+- User confirmed that the latest Filter All Results refresh/lifecycle correction now works well in Creo Elements/Direct Modeling 18.1.
+- The previously reported failure after closing Results (stale Results Dialog Shell / “previous Results tab control still exists”) is resolved in the user's runtime test.
+- Mark the Results replacement lifecycle as user-confirmed runtime success, superseding the pending-verification notes in the earlier 2026-11-25 entries.
+- Accepted behavior: each Filter run replaces the previous Results set; closing/hiding the Results window does not block the next Filter run. The reset occurs after the current Assembly scan/report.
+- Active derivative remains separate from and must not overwrite the canonical Part Note / All Pages baseline.
