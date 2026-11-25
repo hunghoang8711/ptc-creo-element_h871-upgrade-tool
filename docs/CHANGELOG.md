@@ -106,3 +106,10 @@
 - The same refresh behavior applies to Filter All and a specific Process/Material pair. A no-match run now clears previous Results and leaves an empty Results window with a clear message.
 - The Assembly scan and report are completed before destructive UI cleanup begins. If the cleanup APIs are unavailable or cleanup fails, the run stops with a diagnostic instead of proceeding as if the refresh succeeded.
 - Static source validation only. User runtime test in Creo Elements/Direct Modeling 18.1 is required, especially for `sd-destroy-control` and `sd-destroy-logical-table` behavior in this version.
+
+## 2026-11-25 – Part Filter Results reset lifecycle correction
+
+- Fixed the reset strategy after the user reported that filtering after closing the Results window stopped with “The previous Results tab control still exists.”
+- The Results close action uses `sd-hide-dialog-shell`, so closing the window hides the shell instead of destroying it. The reset now destroys the parent Results Dialog Shell (and its child Grid/Tab controls) before rebuilding the window.
+- Old per-page Logical Tables are still destroyed separately. An orphaned Tab Control is handled as a fallback; the old post-destroy `sd-control-p` assertion was removed.
+- Static source check passed. Creo Elements/Direct Modeling 18.1 runtime validation is still required.
