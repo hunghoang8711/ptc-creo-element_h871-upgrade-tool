@@ -428,3 +428,13 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Assembly scan/report still completes before any destructive cleanup starts. Density matching, Filter All grouping, single-pair filtering, Part Note data and Apply callbacks are not intentionally changed.
 
 **Verification:** Balanced parentheses and string checks passed on the updated LISP source. This is static verification only. The target Modeling 18.1 runtime behavior of `sd-destroy-dialog-shell` and `sd-destroy-logical-table` must be tested by the user.
+
+
+## 2026-11-25 – Filter All Results lifecycle runtime-confirmed
+
+- User tested the latest Filter All derivative in Creo Elements/Direct Modeling 18.1 and confirmed: “Đã hoạt động tốt”.
+- This confirms the previously corrected Results reset lifecycle in the user's actual 18.1 installation, including the scenario that previously failed after the Results window was closed/hidden.
+- The active reset destroys the parent Results Dialog Shell (thereby removing its child Grid/Tab controls), explicitly destroys old per-page Logical Tables, and then allows the current Filter run to rebuild its populated result pages.
+- The reset is invoked only after the current Assembly scan/report has completed; do not move destructive cleanup ahead of collection.
+- Verification classification: user-confirmed runtime success in Modeling 18.1. This supersedes the runtime-pending status recorded immediately after the source correction.
+- Preserve the canonical `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp`; continue development only in the separate `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp` derivative unless explicitly instructed otherwise.
