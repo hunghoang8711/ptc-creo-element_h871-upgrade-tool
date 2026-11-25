@@ -410,3 +410,21 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - Preserved Density mapping, `-1` ALL sentinel expansion, exact Density Instance AND Density Base predicate, one-pass pair grouping, Part Note storage, row selection and Apply callbacks. The canonical Part Note / All Pages baseline was not modified.
 - Cleanup APIs `sd-destroy-control` and `sd-destroy-logical-table` are documented in later PTC Integration Kit references. The implementation checks `fboundp` before calling them and verifies that the tab control is gone; exact Modeling 18.1 runtime behavior still requires user acceptance.
 - Static checks are recorded separately from runtime acceptance. Do not claim the new reset behavior works in Modeling 18.1 until the user tests it.
+
+## 2026-11-25 – Correct Results cleanup after closing the window
+
+**User-reported error:** After filtering, closing the Results window, and filtering a new Assembly, Creo reported: `H871: The previous Results tab control still exists. Filter was stopped.`
+
+**Source diagnosis:**
+- `h871-pf-v03-create-shell` creates a persistent named Dialog Shell and its child Grid/Tab Control.
+- The Dialog Shell's `:closeAction` is `sd-hide-dialog-shell`; the window's close button therefore hides the shell rather than destroying it.
+- The previous reset attempted to destroy only the child Tab Control and then used `sd-control-p` as a post-destroy assertion. This lifecycle strategy was too narrow for the parent-owned UI tree and caused the reset to stop.
+
+**Correction:**
+- `h871-pf-v03-reset-results-pages` now destroys the parent Results Dialog Shell using `sd-destroy-dialog-shell`, which removes the window and its child controls together.
+- The previous per-page Logical Tables are still explicitly destroyed after the UI shell is removed.
+- If an orphaned Tab Control remains from a partial/older UI creation, the helper tries `sd-destroy-control` as a fallback.
+- Removed the old post-destroy check that generated the reported “tab control still exists” error.
+- Assembly scan/report still completes before any destructive cleanup starts. Density matching, Filter All grouping, single-pair filtering, Part Note data and Apply callbacks are not intentionally changed.
+
+**Verification:** Balanced parentheses and string checks passed on the updated LISP source. This is static verification only. The target Modeling 18.1 runtime behavior of `sd-destroy-dialog-shell` and `sd-destroy-logical-table` must be tested by the user.
