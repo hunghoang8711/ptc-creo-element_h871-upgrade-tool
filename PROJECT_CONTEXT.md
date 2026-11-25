@@ -1,6 +1,6 @@
 # H871 Upgrade Tools – Project Context
 
-**Last consolidated:** 2026-11-18  
+**Last consolidated:** 2026-11-25  
 **Target application:** PTC Creo Elements/Direct Modeling 18.1  
 **Canonical branch:** `main`  
 **Repository:** `hunghoang8711/ptc-creo-element_h871-upgrade-tool`
@@ -17,7 +17,7 @@ Build reliable, reusable LISP tools for Creo Elements/Direct Modeling 18.1. This
 | `src/part-filter/ver-03/H871_PART_FILTER_VER_03.lsp` | UICT/internal-tab implementation reference | Keep unchanged; do not assume hidden Apply bridge works |
 | `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE.lsp` | Part Note baseline with page-local selection and Edit Note | Preserve unchanged |
 | `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` | Part Note extension with Select All Pages / Clear All Pages / Apply All Pages; Select All Pages confirmed in Modeling 18.1 on 2026-11-18 | Current tested extension; Clear All Pages and Apply All Pages still require independent runtime verification |
-| `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp` | Separate Filter All extension based on the canonical Part Note / All Pages source | Static checks only; Modeling 18.1 runtime acceptance pending |
+| `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp` | Separate Filter All extension with full Results replacement on each Filter run | Filter All and Results reset/lifecycle are user-confirmed in Modeling 18.1 on 2026-11-25; preserve as a separate derivative |
 | `src/part-filter/ver-03-rebuild/H871_PART_FILTER_VER_03_REBUILD.lsp` | Stage 0 native Graphical Browser rebuild derived from ver-02 | Keep as a reference candidate; latest user test reports only Part Name visible |
 | `src/part-filter/ver-01/` | Earlier numeric filter baseline | Preserve |
 
@@ -32,7 +32,7 @@ The ver-03 UICT source and the ver-03 native Browser rebuild are different imple
 - The native Browser rebuild remains **not complete**. Do not make further speculative lifecycle-order changes. First add targeted runtime diagnostics for actual Browser mode, active table, table roots and table-definition/activation return values, and inspect the entire Results window including horizontal scroll state.
 - Separately, the ver-03 Part Note UICT extension includes cross-page Select All / Clear All / Apply All. The user confirmed Select All Pages works in Modeling 18.1 on source revision 415481d0a62a744d3b09cb7b0cc697b623b14716. Clear All Pages and Apply All Pages remain pending separate runtime verification.
 - Density API scaling is now configurable in the main Part Note All Pages source via `*h871-pf-v03-density-api-multiplier*` (a `defparameter`, re-applied whenever the LISP file is loaded) (default 1000.0). The new conversion code is static-checked but its runtime behavior has not yet been tested in Creo 18.1.
-- Filter All extension added as a separate source file. It adds ALL to both selectors, expands selected dimensions into existing process/material convention pairs, traverses the assembly once, and creates/refreshes only populated pair pages. Static validation passed; Modeling 18.1 runtime verification is pending.
+- Filter All extension is a separate source file. It adds ALL to both selectors, expands selected dimensions into existing process/material convention pairs, traverses the assembly once, and creates pages only for populated pairs. User-confirmed runtime success in Modeling 18.1.
 - Row selection, Select All, Clear Selection and native Apply must be regression-tested after any change. Do not assume they still work merely because Results opens.
 
 ## 4. Filter mapping and invariant
@@ -158,3 +158,12 @@ This is user-confirmed runtime behavior in the target application, not merely a 
 - The active Filter All derivative now resets the parent Results Dialog Shell using `sd-destroy-dialog-shell`, removes per-page Logical Tables, and uses `sd-destroy-control` only as a fallback for an orphaned Tab Control. The incorrect post-destroy Tab Control existence assertion was removed.
 - Updated source is committed after the previous Results refresh revision. Static syntax checks pass; Modeling 18.1 runtime validation remains pending.
 - Required test: Filter Assembly A → close Results → Filter Assembly B; then repeat with Results left open and with a no-match Assembly. Regression-test selection, Apply and Part Note controls.
+
+
+## 2026-11-25 – Filter All Results refresh accepted
+
+- User confirmed that the latest Filter All Results refresh/lifecycle correction works in Creo Elements/Direct Modeling 18.1.
+- Filtering after closing the Results window no longer stops with the previous Tab Control lifecycle error.
+- Reset design: complete Assembly scan/report first; destroy the parent Results Dialog Shell (and child Grid/Tab controls); explicitly destroy old per-page Logical Tables; rebuild pages for the current run only.
+- Treat this tested lifecycle as user-confirmed runtime behavior, not pending static-only work. The no-match and broader selection/Apply/Part Note regression cases remain independently tracked unless separately confirmed.
+- Keep the Filter All source separate. Do not overwrite the canonical `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` baseline.
