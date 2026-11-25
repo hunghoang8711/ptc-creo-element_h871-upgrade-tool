@@ -266,3 +266,33 @@ Experimental ver-04/ver-05/ver-06/ver-07 implementation files are not canonical 
 5. Repeat Filter All and confirm no duplicate tabs, and recheck Select All Pages, Clear All Pages, Apply All Pages, per-page Apply and Edit Note.
 
 **Verification status:** source edit and static checks only. Runtime acceptance in Creo Elements/Direct Modeling 18.1 is pending.
+
+## 2026-11-25 – Results reset failure after closing the Results window
+
+**User-reported symptom:** After completing a Filter, closing the Results window, then filtering a new Assembly, the command stopped with:
+
+`H871: The previous Results tab control still exists. Filter was stopped.`
+
+**Diagnosis from the active source:**
+- The Results Dialog Shell is created once under the stable name `h871-pf-v03-results`.
+- Its close action is `sd-hide-dialog-shell`, so the window is hidden rather than destroyed when the user closes it.
+- The previous reset tried to destroy only the child Tab Control and then asserted that `sd-control-p` must return NIL. That did not correctly manage the parent-owned Dialog Shell lifecycle in this scenario.
+
+**Corrective implementation:**
+- Reset now destroys the parent Results Dialog Shell with `sd-destroy-dialog-shell`. Its child Grid and Tab Control are removed with the shell.
+- Each registered Logical Table is still destroyed explicitly to release stored result rows.
+- A remaining orphaned Tab Control is handled with `sd-destroy-control` as a fallback.
+- The old “tab control still exists” post-destroy assertion has been removed.
+- Scan/report ordering remains unchanged: the current Assembly is scanned and its report written before the old Results UI is destroyed.
+
+**API evidence boundary:** PTC Integration Kit documentation for later releases describes `sd-destroy-dialog-shell` as the Dialog Shell destruction function and `sd-dialog-shell-p` as the Dialog Shell type predicate. This does not prove Modeling 18.1 compatibility. Runtime verification in the user's 18.1 installation remains mandatory.
+
+**Static verification:** Parentheses balanced (depth 0, minimum depth 0); no unterminated strings. No claim of runtime success is made.
+
+**Required next runtime test:**
+1. Load the latest Filter All LISP.
+2. Filter Assembly A and allow Results to appear.
+3. Close the Results window with its normal close button.
+4. Filter Assembly B. Confirm the command no longer reports the previous Tab Control error and only B's populated pair pages appear.
+5. Repeat after leaving Results open (without closing it), then test a no-match Assembly.
+6. Regression-test Select All Pages, Clear All Pages, Apply All Pages, per-page Apply and Edit Note.
