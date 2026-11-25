@@ -394,7 +394,7 @@
               logical-table))
           (h871-pf-v03-trace "RESET-RESULTS/DESTROY-LOGICAL-TABLE-FAILED"
             logical-table)
-          (return-from h871-pf-v03-reset-results-pages nil))))
+          (return-from h871-pf-v03-reset-results-pages nil)))))
 
   (setf *h871-pf-v03-pages* nil)
   (setf *h871-pf-v03-current-page* nil)
