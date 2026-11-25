@@ -3,7 +3,7 @@
 **Target:** PTC Creo Elements/Direct Modeling 18.1  
 **Source under test:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp`  
 **Baseline:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` (must remain unchanged)  
-**Status:** Filter All base behavior was user-confirmed in Modeling 18.1. The new per-Filter Results reset is source-edited and statically checked; its Modeling 18.1 runtime acceptance is pending.
+**Status:** Filter All base behavior and the latest Results reset/lifecycle correction are user-confirmed in Creo Elements/Direct Modeling 18.1 (2026-11-25).
 
 ## Installation
 
@@ -63,4 +63,12 @@ Each Filter invocation must represent only the Assembly and filter values select
 6. Test a no-match Assembly and confirm the recreated Results window is empty.
 7. Regression-test row selection, Select All Pages, Clear All Pages, per-page Apply, Apply All Pages and Edit Note.
 
-**Current status:** source correction and static syntax checks completed; Modeling 18.1 runtime acceptance pending. The use of `sd-destroy-dialog-shell` is based on later-release PTC documentation and must be verified in 18.1.
+**Acceptance result (2026-11-25): PASS – user-confirmed in Modeling 18.1.** The user reports that the latest lifecycle correction works. The previously failing sequence of closing the Results window and filtering again is accepted in the target runtime. The API compatibility is therefore confirmed for this tested workflow in the user's 18.1 installation; do not continue marking this correction as runtime-pending.
+
+
+## Runtime acceptance record – 2026-11-25
+
+- [x] Latest Filter All Results reset/lifecycle correction tested by the user in Creo Elements/Direct Modeling 18.1.
+- [x] User confirmed the correction works well, including recovery after closing the Results window before running Filter again.
+- [x] The previous “previous Results tab control still exists” stop condition is resolved in the tested workflow.
+- [ ] Additional regression cases (no-match Assembly and all selection/Apply/Part Note controls) should still be tracked independently unless separately confirmed; this acceptance record does not infer those results from the lifecycle confirmation.
