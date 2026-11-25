@@ -150,3 +150,11 @@ This is user-confirmed runtime behavior in the target application, not merely a 
 - A no-match run is intended to clear previous pages and leave an empty Results window rather than preserve stale data.
 - New cleanup uses `sd-destroy-control` and `sd-destroy-logical-table`, guarded by `fboundp` and return checks. These APIs are documented in later PTC Integration Kit references; exact Modeling 18.1 behavior is not yet user-confirmed.
 - Runtime acceptance pending: test Assembly A → Assembly B with fewer pairs, ALL → one specific pair, and a no-match Assembly. Then regression-test selection, Apply, Part Note and cross-page controls.
+
+## 2026-11-25 – Results reset lifecycle correction
+
+- User reported that filtering a new Assembly after closing the Results window stopped with `H871: The previous Results tab control still exists. Filter was stopped.`
+- The Results Shell close action is `sd-hide-dialog-shell`; closing it hides the shell instead of destroying it.
+- The active Filter All derivative now resets the parent Results Dialog Shell using `sd-destroy-dialog-shell`, removes per-page Logical Tables, and uses `sd-destroy-control` only as a fallback for an orphaned Tab Control. The incorrect post-destroy Tab Control existence assertion was removed.
+- Updated source is committed after the previous Results refresh revision. Static syntax checks pass; Modeling 18.1 runtime validation remains pending.
+- Required test: Filter Assembly A → close Results → Filter Assembly B; then repeat with Results left open and with a no-match Assembly. Regression-test selection, Apply and Part Note controls.
