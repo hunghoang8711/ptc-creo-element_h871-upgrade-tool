@@ -331,8 +331,8 @@
 ;; ---------------------------------------------------------------------------
 ;; Replace the complete Results set for each new Filter invocation.
 ;;
-;; The scan is completed before this function is called. Destroying the tab
-;; control removes its old page grids and child controls; destroying each
+;; The scan is completed before this function is called. Destroying the
+;; Results dialog shell removes its grid/tab/page controls; destroying each
 ;; logical table then releases its stored rows and associated display tables.
 ;; The page registry is reset only after the native objects are removed.
 ;; ---------------------------------------------------------------------------
@@ -340,34 +340,42 @@
 (defun h871-pf-v03-reset-results-pages ()
   (h871-pf-v03-trace
     "RESET-RESULTS/BEGIN"
-    (list (length *h871-pf-v03-pages*) *h871-pf-v03-tabs*))
-  ;; These cleanup APIs are documented in later PTC Integration Kit manuals.
-  ;; Check their availability in this Modeling installation before calling
-  ;; them; never allow an undefined cleanup function to break Filter.
-  (unless (and (fboundp 'sd-destroy-control)
+    (list (length *h871-pf-v03-pages*) *h871-pf-v03-shell*
+          *h871-pf-v03-tabs*))
+
+  ;; The Results close action hides (does not destroy) the dialog shell.
+  ;; Destroy the parent shell as a whole so its grid and tab-control children
+  ;; are removed together. This avoids relying on sd-destroy-control to remove
+  ;; an individual tab control from a still-existing hidden shell.
+  (unless (and (fboundp 'sd-destroy-dialog-shell)
                (fboundp 'sd-destroy-logical-table))
     (sd-display-error
-      "H871: This Modeling installation does not expose the required Results cleanup APIs. Existing Results were not intentionally replaced.")
+      "H871: This Modeling installation does not expose the required Results cleanup APIs. Filter was stopped.")
     (h871-pf-v03-trace "RESET-RESULTS/API-UNAVAILABLE" nil)
     (return-from h871-pf-v03-reset-results-pages nil))
 
-  ;; Destroy the tab control first. PTC documents that destroying a parent
-  ;; control also destroys its child controls/pages.
-  (when (sd-control-p *h871-pf-v03-tabs*)
-    (unless (sd-destroy-control *h871-pf-v03-tabs*)
+  (when (sd-dialog-shell-p *h871-pf-v03-shell*)
+    (unless (sd-destroy-dialog-shell *h871-pf-v03-shell*)
       (sd-display-error
-        "H871: Could not remove the previous Results tab control. Filter was stopped.")
-      (h871-pf-v03-trace "RESET-RESULTS/DESTROY-TABS-FAILED" *h871-pf-v03-tabs*)
-      (return-from h871-pf-v03-reset-results-pages nil))
-    (when (sd-control-p *h871-pf-v03-tabs*)
-      (sd-display-error
-        "H871: The previous Results tab control still exists. Filter was stopped.")
-      (h871-pf-v03-trace "RESET-RESULTS/TABS-STILL-EXIST" *h871-pf-v03-tabs*)
+        "H871: Could not destroy the previous Results window. Filter was stopped.")
+      (h871-pf-v03-trace "RESET-RESULTS/DESTROY-SHELL-FAILED"
+        *h871-pf-v03-shell*)
       (return-from h871-pf-v03-reset-results-pages nil)))
 
-  ;; Remove all old logical tables, including their rows and any remaining
-  ;; associated display tables. Derive the deterministic name if an older
-  ;; in-memory page record does not contain :logical-table.
+  ;; Fallback cleanup for an orphaned tab control left by an earlier partial
+  ;; UI creation. Do not use sd-control-p as a post-destroy test: the parent
+  ;; dialog shell is the lifecycle owner for the normal Results control tree.
+  (when (sd-control-p *h871-pf-v03-tabs*)
+    (unless (and (fboundp 'sd-destroy-control)
+                 (sd-destroy-control *h871-pf-v03-tabs*))
+      (sd-display-error
+        "H871: Could not remove an orphaned Results tab control. Filter was stopped.")
+      (h871-pf-v03-trace "RESET-RESULTS/ORPHAN-TABS-FAILED"
+        *h871-pf-v03-tabs*)
+      (return-from h871-pf-v03-reset-results-pages nil)))
+
+  ;; Remove every old logical table. The dialog shell destruction removes
+  ;; display-table controls; this step releases the stored table data.
   (dolist (entry *h871-pf-v03-pages*)
     (let* ((page-name (getf entry :page))
            (stored-name (getf entry :logical-table))
@@ -386,7 +394,7 @@
               logical-table))
           (h871-pf-v03-trace "RESET-RESULTS/DESTROY-LOGICAL-TABLE-FAILED"
             logical-table)
-          (return-from h871-pf-v03-reset-results-pages nil)))))
+          (return-from h871-pf-v03-reset-results-pages nil))))
 
   (setf *h871-pf-v03-pages* nil)
   (setf *h871-pf-v03-current-page* nil)
