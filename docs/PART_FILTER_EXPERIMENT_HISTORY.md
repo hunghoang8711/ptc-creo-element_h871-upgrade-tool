@@ -296,3 +296,25 @@ Experimental ver-04/ver-05/ver-06/ver-07 implementation files are not canonical 
 4. Filter Assembly B. Confirm the command no longer reports the previous Tab Control error and only B's populated pair pages appear.
 5. Repeat after leaving Results open (without closing it), then test a no-match Assembly.
 6. Regression-test Select All Pages, Clear All Pages, Apply All Pages, per-page Apply and Edit Note.
+
+
+## 2026-11-25 – Results reset lifecycle accepted by user in Modeling 18.1
+
+**User confirmation:** The user tested the latest Filter All source and reported: “Đã hoạt động tốt”. This confirms the Results reset/lifecycle correction works in the target Creo Elements/Direct Modeling 18.1 environment.
+
+**Previously failing scenario now accepted:**
+- Filter an Assembly to create Results pages.
+- Close the Results window using its normal close action (which hides the named Dialog Shell).
+- Run Filter again for another Assembly.
+- The reset no longer stops with `H871: The previous Results tab control still exists. Filter was stopped.`.
+
+**Accepted lifecycle design:**
+- Complete the current Assembly scan/report first.
+- Destroy the parent Results Dialog Shell using `sd-destroy-dialog-shell` so its child Grid and Tab controls are removed together.
+- Destroy each old per-page Logical Table explicitly.
+- Use `sd-destroy-control` only as a guarded fallback for an orphaned Tab Control.
+- Rebuild Results from the current run's populated pair buckets; do not carry stale pages from the previous run.
+
+**Evidence status:** User-confirmed runtime success in Modeling 18.1. This supersedes the pending-runtime statements in the earlier 2026-11-25 lifecycle-correction section. Do not continue describing this reset correction as untested.
+
+**Preservation:** The accepted code remains the separate Filter All derivative at `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp`. The canonical `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` baseline remains unchanged.
