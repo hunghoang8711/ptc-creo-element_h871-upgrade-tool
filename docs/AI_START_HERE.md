@@ -46,3 +46,10 @@ See `docs/PART_FILTER_EXPERIMENT_HISTORY.md` for the full error catalogue and ve
 - Before any further edit, fetch current `main` and read the 2026-11-25 entry in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`.
 - Latest Results-reset source uses `sd-destroy-control` and `sd-destroy-logical-table`, guarded by `fboundp`. These APIs are documented in later Integration Kit references, so Modeling 18.1 runtime validation is mandatory before accepting the reset behavior.
 - Required user test: Assembly A (many pairs) → Assembly B (subset) → single pair → no-match Assembly; confirm no stale tabs/rows. Then regression-test selection, Apply, Edit Note and cross-page controls.
+
+## Results reset correction (2026-11-25)
+
+- Latest correction addresses the reported error when filtering a new Assembly after closing Results: `H871: The previous Results tab control still exists. Filter was stopped.`
+- Results close action hides the named Dialog Shell; it does not destroy it. The reset now destroys the parent shell with `sd-destroy-dialog-shell`, then destroys the old per-page Logical Tables. An orphaned Tab Control has a guarded fallback cleanup.
+- Do not revert to destroying only the Tab Control followed by a post-destroy `sd-control-p` assertion.
+- Static syntax checks passed; do not claim Modeling 18.1 runtime success until the user tests Filter A → close Results → Filter B.
