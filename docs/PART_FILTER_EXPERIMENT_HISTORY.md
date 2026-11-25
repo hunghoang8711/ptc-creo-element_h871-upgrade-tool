@@ -232,3 +232,37 @@ Experimental ver-04/ver-05/ver-06/ver-07 implementation files are not canonical 
 - The feature itself is runtime-confirmed, but the specific initial ALL + ALL display introduced by this later commit should be visually checked once after reloading the latest file. Keep this narrow verification separate from the already accepted Filter All behavior.
 
 **Next-work rule:** Make future changes incrementally against the accepted Filter All derivative, re-fetch `main` before editing, preserve the canonical baseline, and record both the exact commit and whether verification was static or user-confirmed in Creo 18.1.
+
+
+## 2026-11-25 – Results lifecycle: replace stale Assembly pages on every Filter
+
+**User-reported problem:** Filtering a new Assembly left old process/material tabs in the Results window. The current run refreshed pages for pairs populated in the new Assembly, but did not remove tabs for pairs that existed only in the previous Assembly. The result mixed multiple Assembly runs and was difficult to control.
+
+**Root cause in the Filter All derivative:**
+- `h871-pf-v03-run-filter-all` iterated only populated pair buckets and used `h871-pf-v03-find-page` to reuse matching old pages. It did not remove old pages absent from the new Assembly.
+- The no-match branch explicitly preserved all previous Results tabs.
+- The single-pair route similarly refreshed/created one pair without replacing other old pages.
+
+**New intended behavior:**
+- Every invocation of Filter is a complete Results refresh, regardless of whether the user selected ALL or one specific Process/Material pair.
+- First complete the current Assembly scan and report generation. Only then remove the previous Results set.
+- Destroy the old tab control and its child page controls; destroy each previous page's logical table; clear the page registry and current-page state.
+- Recreate the Results tab control and add only populated Density-pair pages from the current Assembly.
+- If the current Assembly has no matching Parts, clear all previous pages and show an empty Results window plus a no-match message.
+- This makes the Results window represent exactly one filter invocation / one selected Assembly at a time. Part Note values remain stored on the Parts themselves; the refresh removes only Results UI/table data.
+
+**Implementation and safety notes:**
+- Added `h871-pf-v03-reset-results-pages` to the separate Filter All source. It checks `fboundp` for `sd-destroy-control` and `sd-destroy-logical-table`, destroys the tab control, verifies the control no longer exists, then destroys each registered logical table and clears the registry.
+- Both `h871-pf-v03-run-filter-all` and `h871-pf-v03-run` call this helper after scan/report completion and before creating the new Results pages.
+- If required cleanup APIs are unavailable or cleanup returns failure, the filter stops with a diagnostic. The source does not silently continue with stale tabs.
+- `sd-destroy-control` and `sd-destroy-logical-table` are documented in later PTC Integration Kit manuals; this is not proof of availability/signature behavior in Modeling 18.1. The helper guards against undefined functions, but a runtime test remains essential.
+- Canonical `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` is untouched. Only the separate Filter All derivative is changed.
+
+**Required Modeling 18.1 acceptance tests:**
+1. Filter Assembly A with ALL + ALL and note the populated tabs.
+2. Filter Assembly B where only a subset of A's process/material pairs exist. Confirm every tab from A that is absent in B disappears; only B's populated pairs remain.
+3. Filter Assembly B with one specific pair. Confirm the Results window contains only that one pair, not pages from the previous ALL + ALL run.
+4. Filter an Assembly with no matching Parts. Confirm all old tabs disappear and the Results window is empty; no stale Part rows remain.
+5. Repeat Filter All and confirm no duplicate tabs, and recheck Select All Pages, Clear All Pages, Apply All Pages, per-page Apply and Edit Note.
+
+**Verification status:** source edit and static checks only. Runtime acceptance in Creo Elements/Direct Modeling 18.1 is pending.

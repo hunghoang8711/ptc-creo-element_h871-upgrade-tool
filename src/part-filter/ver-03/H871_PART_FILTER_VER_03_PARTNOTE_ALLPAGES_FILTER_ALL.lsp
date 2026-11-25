@@ -6,7 +6,8 @@
 ;; - ONE standalone UICT Results window with INTERNAL tabs.
 ;; - One multi-column Display Table per Density pair page.
 ;; - Each unique Density Instance + Density Base pair owns one page.
-;; - Repeating a pair refreshes that page; a no-match search leaves pages intact.
+;; - Every Filter invocation replaces the complete previous Results set.
+;; - Only populated pairs from the Assembly selected in the current run remain.
 ;;
 ;; Filter All extension: adds ALL selectors for process/material and creates
 ;; result tabs only for mapped Density pairs that contain matching Parts.
@@ -327,6 +328,71 @@
       (format stream "MATCHED PAIR COUNT: ~A~%" (length grouped)))
     report))
 
+;; ---------------------------------------------------------------------------
+;; Replace the complete Results set for each new Filter invocation.
+;;
+;; The scan is completed before this function is called. Destroying the tab
+;; control removes its old page grids and child controls; destroying each
+;; logical table then releases its stored rows and associated display tables.
+;; The page registry is reset only after the native objects are removed.
+;; ---------------------------------------------------------------------------
+
+(defun h871-pf-v03-reset-results-pages ()
+  (h871-pf-v03-trace
+    "RESET-RESULTS/BEGIN"
+    (list (length *h871-pf-v03-pages*) *h871-pf-v03-tabs*))
+  ;; These cleanup APIs are documented in later PTC Integration Kit manuals.
+  ;; Check their availability in this Modeling installation before calling
+  ;; them; never allow an undefined cleanup function to break Filter.
+  (unless (and (fboundp 'sd-destroy-control)
+               (fboundp 'sd-destroy-logical-table))
+    (sd-display-error
+      "H871: This Modeling installation does not expose the required Results cleanup APIs. Existing Results were not intentionally replaced.")
+    (h871-pf-v03-trace "RESET-RESULTS/API-UNAVAILABLE" nil)
+    (return-from h871-pf-v03-reset-results-pages nil))
+
+  ;; Destroy the tab control first. PTC documents that destroying a parent
+  ;; control also destroys its child controls/pages.
+  (when (sd-control-p *h871-pf-v03-tabs*)
+    (unless (sd-destroy-control *h871-pf-v03-tabs*)
+      (sd-display-error
+        "H871: Could not remove the previous Results tab control. Filter was stopped.")
+      (h871-pf-v03-trace "RESET-RESULTS/DESTROY-TABS-FAILED" *h871-pf-v03-tabs*)
+      (return-from h871-pf-v03-reset-results-pages nil))
+    (when (sd-control-p *h871-pf-v03-tabs*)
+      (sd-display-error
+        "H871: The previous Results tab control still exists. Filter was stopped.")
+      (h871-pf-v03-trace "RESET-RESULTS/TABS-STILL-EXIST" *h871-pf-v03-tabs*)
+      (return-from h871-pf-v03-reset-results-pages nil)))
+
+  ;; Remove all old logical tables, including their rows and any remaining
+  ;; associated display tables. Derive the deterministic name if an older
+  ;; in-memory page record does not contain :logical-table.
+  (dolist (entry *h871-pf-v03-pages*)
+    (let* ((page-name (getf entry :page))
+           (stored-name (getf entry :logical-table))
+           (logical-table
+             (if (and (stringp stored-name) (> (length stored-name) 0))
+                 stored-name
+               (and (stringp page-name) (> (length page-name) 0)
+                    (h871-pf-v03-logical-table-name page-name)))))
+      (when (and (stringp logical-table)
+                 (> (length logical-table) 0)
+                 (sd-logical-table-p logical-table))
+        (unless (sd-destroy-logical-table logical-table)
+          (sd-display-error
+            (format nil
+              "H871: Could not remove previous Results data table ~A. Filter was stopped."
+              logical-table))
+          (h871-pf-v03-trace "RESET-RESULTS/DESTROY-LOGICAL-TABLE-FAILED"
+            logical-table)
+          (return-from h871-pf-v03-reset-results-pages nil)))))
+
+  (setf *h871-pf-v03-pages* nil)
+  (setf *h871-pf-v03-current-page* nil)
+  (h871-pf-v03-trace "RESET-RESULTS/COMPLETE" nil)
+  t)
+
 (defun h871-pf-v03-run-filter-all
     (assembly selected-process selected-material)
   (h871-pf-v03-trace-reset)
@@ -362,17 +428,23 @@
         assembly grouped selected-process selected-material))
     (h871-pf-v03-trace "COLLECT-ALL/DONE"
       (list (length grouped) report))
-    ;; Buckets exist only for pairs that actually contain Parts. No empty
-    ;; Results tabs are created; existing tabs remain untouched on no-match.
-    (when (null grouped)
-      (sd-display-message
-        (format nil
-          "No Parts matched the selected Filter All range.~%Existing Results tabs were kept unchanged.~%Report: ~A"
-          (namestring report)))
-      (return-from h871-pf-v03-run-filter-all (values 0 report)))
+    ;; The scan/report are complete. Replace all pages from the previous
+    ;; Assembly/filter run before building this run's populated pair pages.
+    (unless (h871-pf-v03-reset-results-pages)
+      (return-from h871-pf-v03-run-filter-all nil))
     (h871-pf-v03-trace "RUN/FILTER-ALL/CREATE-SHELL" nil)
     (unless (h871-pf-v03-create-shell)
       (return-from h871-pf-v03-run-filter-all nil))
+    ;; A no-match run also clears the old Results set and leaves an empty
+    ;; Results window, so no previous Assembly data remains visible.
+    (when (null grouped)
+      (unless (sd-dialog-shell-visible-p *h871-pf-v03-shell*)
+        (sd-show-dialog-shell *h871-pf-v03-shell*))
+      (sd-display-message
+        (format nil
+          "No Parts matched the selected Filter All range.~%Previous Results were cleared.~%Report: ~A"
+          (namestring report)))
+      (return-from h871-pf-v03-run-filter-all (values 0 report)))
     ;; Process in the convention-table order, not the traversal/discovery order.
     (dolist (pair pairs)
       (let ((bucket (assoc pair grouped :test #'equal)))
@@ -1124,23 +1196,27 @@
       (h871-pf-v03-write-report assembly matches requested-instance requested-base))
     (h871-pf-v03-trace "RUN/REPORT-DONE" report)
 
-    ;; No-match must not modify or replace any existing tab.
-    (when (null matches)
-      (sd-display-message
-        (format nil
-          "No Parts matched Density Instance ~A and Density Base ~A.~%Existing Results tabs were kept unchanged.~%Report: ~A"
-          requested-instance requested-base (namestring report)))
-      (return-from h871-pf-v03-run (values 0 report)))
+    ;; Replace all pages from the previous Assembly/filter run only after
+    ;; this Assembly has completed its scan and report generation.
+    (unless (h871-pf-v03-reset-results-pages)
+      (return-from h871-pf-v03-run nil))
 
     (h871-pf-v03-trace "RUN/CREATE-SHELL/BEGIN" nil)
     (unless (h871-pf-v03-create-shell)
       (return-from h871-pf-v03-run nil))
 
-    (h871-pf-v03-trace "RUN/FIND-PAGE/BEGIN" (list requested-instance requested-base))
-    (setf entry (h871-pf-v03-find-page requested-instance requested-base))
-    (h871-pf-v03-trace "RUN/FIND-PAGE/DONE" (list (getf entry :page) (getf entry :table) (getf entry :logical-table)))
-    (unless entry
-      (setf entry (h871-pf-v03-create-page requested-instance requested-base)))
+    ;; A no-match run must not leave rows or tabs from the previous Assembly.
+    (when (null matches)
+      (unless (sd-dialog-shell-visible-p *h871-pf-v03-shell*)
+        (sd-show-dialog-shell *h871-pf-v03-shell*))
+      (sd-display-message
+        (format nil
+          "No Parts matched Density Instance ~A and Density Base ~A.~%Previous Results were cleared.~%Report: ~A"
+          requested-instance requested-base (namestring report)))
+      (return-from h871-pf-v03-run (values 0 report)))
+
+    (h871-pf-v03-trace "RUN/CREATE-PAGE/BEGIN" (list requested-instance requested-base))
+    (setf entry (h871-pf-v03-create-page requested-instance requested-base))
     (unless entry
       (return-from h871-pf-v03-run nil))
 

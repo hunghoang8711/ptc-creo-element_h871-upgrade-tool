@@ -36,3 +36,13 @@ This file is the mandatory entry point for any new ChatGPT conversation or devel
 The native Browser rebuild opens Results, but the user reports that only Part Name is visible even though four column definitions exist in source. The latest table activation-order change did not fix it. The rebuild is not complete. The next step is targeted runtime diagnostics of Browser mode, active table, table roots and table activation results—not another speculative order change.
 
 See `docs/PART_FILTER_EXPERIMENT_HISTORY.md` for the full error catalogue and ver-04 through ver-07 lessons.
+
+
+## Current Filter All derivative and Results refresh work (2026-11-25)
+
+- Active user-tested Filter All derivative: `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp`.
+- User confirmed the Filter All feature runs perfectly in Modeling 18.1. Do not overwrite the canonical `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` baseline.
+- The user then reported stale Results tabs when switching Assemblies. The latest source change makes every Filter invocation replace the previous Results set; it applies to both ALL selectors and a single Process/Material pair. A no-match run should clear all previous pages.
+- Before any further edit, fetch current `main` and read the 2026-11-25 entry in `docs/PART_FILTER_EXPERIMENT_HISTORY.md`.
+- Latest Results-reset source uses `sd-destroy-control` and `sd-destroy-logical-table`, guarded by `fboundp`. These APIs are documented in later Integration Kit references, so Modeling 18.1 runtime validation is mandatory before accepting the reset behavior.
+- Required user test: Assembly A (many pairs) → Assembly B (subset) → single pair → no-match Assembly; confirm no stale tabs/rows. Then regression-test selection, Apply, Edit Note and cross-page controls.

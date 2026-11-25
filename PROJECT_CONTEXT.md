@@ -140,3 +140,13 @@ This is user-confirmed runtime behavior in the target application, not merely a 
 - It never writes to user_avail_cmds.cmd, sd_avail_cmds.cmd, Ribbon customization files or startup files.
 - On a new workstation, user still needs to LOAD the Lisp, register the user-defined command in Customize / Commands, and add it to a Ribbon tab/group. These are intentional safety boundaries, not completed automation.
 - Verification status: installer source committed; Windows PowerShell execution and second-workstation Modeling 18.1 acceptance remain pending. Do not claim one-click deployment.
+
+
+## 2026-11-25 – Part Filter Filter All Results refresh update
+
+- Accepted Filter All source remains `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp`; the canonical `H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` remains unchanged.
+- User previously confirmed the Filter All feature runs perfectly in Modeling 18.1. A new issue was then reported: when filtering a different Assembly, pages belonging only to the previous Assembly remained in Results.
+- The Filter All derivative now implements a full Results replacement on every Filter invocation, for both ALL-range and single-pair searches. It scans/reports first, then removes the previous tab control/pages and per-page logical tables, resets the page registry, and rebuilds only the current run's populated pairs.
+- A no-match run is intended to clear previous pages and leave an empty Results window rather than preserve stale data.
+- New cleanup uses `sd-destroy-control` and `sd-destroy-logical-table`, guarded by `fboundp` and return checks. These APIs are documented in later PTC Integration Kit references; exact Modeling 18.1 behavior is not yet user-confirmed.
+- Runtime acceptance pending: test Assembly A → Assembly B with fewer pairs, ALL → one specific pair, and a no-match Assembly. Then regression-test selection, Apply, Part Note and cross-page controls.

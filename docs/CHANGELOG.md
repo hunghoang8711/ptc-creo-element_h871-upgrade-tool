@@ -97,3 +97,12 @@
 - Record the Filter All behavior as user-confirmed runtime success, not merely static-checked: ALL expansion, pair grouping and populated-result behavior are accepted by the user.
 - The subsequent change that makes both selectors default to ALL (`-1`) is a separate small revision. Its source values were statically verified; the initial dialog display should still be checked after reloading the latest revision.
 - Preserve the canonical Part Note / All Pages baseline and the separate Filter All derivative. Do not fold this feature into the baseline without an explicit request.
+
+
+## 2026-11-25 – Refresh Results on every Filter
+
+- Updated the separate Filter All source so each successful new filter scan replaces the complete previous Results set, rather than refreshing only matching pages and retaining stale process/material tabs from the previous Assembly.
+- The reset removes the old tab control and its page controls, destroys the previous per-page logical tables, clears the page registry/current-page state, and rebuilds pages only for populated pairs from the currently selected Assembly.
+- The same refresh behavior applies to Filter All and a specific Process/Material pair. A no-match run now clears previous Results and leaves an empty Results window with a clear message.
+- The Assembly scan and report are completed before destructive UI cleanup begins. If the cleanup APIs are unavailable or cleanup fails, the run stops with a diagnostic instead of proceeding as if the refresh succeeded.
+- Static source validation only. User runtime test in Creo Elements/Direct Modeling 18.1 is required, especially for `sd-destroy-control` and `sd-destroy-logical-table` behavior in this version.

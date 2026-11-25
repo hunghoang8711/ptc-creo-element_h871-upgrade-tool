@@ -398,3 +398,15 @@ Correct next direction: preserve Stage 0 native Browser and Apply, integrate ver
 - The subsequent commit `9fefe722e7ddfb9a2e09db64cd45b417dcd7cd1f` changed four dialog defaults to `-1`: selected Process, Process display code, selected Material and Material display code. This makes the initial intended state ALL + ALL while retaining the individual selector options and their numeric mappings.
 - Static verification of the default revision passed: all four defaults are `-1`; parentheses are balanced; no negative nesting or unterminated string was found. The user's earlier runtime acceptance confirms the Filter All feature, but does not by itself prove the latest dialog's initial ALL + ALL display. Verify that small UI detail after reloading the latest source.
 - Future changes should preserve the exact Density Instance AND Density Base matching rule, the one-pass assembly bucketing approach, the non-empty-pair-only result tabs, and the single-pair route through the established original filter function.
+
+
+## 2026-11-25 – Refresh Results when filtering a new Assembly
+
+- User reported that after filtering a different Assembly, old Results tabs remained visible. The Filter All collector updated only the pages corresponding to populated pairs in the new Assembly; pages for pairs absent from the new Assembly were retained and caused confusion.
+- Confirmed source cause: `h871-pf-v03-run-filter-all` reused `*h871-pf-v03-pages*` and refreshed/created only populated pairs; the no-match branch explicitly kept existing tabs unchanged. The single-pair path also refreshed one existing pair without clearing other pages.
+- Implemented `h871-pf-v03-reset-results-pages` in the Filter All derivative. It destroys the old tab control (and child page controls), destroys each previous page's logical table, then clears the page registry and current-page pointer.
+- Both Filter All and single-pair filter paths now call the reset only after the current Assembly scan and report generation complete. They then recreate the Results shell/tab control and add only pages with Parts from the current Assembly.
+- No-match behavior changed intentionally: all previous Results pages are removed and the current run leaves an empty Results window. This avoids stale rows even when the new Assembly has no matching Parts.
+- Preserved Density mapping, `-1` ALL sentinel expansion, exact Density Instance AND Density Base predicate, one-pass pair grouping, Part Note storage, row selection and Apply callbacks. The canonical Part Note / All Pages baseline was not modified.
+- Cleanup APIs `sd-destroy-control` and `sd-destroy-logical-table` are documented in later PTC Integration Kit references. The implementation checks `fboundp` before calling them and verifies that the tab control is gone; exact Modeling 18.1 runtime behavior still requires user acceptance.
+- Static checks are recorded separately from runtime acceptance. Do not claim the new reset behavior works in Modeling 18.1 until the user tests it.

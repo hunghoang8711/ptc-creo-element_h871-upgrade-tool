@@ -3,7 +3,7 @@
 **Target:** PTC Creo Elements/Direct Modeling 18.1  
 **Source under test:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES_FILTER_ALL.lsp`  
 **Baseline:** `src/part-filter/ver-03/H871_PART_FILTER_VER_03_PARTNOTE_ALLPAGES.lsp` (must remain unchanged)  
-**Status:** Static checks passed; runtime acceptance pending.
+**Status:** Filter All base behavior was user-confirmed in Modeling 18.1. The new per-Filter Results reset is source-edited and statically checked; its Modeling 18.1 runtime acceptance is pending.
 
 ## Installation
 
@@ -20,7 +20,7 @@
 | All materials | CNC | ALL | Only populated CNC/material pages appear |
 | All combinations | ALL | ALL | Only populated pages among the 36 mapped pairs appear |
 | Single pair after ALL | KH | SS400 | Existing individual filter still works |
-| No-match range | Select a pair known to have no Parts | Select corresponding value | No empty page is created; existing Results pages remain unchanged |
+| No-match range | Select a pair known to have no Parts | Select corresponding value | All previous Results pages are cleared; the Results window contains no stale rows or tabs |
 
 ## Results and regression checks
 
@@ -38,3 +38,17 @@
 ## Evidence boundary
 
 Static source checks do not establish Creo 18.1 dialog compatibility or runtime behavior. Record actual results and errors before treating Filter All as production-ready.
+
+
+## Results refresh across Assemblies (new acceptance cases)
+
+Each Filter invocation must represent only the Assembly and filter values selected in that invocation. Previous Results pages must not survive into the new run.
+
+1. Filter Assembly A with ALL + ALL and record its populated tabs.
+2. Filter Assembly B with ALL + ALL where B contains fewer process/material pairs. Confirm tabs that existed only in A are removed; only B's populated pairs remain.
+3. From the same Results window, filter Assembly B using one specific Process + Material pair. Confirm only that one result page remains.
+4. Filter an Assembly with no matching Parts. Confirm all old tabs and rows are cleared and the Results window is empty.
+5. Repeat Filter All. Confirm no duplicate pages are created.
+6. After each reset, verify Select All Pages, Clear All Pages, Apply All Pages, per-page Apply and Edit Note still work.
+
+**Safety expectation:** The current Assembly scan/report must complete before the old Results UI is destroyed. If cleanup APIs are unavailable or cleanup fails, the command must stop and report the failure rather than silently mixing old and new Assembly data.
