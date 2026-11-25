@@ -52,3 +52,15 @@ Each Filter invocation must represent only the Assembly and filter values select
 6. After each reset, verify Select All Pages, Clear All Pages, Apply All Pages, per-page Apply and Edit Note still work.
 
 **Safety expectation:** The current Assembly scan/report must complete before the old Results UI is destroyed. If cleanup APIs are unavailable or cleanup fails, the command must stop and report the failure rather than silently mixing old and new Assembly data.
+
+## Results window close/reopen lifecycle regression
+
+1. Load the latest Filter All LISP.
+2. Filter Assembly A and wait for its Results pages to finish.
+3. Close the Results window using its normal close button (the configured action hides the Dialog Shell).
+4. Filter Assembly B. Expected: the reset removes the hidden old Results Dialog Shell and its child controls, then recreates Results with only B's populated pairs. No “previous Results tab control still exists” error should appear.
+5. Repeat with the Results window left open before filtering Assembly C.
+6. Test a no-match Assembly and confirm the recreated Results window is empty.
+7. Regression-test row selection, Select All Pages, Clear All Pages, per-page Apply, Apply All Pages and Edit Note.
+
+**Current status:** source correction and static syntax checks completed; Modeling 18.1 runtime acceptance pending. The use of `sd-destroy-dialog-shell` is based on later-release PTC documentation and must be verified in 18.1.
